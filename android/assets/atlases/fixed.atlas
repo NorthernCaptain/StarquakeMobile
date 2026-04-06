@@ -1,230 +1,41 @@
 
 fixed.png
-size: 1024, 1024
+size: 1024, 256
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
 tile
   rotate: false
-  xy: 1, 733
-  size: 384, 288
-  orig: 384, 288
-  offset: 0, 0
-  index: 86
-tile
-  rotate: false
-  xy: 1, 587
-  size: 336, 144
-  orig: 336, 144
-  offset: 0, 0
-  index: 58
-tile
-  rotate: false
-  xy: 387, 877
+  xy: 1, 1
   size: 192, 144
   orig: 192, 144
   offset: 0, 0
   index: 0
 tile
   rotate: false
-  xy: 1, 441
+  xy: 195, 1
   size: 192, 144
   orig: 192, 144
   offset: 0, 0
   index: 1
 tile
   rotate: false
-  xy: 581, 877
+  xy: 389, 1
   size: 192, 144
   orig: 192, 144
   offset: 0, 0
   index: 2
 tile
   rotate: false
-  xy: 1, 295
+  xy: 583, 1
   size: 192, 144
   orig: 192, 144
   offset: 0, 0
   index: 3
 tile
   rotate: false
-  xy: 775, 877
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 4
-tile
-  rotate: false
-  xy: 1, 149
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 5
-tile
-  rotate: false
-  xy: 1, 3
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 6
-tile
-  rotate: false
-  xy: 387, 731
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 7
-tile
-  rotate: false
-  xy: 581, 731
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 8
-tile
-  rotate: false
-  xy: 775, 731
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 26
-tile
-  rotate: false
-  xy: 195, 441
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 27
-tile
-  rotate: false
-  xy: 195, 295
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 32
-tile
-  rotate: false
-  xy: 195, 149
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 33
-tile
-  rotate: false
-  xy: 195, 3
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 36
-tile
-  rotate: false
-  xy: 969, 877
-  size: 48, 144
-  orig: 48, 144
-  offset: 0, 0
-  index: 34
-tile
-  rotate: false
-  xy: 389, 585
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 37
-tile
-  rotate: false
-  xy: 389, 439
+  xy: 777, 1
   size: 192, 144
   orig: 192, 144
   offset: 0, 0
   index: 38
-tile
-  rotate: false
-  xy: 583, 585
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 40
-tile
-  rotate: false
-  xy: 389, 293
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 49
-tile
-  rotate: false
-  xy: 583, 439
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 53
-tile
-  rotate: false
-  xy: 389, 147
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 54
-tile
-  rotate: false
-  xy: 583, 293
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 57
-tile
-  rotate: false
-  xy: 583, 147
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 81
-tile
-  rotate: false
-  xy: 777, 585
-  size: 192, 144
-  orig: 192, 144
-  offset: 0, 0
-  index: 83
-tile
-  rotate: false
-  xy: 777, 439
-  size: 144, 144
-  orig: 144, 144
-  offset: 0, 0
-  index: 30
-tile
-  rotate: false
-  xy: 777, 293
-  size: 144, 144
-  orig: 144, 144
-  offset: 0, 0
-  index: 46
-tile
-  rotate: false
-  xy: 777, 147
-  size: 144, 144
-  orig: 144, 144
-  offset: 0, 0
-  index: 82
-tile
-  rotate: false
-  xy: 389, 1
-  size: 144, 144
-  orig: 144, 144
-  offset: 0, 0
-  index: 85
-tile
-  rotate: false
-  xy: 535, 1
-  size: 96, 144
-  orig: 96, 144
-  offset: 0, 0
-  index: 25
-tile
-  rotate: false
-  xy: 633, 97
-  size: 192, 48
-  orig: 192, 48
-  offset: 0, 0
-  index: 39

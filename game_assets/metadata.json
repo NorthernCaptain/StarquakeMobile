@@ -10120,8 +10120,15 @@
       "blocks_tall": 3
     },
     "4": {
-      "type": "fixed",
-      "texture": "tile_004",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -10148,8 +10155,13 @@
       "blocks_tall": 3
     },
     "5": {
-      "type": "fixed",
-      "texture": "tile_005",
+      "type": "terrain",
+      "available_colors": [
+        "magenta",
+        "green",
+        "cyan",
+        "yellow"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -10176,8 +10188,12 @@
       "blocks_tall": 3
     },
     "6": {
-      "type": "fixed",
-      "texture": "tile_006",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "cyan",
+        "yellow"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -10204,8 +10220,15 @@
       "blocks_tall": 3
     },
     "7": {
-      "type": "fixed",
-      "texture": "tile_007",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "ray",
       "raw_type": 113,
       "solidity": [
@@ -10232,8 +10255,15 @@
       "blocks_tall": 3
     },
     "8": {
-      "type": "fixed",
-      "texture": "tile_008",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -10793,8 +10823,15 @@
       "blocks_tall": 3
     },
     "25": {
-      "type": "fixed",
-      "texture": "tile_025",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -10815,8 +10852,10 @@
       "blocks_tall": 3
     },
     "26": {
-      "type": "fixed",
-      "texture": "tile_026",
+      "type": "terrain",
+      "available_colors": [
+        "cyan"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -10843,8 +10882,14 @@
       "blocks_tall": 3
     },
     "27": {
-      "type": "fixed",
-      "texture": "tile_027",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "white"
+      ],
       "behavior": "hazard",
       "raw_type": 98,
       "solidity": [
@@ -10938,8 +10983,15 @@
       "blocks_tall": 3
     },
     "30": {
-      "type": "fixed",
-      "texture": "tile_030",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -10998,8 +11050,15 @@
       "blocks_tall": 3
     },
     "32": {
-      "type": "fixed",
-      "texture": "tile_032",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -11026,8 +11085,15 @@
       "blocks_tall": 3
     },
     "33": {
-      "type": "fixed",
-      "texture": "tile_033",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "pickup",
       "raw_type": 197,
       "solidity": [
@@ -11054,8 +11120,14 @@
       "blocks_tall": 3
     },
     "34": {
-      "type": "fixed",
-      "texture": "tile_034",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow"
+      ],
       "behavior": "pickup",
       "raw_type": 197,
       "solidity": [
@@ -11073,8 +11145,8 @@
       "blocks_tall": 3
     },
     "35": {
-      "type": "fixed",
-      "texture": "tile_035",
+      "type": "terrain",
+      "available_colors": [],
       "behavior": "pickup",
       "raw_type": 197,
       "solidity": [
@@ -11101,8 +11173,12 @@
       "blocks_tall": 3
     },
     "36": {
-      "type": "fixed",
-      "texture": "tile_036",
+      "type": "terrain",
+      "available_colors": [
+        "magenta",
+        "yellow",
+        "white"
+      ],
       "behavior": "teleport",
       "raw_type": 212,
       "solidity": [
@@ -11129,8 +11205,12 @@
       "blocks_tall": 3
     },
     "37": {
-      "type": "fixed",
-      "texture": "tile_037",
+      "type": "terrain",
+      "available_colors": [
+        "magenta",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 4,
       "solidity": [
@@ -11185,8 +11265,11 @@
       "blocks_tall": 3
     },
     "39": {
-      "type": "fixed",
-      "texture": "tile_039",
+      "type": "terrain",
+      "available_colors": [
+        "green",
+        "cyan"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -11201,8 +11284,13 @@
       "blocks_tall": 1
     },
     "40": {
-      "type": "fixed",
-      "texture": "tile_040",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "cyan",
+        "yellow"
+      ],
       "behavior": "ray",
       "raw_type": 117,
       "solidity": [
@@ -11339,8 +11427,15 @@
       "blocks_tall": 3
     },
     "46": {
-      "type": "fixed",
-      "texture": "tile_046",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "hazard",
       "raw_type": 101,
       "solidity": [
@@ -11407,8 +11502,10 @@
       "blocks_tall": 0
     },
     "49": {
-      "type": "fixed",
-      "texture": "tile_049",
+      "type": "terrain",
+      "available_colors": [
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -11540,8 +11637,11 @@
       "blocks_tall": 3
     },
     "53": {
-      "type": "fixed",
-      "texture": "tile_053",
+      "type": "terrain",
+      "available_colors": [
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -11568,8 +11668,11 @@
       "blocks_tall": 3
     },
     "54": {
-      "type": "fixed",
-      "texture": "tile_054",
+      "type": "terrain",
+      "available_colors": [
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -11612,8 +11715,15 @@
       "blocks_tall": 0
     },
     "57": {
-      "type": "fixed",
-      "texture": "tile_057",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "green",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 64,
       "solidity": [
@@ -11640,8 +11750,13 @@
       "blocks_tall": 3
     },
     "58": {
-      "type": "fixed",
-      "texture": "tile_058",
+      "type": "terrain",
+      "available_colors": [
+        "magenta",
+        "cyan",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -12435,8 +12550,12 @@
       "blocks_tall": 3
     },
     "81": {
-      "type": "fixed",
-      "texture": "tile_081",
+      "type": "terrain",
+      "available_colors": [
+        "green",
+        "yellow",
+        "white"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -12463,8 +12582,12 @@
       "blocks_tall": 3
     },
     "82": {
-      "type": "fixed",
-      "texture": "tile_082",
+      "type": "terrain",
+      "available_colors": [
+        "green",
+        "yellow",
+        "white"
+      ],
       "behavior": "hazard",
       "raw_type": 101,
       "solidity": [
@@ -12488,8 +12611,12 @@
       "blocks_tall": 3
     },
     "83": {
-      "type": "fixed",
-      "texture": "tile_083",
+      "type": "terrain",
+      "available_colors": [
+        "red",
+        "magenta",
+        "yellow"
+      ],
       "behavior": "terrain",
       "raw_type": 64,
       "solidity": [
@@ -12516,8 +12643,8 @@
       "blocks_tall": 3
     },
     "84": {
-      "type": "fixed",
-      "texture": "tile_084",
+      "type": "terrain",
+      "available_colors": [],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -12544,8 +12671,10 @@
       "blocks_tall": 3
     },
     "85": {
-      "type": "fixed",
-      "texture": "tile_085",
+      "type": "terrain",
+      "available_colors": [
+        "magenta"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -12569,8 +12698,10 @@
       "blocks_tall": 3
     },
     "86": {
-      "type": "fixed",
-      "texture": "tile_086",
+      "type": "terrain",
+      "available_colors": [
+        "green"
+      ],
       "behavior": "terrain",
       "raw_type": 0,
       "solidity": [
@@ -12710,6 +12841,156 @@
     }
   },
   "tile_registry": {
+    "tile_004_red": {
+      "tile": 4,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_004_magenta": {
+      "tile": 4,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_004_green": {
+      "tile": 4,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_004_cyan": {
+      "tile": 4,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_004_yellow": {
+      "tile": 4,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_004_white": {
+      "tile": 4,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_005_magenta": {
+      "tile": 5,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_005_green": {
+      "tile": 5,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_005_cyan": {
+      "tile": 5,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_005_yellow": {
+      "tile": 5,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_006_red": {
+      "tile": 6,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_006_cyan": {
+      "tile": 6,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_006_yellow": {
+      "tile": 6,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_007_red": {
+      "tile": 7,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_007_magenta": {
+      "tile": 7,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_007_green": {
+      "tile": 7,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_007_cyan": {
+      "tile": 7,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_007_yellow": {
+      "tile": 7,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_007_white": {
+      "tile": 7,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_008_red": {
+      "tile": 8,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_008_magenta": {
+      "tile": 8,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_008_green": {
+      "tile": 8,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_008_cyan": {
+      "tile": 8,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_008_yellow": {
+      "tile": 8,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_008_white": {
+      "tile": 8,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
     "tile_009_red": {
       "tile": 9,
       "color": "red",
@@ -13250,6 +13531,78 @@
       "width": 192,
       "height": 144
     },
+    "tile_025_red": {
+      "tile": 25,
+      "color": "red",
+      "width": 96,
+      "height": 144
+    },
+    "tile_025_magenta": {
+      "tile": 25,
+      "color": "magenta",
+      "width": 96,
+      "height": 144
+    },
+    "tile_025_green": {
+      "tile": 25,
+      "color": "green",
+      "width": 96,
+      "height": 144
+    },
+    "tile_025_cyan": {
+      "tile": 25,
+      "color": "cyan",
+      "width": 96,
+      "height": 144
+    },
+    "tile_025_yellow": {
+      "tile": 25,
+      "color": "yellow",
+      "width": 96,
+      "height": 144
+    },
+    "tile_025_white": {
+      "tile": 25,
+      "color": "white",
+      "width": 96,
+      "height": 144
+    },
+    "tile_026_cyan": {
+      "tile": 26,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_027_red": {
+      "tile": 27,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_027_magenta": {
+      "tile": 27,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_027_green": {
+      "tile": 27,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_027_cyan": {
+      "tile": 27,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_027_white": {
+      "tile": 27,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
     "tile_028_red": {
       "tile": 28,
       "color": "red",
@@ -13322,6 +13675,42 @@
       "width": 192,
       "height": 144
     },
+    "tile_030_red": {
+      "tile": 30,
+      "color": "red",
+      "width": 144,
+      "height": 144
+    },
+    "tile_030_magenta": {
+      "tile": 30,
+      "color": "magenta",
+      "width": 144,
+      "height": 144
+    },
+    "tile_030_green": {
+      "tile": 30,
+      "color": "green",
+      "width": 144,
+      "height": 144
+    },
+    "tile_030_cyan": {
+      "tile": 30,
+      "color": "cyan",
+      "width": 144,
+      "height": 144
+    },
+    "tile_030_yellow": {
+      "tile": 30,
+      "color": "yellow",
+      "width": 144,
+      "height": 144
+    },
+    "tile_030_white": {
+      "tile": 30,
+      "color": "white",
+      "width": 144,
+      "height": 144
+    },
     "tile_031_red": {
       "tile": 31,
       "color": "red",
@@ -13355,6 +13744,180 @@
     "tile_031_white": {
       "tile": 31,
       "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_032_red": {
+      "tile": 32,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_032_magenta": {
+      "tile": 32,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_032_green": {
+      "tile": 32,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_032_cyan": {
+      "tile": 32,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_032_yellow": {
+      "tile": 32,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_032_white": {
+      "tile": 32,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_033_red": {
+      "tile": 33,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_033_magenta": {
+      "tile": 33,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_033_green": {
+      "tile": 33,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_033_cyan": {
+      "tile": 33,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_033_yellow": {
+      "tile": 33,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_033_white": {
+      "tile": 33,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_034_red": {
+      "tile": 34,
+      "color": "red",
+      "width": 48,
+      "height": 144
+    },
+    "tile_034_magenta": {
+      "tile": 34,
+      "color": "magenta",
+      "width": 48,
+      "height": 144
+    },
+    "tile_034_green": {
+      "tile": 34,
+      "color": "green",
+      "width": 48,
+      "height": 144
+    },
+    "tile_034_cyan": {
+      "tile": 34,
+      "color": "cyan",
+      "width": 48,
+      "height": 144
+    },
+    "tile_034_yellow": {
+      "tile": 34,
+      "color": "yellow",
+      "width": 48,
+      "height": 144
+    },
+    "tile_036_magenta": {
+      "tile": 36,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_036_yellow": {
+      "tile": 36,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_036_white": {
+      "tile": 36,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_037_magenta": {
+      "tile": 37,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_037_yellow": {
+      "tile": 37,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_037_white": {
+      "tile": 37,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_039_green": {
+      "tile": 39,
+      "color": "green",
+      "width": 192,
+      "height": 48
+    },
+    "tile_039_cyan": {
+      "tile": 39,
+      "color": "cyan",
+      "width": 192,
+      "height": 48
+    },
+    "tile_040_red": {
+      "tile": 40,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_040_magenta": {
+      "tile": 40,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_040_cyan": {
+      "tile": 40,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_040_yellow": {
+      "tile": 40,
+      "color": "yellow",
       "width": 192,
       "height": 144
     },
@@ -13436,6 +13999,42 @@
       "width": 96,
       "height": 144
     },
+    "tile_046_red": {
+      "tile": 46,
+      "color": "red",
+      "width": 144,
+      "height": 144
+    },
+    "tile_046_magenta": {
+      "tile": 46,
+      "color": "magenta",
+      "width": 144,
+      "height": 144
+    },
+    "tile_046_green": {
+      "tile": 46,
+      "color": "green",
+      "width": 144,
+      "height": 144
+    },
+    "tile_046_cyan": {
+      "tile": 46,
+      "color": "cyan",
+      "width": 144,
+      "height": 144
+    },
+    "tile_046_yellow": {
+      "tile": 46,
+      "color": "yellow",
+      "width": 144,
+      "height": 144
+    },
+    "tile_046_white": {
+      "tile": 46,
+      "color": "white",
+      "width": 144,
+      "height": 144
+    },
     "tile_047_red": {
       "tile": 47,
       "color": "red",
@@ -13468,6 +14067,12 @@
     },
     "tile_047_white": {
       "tile": 47,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_049_white": {
+      "tile": 49,
       "color": "white",
       "width": 192,
       "height": 144
@@ -13578,6 +14183,90 @@
       "tile": 52,
       "color": "white",
       "width": 192,
+      "height": 144
+    },
+    "tile_053_yellow": {
+      "tile": 53,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_053_white": {
+      "tile": 53,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_054_yellow": {
+      "tile": 54,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_054_white": {
+      "tile": 54,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_057_red": {
+      "tile": 57,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_057_magenta": {
+      "tile": 57,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_057_green": {
+      "tile": 57,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_057_cyan": {
+      "tile": 57,
+      "color": "cyan",
+      "width": 192,
+      "height": 144
+    },
+    "tile_057_yellow": {
+      "tile": 57,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_057_white": {
+      "tile": 57,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_058_magenta": {
+      "tile": 58,
+      "color": "magenta",
+      "width": 336,
+      "height": 144
+    },
+    "tile_058_cyan": {
+      "tile": 58,
+      "color": "cyan",
+      "width": 336,
+      "height": 144
+    },
+    "tile_058_yellow": {
+      "tile": 58,
+      "color": "yellow",
+      "width": 336,
+      "height": 144
+    },
+    "tile_058_white": {
+      "tile": 58,
+      "color": "white",
+      "width": 336,
       "height": 144
     },
     "tile_059_red": {
@@ -14318,6 +15007,72 @@
       "width": 192,
       "height": 144
     },
+    "tile_081_green": {
+      "tile": 81,
+      "color": "green",
+      "width": 192,
+      "height": 144
+    },
+    "tile_081_yellow": {
+      "tile": 81,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_081_white": {
+      "tile": 81,
+      "color": "white",
+      "width": 192,
+      "height": 144
+    },
+    "tile_082_green": {
+      "tile": 82,
+      "color": "green",
+      "width": 144,
+      "height": 144
+    },
+    "tile_082_yellow": {
+      "tile": 82,
+      "color": "yellow",
+      "width": 144,
+      "height": 144
+    },
+    "tile_082_white": {
+      "tile": 82,
+      "color": "white",
+      "width": 144,
+      "height": 144
+    },
+    "tile_083_red": {
+      "tile": 83,
+      "color": "red",
+      "width": 192,
+      "height": 144
+    },
+    "tile_083_magenta": {
+      "tile": 83,
+      "color": "magenta",
+      "width": 192,
+      "height": 144
+    },
+    "tile_083_yellow": {
+      "tile": 83,
+      "color": "yellow",
+      "width": 192,
+      "height": 144
+    },
+    "tile_085_magenta": {
+      "tile": 85,
+      "color": "magenta",
+      "width": 144,
+      "height": 144
+    },
+    "tile_086_green": {
+      "tile": 86,
+      "color": "green",
+      "width": 384,
+      "height": 288
+    },
     "tile_087_red": {
       "tile": 87,
       "color": "red",
@@ -14366,173 +15121,11 @@
       "width": 192,
       "height": 144
     },
-    "tile_004": {
-      "tile": 4,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_005": {
-      "tile": 5,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_006": {
-      "tile": 6,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_007": {
-      "tile": 7,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_008": {
-      "tile": 8,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_025": {
-      "tile": 25,
-      "color": "fixed",
-      "width": 96,
-      "height": 144
-    },
-    "tile_026": {
-      "tile": 26,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_027": {
-      "tile": 27,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_030": {
-      "tile": 30,
-      "color": "fixed",
-      "width": 144,
-      "height": 144
-    },
-    "tile_032": {
-      "tile": 32,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_033": {
-      "tile": 33,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_034": {
-      "tile": 34,
-      "color": "fixed",
-      "width": 48,
-      "height": 144
-    },
-    "tile_036": {
-      "tile": 36,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_037": {
-      "tile": 37,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
     "tile_038": {
       "tile": 38,
       "color": "fixed",
       "width": 192,
       "height": 144
-    },
-    "tile_039": {
-      "tile": 39,
-      "color": "fixed",
-      "width": 192,
-      "height": 48
-    },
-    "tile_040": {
-      "tile": 40,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_046": {
-      "tile": 46,
-      "color": "fixed",
-      "width": 144,
-      "height": 144
-    },
-    "tile_049": {
-      "tile": 49,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_053": {
-      "tile": 53,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_054": {
-      "tile": 54,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_057": {
-      "tile": 57,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_058": {
-      "tile": 58,
-      "color": "fixed",
-      "width": 336,
-      "height": 144
-    },
-    "tile_081": {
-      "tile": 81,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_082": {
-      "tile": 82,
-      "color": "fixed",
-      "width": 144,
-      "height": 144
-    },
-    "tile_083": {
-      "tile": 83,
-      "color": "fixed",
-      "width": 192,
-      "height": 144
-    },
-    "tile_085": {
-      "tile": 85,
-      "color": "fixed",
-      "width": 144,
-      "height": 144
-    },
-    "tile_086": {
-      "tile": 86,
-      "color": "fixed",
-      "width": 384,
-      "height": 288
     }
   },
   "teleporters": [

@@ -21,7 +21,7 @@ public class LoadingScreen implements Screen {
 
         if (game.assets.update()) {
             // setScreen calls hide() then dispose() on this screen — no manual dispose needed
-            game.setScreen(new GameScreen(game, 0));
+            game.setScreen(new GameScreen(game, 15));
             return;
         }
 

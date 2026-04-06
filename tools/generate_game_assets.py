@@ -124,12 +124,16 @@ def load_z80_snapshot(filepath):
     return memory
 
 
-def resolve_attr(stored_attr, ea62, ea63):
+def resolve_attr(stored_attr, ea62, ea63, replace_white_ink=False):
     lower6 = stored_attr & 0x3F
     if lower6 == 0x36:
         a = (stored_attr & 0xC0) | ea63
     elif lower6 != 0:
-        a = stored_attr
+        # For terrain tiles: ink=7 with paper=0 means "use room color"
+        if replace_white_ink and (stored_attr & 0x3F) == 0x07:
+            a = (stored_attr & 0xF8) | ea62
+        else:
+            a = stored_attr
     else:
         a = (stored_attr & 0xF8) | ea62
     a &= ~0x40
@@ -150,7 +154,12 @@ def tile_info(mem, tile_index):
     bitmask = mem[addr:addr + 6]
     total_blocks = sum(bin(b).count('1') for b in bitmask)
     raw_attrs = [mem[addr - 6 + i] for i in range(6)]
-    has_room_color = any((a & 0x3F) == 0x36 for a in raw_attrs)
+    # Room color dependency: ea63 pattern (0x36), ea62 pattern (lower6==0),
+    # or white-ink-on-black-paper (0x07) which is the room color placeholder
+    has_room_color = any(
+        (a & 0x3F) == 0x36 or (a & 0x3F) == 0 or (a & 0x3F) == 0x07
+        for a in raw_attrs
+    )
     return total_blocks == 0, has_room_color
 
 
@@ -219,16 +228,19 @@ def tile_gameplay(mem, tile_index):
     }
 
 
-def render_tile(mem, tile_index, ea63_val):
-    """Render a tile at 1x with the given ea63 color. Returns Image or None."""
+def render_tile(mem, tile_index, ea63_val, ea62_val=None):
+    """Render a tile at 1x with the given ea63 color. Returns Image or None.
+    If ea62_val is provided, it overrides the snapshot ea62 value AND enables
+    white-ink replacement for terrain tiles."""
     addr = struct.unpack('<H', mem[ADDR_TILE_LOOKUP + tile_index * 2:
                                    ADDR_TILE_LOOKUP + tile_index * 2 + 2])[0]
     bitmask = mem[addr:addr + 6]
     raw_attrs = [mem[addr - 6 + i] for i in range(6)]
 
-    ea62 = mem[ADDR_EA62] & 0x07
+    ea62 = ea62_val if ea62_val is not None else (mem[ADDR_EA62] & 0x07)
+    replace_white = ea62_val is not None
     ea63 = ea63_val & 0x3F
-    attrs = [resolve_attr(a, ea62, ea63) for a in raw_attrs]
+    attrs = [resolve_attr(a, ea62, ea63, replace_white_ink=replace_white) for a in raw_attrs]
 
     blocks = []
     max_col = max_row = -1
@@ -349,7 +361,7 @@ def main():
     for tile_idx, colors in sorted(terrain_tiles.items()):
         for color_idx in colors:
             ea63 = color_idx & 0x07
-            img = render_tile(mem, tile_idx, ea63)
+            img = render_tile(mem, tile_idx, ea63, ea62_val=ea63)
             if img:
                 name = f"tile_{tile_idx:03d}_{COLOR_NAMES[color_idx]}"
                 scaled = scale_nn(img, SCALE)
