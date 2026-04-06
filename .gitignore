@@ -10,7 +10,6 @@ android/libs/
 
 # Gradle caches / wrapper internals
 .gradle/
-gradle/wrapper/gradle-wrapper.jar
 
 # IDE
 .idea/

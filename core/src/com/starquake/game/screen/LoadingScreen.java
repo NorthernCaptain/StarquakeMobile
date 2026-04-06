@@ -20,7 +20,7 @@ public class LoadingScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         if (game.assets.update()) {
-            dispose();
+            // setScreen calls hide() then dispose() on this screen — no manual dispose needed
             game.setScreen(new GameScreen(game, 0));
             return;
         }

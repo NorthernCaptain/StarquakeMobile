@@ -4,8 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.starquake.game.StarquakeGame;
@@ -24,15 +22,14 @@ public class GameScreen implements Screen {
     // Full-screen overlay for touch controls (Phase 2+)
     private final ScreenViewport overlayViewport = new ScreenViewport();
 
-    private final JsonValue metadata;
     private Room room;
     private final RoomRenderer roomRenderer;
 
     public GameScreen(StarquakeGame game, int startRoom) {
         this.game    = game;
-        metadata     = new JsonReader().parse(Gdx.files.internal("metadata.json"));
-        room         = Room.build(metadata, startRoom);
-        roomRenderer = new RoomRenderer(game.assets, metadata);
+        // metadata and tilesById are already parsed in Assets.buildCaches()
+        room         = Room.build(game.assets, startRoom);
+        roomRenderer = new RoomRenderer(game.assets);
     }
 
     @Override

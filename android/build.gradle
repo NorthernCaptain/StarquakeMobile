@@ -34,7 +34,6 @@ android {
         applicationId 'com.starquake.game.android'
         versionName "1.0"
         versionCode 1
-        multiDexEnabled true
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }

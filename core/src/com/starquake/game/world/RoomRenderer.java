@@ -9,35 +9,31 @@ public class RoomRenderer {
     private static final int TILE_W = 192;
     private static final int TILE_H = 144;
 
-    private final Assets assets;
-    private final JsonValue metadata;
+    // Quad offsets: tl, tr, bl, br — static to avoid per-frame allocation
+    private static final int[] QUAD_QCOL = {0, 1, 0, 1};
+    private static final int[] QUAD_QROW = {1, 1, 0, 0};
+    private static final String[] QUAD_KEY = {"tl", "tr", "bl", "br"};
 
-    public RoomRenderer(Assets assets, JsonValue metadata) {
-        this.assets   = assets;
-        this.metadata = metadata;
+    private final Assets assets;
+
+    public RoomRenderer(Assets assets) {
+        this.assets = assets;
     }
 
     public void render(SpriteBatch batch, Room room) {
         int[] bpIds = room.bigPlatformIds;
+        JsonValue bigPlatforms = assets.metadata.get("big_platforms");
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
-                int bpIdx    = bpIds[row * 4 + col];
-                JsonValue bp = metadata.get("big_platforms").get(bpIdx);
+                JsonValue bp = bigPlatforms.get(bpIds[row * 4 + col]);
 
-                int[][] quads = {
-                    {bp.getInt("tl"), 0, 1},
-                    {bp.getInt("tr"), 1, 1},
-                    {bp.getInt("bl"), 0, 0},
-                    {bp.getInt("br"), 1, 0}
-                };
+                for (int qi = 0; qi < 4; qi++) {
+                    int tileIdx = bp.getInt(QUAD_KEY[qi]);
+                    int qCol    = QUAD_QCOL[qi];
+                    int qRow    = QUAD_QROW[qi];
 
-                for (int[] q : quads) {
-                    int tileIdx = q[0];
-                    int qCol    = q[1];
-                    int qRow    = q[2];
-
-                    JsonValue tile = metadata.get("tiles").get(String.valueOf(tileIdx));
+                    JsonValue tile = (tileIdx < assets.tilesById.length) ? assets.tilesById[tileIdx] : null;
                     if (tile == null) continue;
 
                     String tileType = tile.getString("type", "empty");

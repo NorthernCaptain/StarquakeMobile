@@ -5,6 +5,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.IntMap;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,16 +14,22 @@ import java.util.Map;
 public class Assets {
     public final AssetManager manager = new AssetManager();
 
+    // Set after loading completes — null before that
     public TextureAtlas fixedAtlas;
     public TextureAtlas spritesAtlas;
     public TextureAtlas fontAtlas;
     public final Map<String, TextureAtlas> terrainAtlases = new HashMap<>();
 
-    /** Key: region name as packed, e.g. "tile_014_red" */
+    /** Game metadata parsed from metadata.json. Available after update() returns true. */
+    public JsonValue metadata;
+    /** Tiles indexed by integer tile index (0–89) for O(1) lookup. Available after update(). */
+    public JsonValue[] tilesById;
+
+    /** Key: region name as packed in atlas, e.g. "tile_014_red" */
     public final Map<String, TextureRegion> terrainRegions = new HashMap<>();
     /** Key: tile index */
     public final IntMap<TextureRegion> fixedRegions = new IntMap<>();
-    /** ASCII index 0-127 → glyph, null if absent */
+    /** ASCII code 0–127 → glyph region, null if absent */
     public final TextureRegion[] fontRegions = new TextureRegion[128];
 
     private static final String[] COLORS = {"red", "magenta", "cyan", "yellow", "green", "white"};
@@ -48,6 +56,15 @@ public class Assets {
 
     private void buildCaches() {
         cachesBuilt = true;
+
+        // Parse metadata once — shared across all screens for the lifetime of the app
+        metadata = new JsonReader().parse(Gdx.files.internal("metadata.json"));
+
+        // Pre-index tiles by integer id for O(1) lookup (avoids per-draw string key scan)
+        JsonValue tilesNode = metadata.get("tiles");
+        tilesById = new JsonValue[90];
+        for (int i = 0; i < 90; i++)
+            tilesById[i] = tilesNode.get(String.valueOf(i));
 
         for (String color : COLORS) {
             TextureAtlas atlas = manager.get("atlases/terrain_" + color + ".atlas");

@@ -1,6 +1,7 @@
 package com.starquake.game.world;
 
 import com.badlogic.gdx.utils.JsonValue;
+import com.starquake.game.Assets;
 
 import java.util.Arrays;
 
@@ -12,6 +13,11 @@ public class Room {
     public final boolean[][] collision;  // [18 rows][32 cols] of 48px blocks
     public final String[][] behaviorMap; // same grid
 
+    // Quad offsets: tl, tr, bl, br
+    private static final int[] QUAD_QCOL = {0, 1, 0, 1};
+    private static final int[] QUAD_QROW = {1, 1, 0, 0};
+    private static final String[] QUAD_KEY = {"tl", "tr", "bl", "br"};
+
     private Room(int roomIndex, String color, int colorIndex,
                  int[] bigPlatformIds, boolean[][] collision, String[][] behaviorMap) {
         this.roomIndex      = roomIndex;
@@ -22,9 +28,9 @@ public class Room {
         this.behaviorMap    = behaviorMap;
     }
 
-    /** Builds room data from metadata JSON. Call on room entry. */
-    public static Room build(JsonValue metadata, int roomIndex) {
-        JsonValue roomData = metadata.get("rooms").get(roomIndex);
+    /** Builds room data from pre-loaded assets. Call on room entry. */
+    public static Room build(Assets assets, int roomIndex) {
+        JsonValue roomData = assets.metadata.get("rooms").get(roomIndex);
         String color       = roomData.getString("color");
         int colorIndex     = roomData.getInt("color_index");
         int[] bpIds        = roomData.get("big_platforms").asIntArray();
@@ -34,26 +40,18 @@ public class Room {
         for (String[] row : behaviorMap)
             Arrays.fill(row, "");
 
+        JsonValue bigPlatforms = assets.metadata.get("big_platforms");
+
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 4; col++) {
-                int bpIdx    = bpIds[row * 4 + col];
-                JsonValue bp = metadata.get("big_platforms").get(bpIdx);
+                JsonValue bp = bigPlatforms.get(bpIds[row * 4 + col]);
 
-                // tl=top-left, tr=top-right, bl=bottom-left, br=bottom-right
-                // qCol/qRow are offsets within the big platform (0 or 1)
-                int[][] quads = {
-                    {bp.getInt("tl"), 0, 1},
-                    {bp.getInt("tr"), 1, 1},
-                    {bp.getInt("bl"), 0, 0},
-                    {bp.getInt("br"), 1, 0}
-                };
+                for (int qi = 0; qi < 4; qi++) {
+                    int tileIdx = bp.getInt(QUAD_KEY[qi]);
+                    int qCol    = QUAD_QCOL[qi];
+                    int qRow    = QUAD_QROW[qi];
 
-                for (int[] q : quads) {
-                    int tileIdx = q[0];
-                    int qCol    = q[1];
-                    int qRow    = q[2];
-
-                    JsonValue tile = metadata.get("tiles").get(String.valueOf(tileIdx));
+                    JsonValue tile = (tileIdx < assets.tilesById.length) ? assets.tilesById[tileIdx] : null;
                     if (tile == null) continue;
 
                     String behavior    = tile.getString("behavior", "");
@@ -72,7 +70,9 @@ public class Room {
                             int cr = baseRow + tr;
                             int cc = baseCol + tc;
                             if (cr < 0 || cr >= 18 || cc < 0 || cc >= 32) continue;
-                            if (!solidRow.get(tc).isNull() && solidRow.get(tc).asBoolean())
+                            JsonValue cell = solidRow.get(tc);
+                            if (cell.isNull()) continue;  // skip empty cells in sparse tiles
+                            if (cell.asBoolean())
                                 collision[cr][cc] = true;
                             if (!behavior.isEmpty())
                                 behaviorMap[cr][cc] = behavior;
