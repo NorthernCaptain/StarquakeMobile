@@ -37,3 +37,6 @@ local.properties
 
 # Robovm
 ios/build/
+
+# Reference/template directories not needed in repo
+other/
