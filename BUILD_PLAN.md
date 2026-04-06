@@ -835,20 +835,120 @@ Gdx.app.log("Assets", "Loaded " + terrainRegions.size() + " terrain regions, "
 ```
 Expect: **272 terrain regions** (47+43+43+48+46+45 across 6 atlases), **32 fixed regions**, **39 sprite regions**.
 
-### Phase 2: BLOB + movement + collision + touch controls
-- Implement `Blob` + `BlobRenderer` (walk animation)
-- Build collision map in `Room`
-- Horizontal movement with collision resolution
-- Gravity + landing on solid blocks
-- Implement `InputManager` with keyboard support (desktop)
-- Implement `TouchControls` with dual-viewport overlay (D-pad right, actions left)
-- Multi-touch support for simultaneous movement + actions
-- **Verify**: BLOB walks/falls on desktop with keyboard, and on Android device with touch controls
+### Phase 2: Touch controls + room navigation + BLOB
 
-### Phase 3: Screen transitions
-- Exit-edge detection → load adjacent room → reposition BLOB
-- Handle world boundaries (no transition off edge of 16x32 grid)
-- **Verify**: Walk through multiple rooms on both desktop and device
+#### Step 2.1 — Touch controls + room navigation (no BLOB)
+
+Navigate between rooms with D-pad controls. No BLOB, no transitions — instant room swap. For verifying all 512 rooms render correctly and deciding on transition style.
+
+**New: `core/src/com/starquake/game/input/InputManager.java`**
+- Abstracts input into directional actions: `LEFT`, `RIGHT`, `UP`, `DOWN`, `ACTION_A`, `ACTION_B`
+- Enum `Action { LEFT, RIGHT, UP, DOWN, ACTION_A, ACTION_B }`
+- **Event-driven**, not polling. Receives events from three sources, sets internal state flags:
+  - **Keyboard**: implements `InputProcessor` — `keyDown()`/`keyUp()` set/clear flags. Arrow keys → directions, Z/X → actions
+  - **Game controller**: implements `ControllerListener` — `buttonDown()`/`buttonUp()` + `axisMoved()` set/clear flags. D-pad/left stick → directions, A/B buttons → actions. Uses libGDX `Controllers` extension (`com.badlogicgames.gdx-controllers` dependency in core/build.gradle)
+  - **Touch**: TouchControls calls `InputManager.setPressed(action, true/false)` from its touch event handlers
+- Internal state: `boolean[] pressed` (held down), `boolean[] justPressed` (pressed this frame)
+- `justPressed` flags cleared at end of each frame via `update()` called from GameScreen
+- Public read methods: `boolean isPressed(Action)`, `boolean isJustPressed(Action)`
+- Registered via `InputMultiplexer` (keyboard + controller listeners combined)
+
+**New: `core/src/com/starquake/game/input/TouchControls.java`**
+- Renders semi-transparent D-pad and action buttons using `ShapeRenderer`
+- Uses `ScreenViewport` (full physical screen, independent of game viewport)
+- D-pad on right side, action buttons on left side
+- Touch zones: rectangular hit areas in screen coordinates
+- Multi-touch: polls `Gdx.input.isTouched(pointer)` for pointers 0–4
+- Provides `boolean isTouched(Action)` queried by InputManager
+- Resizes based on physical screen dimensions
+
+Touch layout (default — right-handed, D-pad on right):
+```
+|  [ACTION_A]  |     GAME AREA (256×144)    |  [UP]         |
+|  [ACTION_B]  |     FitViewport centered   |  [LEFT][RIGHT]|
+|              |                            |  [DOWN]       |
+```
+- **Swappable**: `TouchControls` takes a `boolean leftHanded` flag
+- When `leftHanded = true`, D-pad moves to left side, actions to right side
+- Default: D-pad on right (`leftHanded = false`)
+- Setting stored in `Preferences` — settings UI added later, but the flag is wired now
+
+**Modify: `Room.java`**
+- Add `public int getX()` → `roomIndex % 16`
+- Add `public int getY()` → `roomIndex / 16`
+- Add `public static int adjacentIndex(int currentIndex, int dx, int dy)` — returns -1 if out of bounds
+
+Room adjacency (calculated, no adjacency data in metadata):
+```
+grid: 16 columns × 32 rows = 512 rooms
+room.x = roomIndex % 16  (0–15)
+room.y = roomIndex / 16   (0–31)
+right:  x < 15 → (y * 16) + (x + 1)
+left:   x > 0  → (y * 16) + (x - 1)
+down:   y < 31 → ((y + 1) * 16) + x
+up:     y > 0  → ((y - 1) * 16) + x
+```
+
+**Modify: `GameScreen.java`**
+- Add `InputManager` and `TouchControls`
+- Add `ScreenViewport overlayViewport` for touch control rendering
+- In `render()`: check `inputManager.isJustPressed(RIGHT)` → navigate to adjacent room
+- Dispose old room's FBO, build new room
+- Display current room index as text (BitmapFont) for debugging
+
+Render order:
+1. `gameViewport.apply()` → draw room terrain FBO
+2. `overlayViewport.apply()` → draw touch control shapes
+3. `gameViewport.apply()` → draw debug text (room index)
+
+**Verify:**
+- Desktop: arrow keys switch rooms instantly. Room index displayed on screen.
+- Navigate to room 0, room 511, various edge rooms — no crashes.
+- Touch controls visible on Android, respond to taps, navigate rooms.
+- FBO disposal: old room's FBO freed when navigating away (no memory leak over 512 rooms).
+
+---
+
+#### Step 2.2 — BLOB + collisions, rewire controls
+
+Add BLOB character with physics and collision detection. Rewire controls to move BLOB instead of directly switching rooms. Room transitions happen when BLOB reaches screen edge.
+
+**New: `core/src/com/starquake/game/world/Blob.java`**
+- Position in room pixels (float x, y)
+- Velocity (float vx, vy)
+- Walking: fixed speed ~32 units/sec in game-world coordinates (room = 256×144 units), no momentum
+- Gravity: acceleration ~128 units/sec², terminal velocity ~64 units/sec
+- No jumping — platform-laying is the core mechanic
+- Hitbox: 16×16 units (1 sprite frame)
+- All physics in game-world units — FitViewport maps to any screen resolution
+- `update(float delta, Room room)` — apply velocity, resolve collisions
+- Screen edge detection → triggers room transition
+
+**New: `core/src/com/starquake/game/world/BlobRenderer.java`**
+- Draws current BLOB animation frame from spritesAtlas
+- Selects frame based on walk direction and animation timer
+- Frames: blob_00 through blob_10 (11 frames, full rotation)
+
+**Modify: `Room.java`**
+- Add collision grid: `boolean[6][8]` (6 rows × 8 columns of tiles)
+- Built from big platform tile data at room construction
+- Query method: `boolean isSolid(float worldX, float worldY)`
+
+**Modify: `GameScreen.java`**
+- Create Blob + BlobRenderer
+- Rewire InputManager: directions move BLOB, not room cursor
+- Room transition: when BLOB exits edge, build adjacent room, reposition BLOB at opposite edge
+
+**Modify: `InputManager.java`**
+- `isPressed()` (held down) for continuous BLOB movement
+- `isJustPressed()` for one-shot actions (shoot, pickup)
+
+**Verify:**
+- BLOB renders at correct position, animates when walking
+- BLOB falls with gravity, lands on solid tiles
+- BLOB can't walk through walls
+- Walking off screen edge transitions to adjacent room
+- BLOB repositioned at opposite edge after transition
 
 ### Phase 4: HUD + font
 - Implement `GameFont` from font atlas (cache all 88 char regions)

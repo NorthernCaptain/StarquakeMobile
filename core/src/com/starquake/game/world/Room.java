@@ -20,6 +20,8 @@ import com.starquake.game.Assets;
 public class Room {
     public static final int WIDTH = 256;
     public static final int HEIGHT = 144;
+    public static final int GRID_COLS = 16;
+    public static final int GRID_ROWS = 32;
 
     public final int roomIndex;
     public final int paletteIndex;
@@ -32,6 +34,20 @@ public class Room {
         this.roomIndex      = roomIndex;
         this.paletteIndex   = paletteIndex;
         this.bigPlatformIds = bigPlatformIds;
+    }
+
+    public int getX() { return roomIndex % GRID_COLS; }
+    public int getY() { return roomIndex / GRID_COLS; }
+
+    /**
+     * Returns the room index adjacent to {@code currentIndex} in direction (dx, dy).
+     * Returns -1 if out of bounds.
+     */
+    public static int adjacentIndex(int currentIndex, int dx, int dy) {
+        int x = currentIndex % GRID_COLS + dx;
+        int y = currentIndex / GRID_COLS + dy;
+        if (x < 0 || x >= GRID_COLS || y < 0 || y >= GRID_ROWS) return -1;
+        return y * GRID_COLS + x;
     }
 
     public static Room build(Assets assets, int roomIndex) {
