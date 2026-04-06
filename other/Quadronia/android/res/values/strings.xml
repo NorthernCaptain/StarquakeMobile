@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="app_name">Quadronia</string>
-    <string name="usernamelbl">Enter player\'s name:</string>
-    <string name="yournamehint">Your name, please</string>
-    <string name="wrongname">The name should be between 1 and 15 symbols.</string>
-
-</resources>

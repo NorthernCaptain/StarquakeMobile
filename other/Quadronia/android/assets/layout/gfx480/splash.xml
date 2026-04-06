@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<screen name="screen" fill="background" bg="v3_bg_t3x3" w="480" h="720" sw="480" dx="-18" dy="0">
-    <img name="header" img="im_header" x="0" y="0"></img>
-    <img name="footer" img="im_footer" x="0" y="0"></img>
-    <img name="intro" img="v3_intro" x="0" y="0"></img>
-    <img name="back" img="background" x="0" y="0" type="tile"></img>
-    <lbl name="load" text="loading" x="0" y="190" w="480" h="50" alignx="center" aligny="top"
-        font="def"></lbl>
-</screen>
