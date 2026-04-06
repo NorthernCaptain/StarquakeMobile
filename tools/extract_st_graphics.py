@@ -186,104 +186,165 @@ def extract_tiles(ram, outdir, palettes):
     return tile_info
 
 
+ADDR_SPRITE_DATA = 0x34978    # Sprite data (immediately after tile graphics)
+SPRITE_FRAME_SIZE = 160       # 16 rows x 10 bytes/row
+SPRITE_ROWS = 16
+
+# Sprite memory layout (verified via 68000 disassembly):
+#   BLOB:    11 frames at 0x34978, 160 bytes each, stored top-to-bottom
+#   Laser:    3 frames at 0x35058, 80 bytes each (8 rows), top-to-bottom
+#   Effects: 62 frames at 0x35148, 160 bytes each, stored bottom-half-first
+# The game uses separate base addresses for each section (found in blit code).
+BLOB_FRAME_COUNT = 11
+ADDR_LASER = 0x35058          # 3 frames x 80 bytes (8 rows each)
+LASER_FRAME_COUNT = 3
+LASER_FRAME_SIZE = 80
+ADDR_EFFECTS = 0x35148        # 62 frames x 160 bytes (verified from frame offset table at 0x26622)
+EFFECTS_FRAME_COUNT = 62
+
+
+def decode_masked_sprite(ram, addr, height):
+    """
+    Decode masked sprite: 10 bytes/row = mask(2) + 4 planes(8).
+    Mask bit 1 = transparent, 0 = opaque.
+    Returns (pixels, masks) as 2D lists.
+    """
+    pixels = []
+    masks = []
+    for y in range(height):
+        off = addr + y * 10
+        if off + 10 > len(ram):
+            pixels.append([0] * 16)
+            masks.append([1] * 16)
+            continue
+        mask_w = struct.unpack_from('>H', ram, off)[0]
+        planes = [struct.unpack_from('>H', ram, off + 2 + p * 2)[0] for p in range(4)]
+        row = []
+        mrow = []
+        for bit in range(16):
+            bm = 1 << (15 - bit)
+            ci = sum((1 << p) for p in range(4) if planes[p] & bm)
+            m = 1 if (mask_w & bm) else 0
+            row.append(ci)
+            mrow.append(m)
+        pixels.append(row)
+        masks.append(mrow)
+    return pixels, masks
+
+
+def render_masked_sprite(pixels, masks, palette_rgb, scale=6):
+    """Render a masked sprite as a PIL Image with transparency."""
+    h = len(pixels)
+    w = len(pixels[0])
+    img = Image.new('RGBA', (w * scale, h * scale), (0, 0, 0, 0))
+    for y in range(h):
+        for x in range(w):
+            if masks[y][x] == 0:  # opaque
+                color = palette_rgb[pixels[y][x] % 16] + (255,)
+                for dy in range(scale):
+                    for dx in range(scale):
+                        img.putpixel((x * scale + dx, y * scale + dy), color)
+    return img
+
+
 def extract_sprites(ram, outdir, palettes):
-    """Extract sprite data — BLOB, enemies, items."""
+    """Extract sprite data — BLOB, laser, effects, enemies.
+
+    Sprites use a masked format: 10 bytes/row (mask word + 4 plane words),
+    16 pixels wide.  Three separate memory regions (verified via 68000 disassembly):
+      - BLOB:    11 frames at 0x34978, 160 bytes/frame, top-to-bottom
+      - Laser:    3 frames at 0x35058,  80 bytes/frame (8 rows), top-to-bottom
+      - Effects: 62 frames at 0x35148, 160 bytes/frame, bottom-half-first (swap needed)
+    """
     spritedir = os.path.join(outdir, "sprites")
     os.makedirs(spritedir, exist_ok=True)
 
     default_pal = palettes[min(8, len(palettes) - 1)]
     default_rgb = [st_color_to_rgb(c) for c in default_pal]
 
+    # Build frame list: (address, height, needs_swap, section_name)
+    frames = []
+
+    # BLOB: 11 frames, 16 rows, no swap
+    for i in range(BLOB_FRAME_COUNT):
+        addr = ADDR_SPRITE_DATA + i * SPRITE_FRAME_SIZE
+        frames.append((addr, 16, False, "blob"))
+
+    # Laser: 3 frames, 8 rows, no swap
+    for i in range(LASER_FRAME_COUNT):
+        addr = ADDR_LASER + i * LASER_FRAME_SIZE
+        frames.append((addr, 8, False, "laser"))
+
+    # Effects + enemies: 62 frames, 16 rows, no swap needed (correct base alignment)
+    for i in range(EFFECTS_FRAME_COUNT):
+        addr = ADDR_EFFECTS + i * SPRITE_FRAME_SIZE
+        frames.append((addr, 16, False, "effect" if i < 24 else "enemy"))
+
     sprite_info = []
 
-    # Known sprites from tile pointer table
-    # Entry 58: BLOB walk frame (width_param=16 -> 64px wide, 24px tall)
-    # Entry 86: Full BLOB sprite (64x48)
-    known_sprites = {58: "blob_walk", 86: "blob_full"}
+    for idx, (addr, height, swap, section) in enumerate(frames):
+        pixels, masks = decode_masked_sprite(ram, addr, height)
 
-    for idx, name in known_sprites.items():
-        ptr_off = ADDR_TILE_PTRS + idx * 4
-        ptr = struct.unpack_from('>I', ram, ptr_off)[0]
-        if ptr == 0 or ptr + 4 >= len(ram):
-            continue
+        if swap:
+            pixels = pixels[8:16] + pixels[0:8]
+            masks = masks[8:16] + masks[0:8]
 
-        height = struct.unpack_from('>H', ram, ptr)[0]
-        width_param = struct.unpack_from('>H', ram, ptr + 2)[0]
-        width_groups = width_param // 4
-        width_px = width_groups * 16
+        opaque = sum(1 for y in range(height)
+                     for x in range(16) if masks[y][x] == 0)
 
-        pixels = decode_bitplane_block(ram, ptr + 4, width_groups, height)
-        img = render_pixels(pixels, default_rgb, scale=3, transparent_bg=True)
-        img.save(os.path.join(spritedir, f"{name}_{width_px}x{height}.png"))
+        img = render_masked_sprite(pixels, masks, default_rgb, scale=6)
+        img.save(os.path.join(spritedir, f"st_sprite_{idx:03d}.png"))
 
         sprite_info.append({
-            "name": name, "index": idx, "ptr": f"0x{ptr:05X}",
-            "width": width_px, "height": height
+            "index": idx,
+            "address": f"0x{addr:05X}",
+            "section": section,
+            "height": height,
+            "opaque_pixels": opaque,
+            "half_swapped": swap,
         })
-        print(f"  Sprite '{name}': {width_px}x{height} at 0x{ptr:05X}")
 
-    # Search for additional sprites outside the tile data region
-    # Look for valid sprite headers (sensible height/width) followed by bitplane data
-    tile_region_start = 0x28D98
-    tile_region_end = 0x34978
+    # Create sprite sheet at 3x scale
+    total = len(frames)
+    scale = 3
+    cols = 16
+    rows = (total + cols - 1) // cols
+    cell_w = 16 * scale + 2
+    cell_h = 16 * scale + 2
+    sheet = Image.new('RGBA', (cell_w * cols, cell_h * rows), (20, 20, 20, 255))
+    for idx, (addr, height, swap, section) in enumerate(frames):
+        pixels, masks = decode_masked_sprite(ram, addr, height)
+        if swap:
+            pixels = pixels[8:16] + pixels[0:8]
+            masks = masks[8:16] + masks[0:8]
+        img = render_masked_sprite(pixels, masks, default_rgb, scale)
+        gx = (idx % cols) * cell_w
+        gy = (idx // cols) * cell_h
+        sheet.paste(img, (gx + 1, gy + 1), img)
+    sheet.save(os.path.join(spritedir, "st_sprite_sheet.png"))
 
-    search_regions = [
-        (0x34978, 0x3AE9A, "post_tiles"),
-        (0x3B3FA, 0x50000, "mid_ram"),
-        (0x60000, 0x80000, "upper_ram"),
-    ]
+    with open(os.path.join(spritedir, "st_sprite_catalog.json"), "w") as f:
+        json.dump({
+            "format": {
+                "type": "Atari ST 4-bitplane masked sprite",
+                "bytes_per_row": 10,
+                "row_layout": "mask_word(2) + plane0(2) + plane1(2) + plane2(2) + plane3(2)",
+                "width_pixels": 16,
+            },
+            "sections": {
+                "blob": {"base": f"0x{ADDR_SPRITE_DATA:05X}", "count": BLOB_FRAME_COUNT,
+                         "frame_size": SPRITE_FRAME_SIZE, "height": 16, "swap": False},
+                "laser": {"base": f"0x{ADDR_LASER:05X}", "count": LASER_FRAME_COUNT,
+                          "frame_size": LASER_FRAME_SIZE, "height": 8, "swap": False},
+                "effects_enemies": {"base": f"0x{ADDR_EFFECTS:05X}", "count": EFFECTS_FRAME_COUNT,
+                                    "frame_size": SPRITE_FRAME_SIZE, "height": 16, "swap": False},
+            },
+            "total_frames": total,
+            "frames": sprite_info,
+        }, f, indent=2)
 
-    found_sprites = []
-    for region_start, region_end, region_name in search_regions:
-        for addr in range(region_start, min(region_end, len(ram) - 8), 2):
-            h = struct.unpack_from('>H', ram, addr)[0]
-            w = struct.unpack_from('>H', ram, addr + 2)[0]
-
-            if h not in range(8, 49) or w not in [4, 8, 12, 16]:
-                continue
-
-            wg = w // 4
-            data_size = h * wg * 8
-            if addr + 4 + data_size > len(ram):
-                continue
-
-            block = ram[addr + 4:addr + 4 + data_size]
-            nz = sum(1 for b in block if b != 0)
-            total = len(block)
-
-            # Must have meaningful data (not empty, not code)
-            if nz < total * 0.05 or nz > total * 0.95:
-                continue
-
-            # Check it doesn't overlap with an already-found sprite
-            overlap = False
-            for fa, fh, fw in found_sprites:
-                fs = fh * (fw // 4) * 8 + 4
-                if fa <= addr < fa + fs or addr <= fa < addr + data_size + 4:
-                    overlap = True
-                    break
-            if overlap:
-                continue
-
-            wpx = wg * 16
-            found_sprites.append((addr, h, w))
-
-            pixels = decode_bitplane_block(ram, addr + 4, wg, h)
-            img = render_pixels(pixels, default_rgb, scale=3, transparent_bg=True)
-            img.save(os.path.join(spritedir, f"sprite_0x{addr:05X}_{wpx}x{h}.png"))
-
-            sprite_info.append({
-                "name": f"sprite_0x{addr:05X}",
-                "ptr": f"0x{addr:05X}",
-                "width": wpx, "height": h,
-                "region": region_name,
-            })
-
-    print(f"  Found {len(found_sprites)} additional sprites outside tile region")
-
-    with open(os.path.join(spritedir, "sprite_info.json"), "w") as f:
-        json.dump(sprite_info, f, indent=2)
-
+    print(f"  Extracted {total} sprite frames ({BLOB_FRAME_COUNT} blob + "
+          f"{LASER_FRAME_COUNT} laser + {EFFECTS_FRAME_COUNT} effects/enemies)")
     return sprite_info
 
 
