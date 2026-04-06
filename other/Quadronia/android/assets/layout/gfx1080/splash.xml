@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen name="screen" fill="background" bg="v3_bg_t3x3" w="1080" h="1620" sw="1080"
+        dx="-40"
+        dy="0">
+   <img name="header" img="im_header" x="0" y="0"/>
+   <img name="footer" img="im_footer" x="0" y="0"/>
+   <img name="intro" img="v3_intro" x="0" y="0"/>
+   <img name="back" img="background" x="0" y="0" type="tile"/>
+   <lbl name="load" text="loading" x="0" y="428" w="1080" h="113" alignx="center"
+        aligny="top"
+        font="def"/>
+</screen>

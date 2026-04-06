@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<common>
+    <colors name="colors">
+		<color name="defaultColor" value="0000CC"></color>
+   		<color name="fontButColor" value="0000CC"></color>
+		<color name="selectColor" value="1e6eff32"></color>
+		<color name="selectWrongColor" value="c81e1e30"></color>
+		<color name="selectForbidColor" value="fa0a0a37"></color>
+		<color name="winnerScoreColor" value="910c0c"></color>
+		<color name="darkRed" value="910c0c"></color>
+		<color name="myScoreColor" value="881000"></color>
+		<color name="myWhite" value="e0e0e5"></color>        
+    </colors>
+
+    <item type="integer" name="font_def">48</item>
+    <item type="integer" name="font_m30">30</item>
+    <item type="integer" name="font_m20">22</item>
+    <item type="integer" name="font_d40">42</item>
+
+
+    <item type="integer" name="field_top_dy">0</item>
+    <item type="integer" name="stat_font_sz">24</item>
+    <item type="integer" name="stat_font2_sz">30</item>
+    <integer-array name="battle_status_dy">
+        <item>693</item>
+        <item>661</item>
+        <item>629</item>
+        <item>597</item>
+        <item>561</item>
+    </integer-array>
+    <integer-array name="fieldsz_small_status">
+        <item>35</item>
+        <item>471</item>
+        <item>27</item>
+        <item>27</item>
+        <item>270</item>
+        <item>270</item>
+        <item>1</item>
+        <item>1</item>
+    </integer-array>
+    <integer-array name="fieldsz">
+        <item>30</item>
+        <item>14</item>
+        <item>42</item>
+        <item>42</item>
+        <item>420</item>
+        <item>420</item>
+        <item>3</item>
+        <item>3</item>
+    </integer-array>
+    <integer-array name="fieldsz_lost">
+        <item>30</item>
+        <item>26</item>
+        <item>42</item>
+        <item>42</item>
+        <item>420</item>
+        <item>420</item>
+        <item>3</item>
+        <item>3</item>
+    </integer-array>
+    <integer-array name="sailor_gal_wh">
+        <item>68</item>
+        <item>59</item>
+        <item>23</item>
+        <item>3</item>
+    </integer-array>
+    <integer-array name="fieldsz_micro">
+        <item>3</item>
+        <item>12</item>
+        <item>10</item>
+        <item>10</item>
+        <item>100</item>
+        <item>100</item>
+        <item>1</item>
+        <item>6</item>
+    </integer-array>
+    <integer-array name="fieldpos_micro">
+        <item>85</item>
+        <item>21</item>
+
+        <item>17</item>
+        <item>162</item>
+        <item>131</item>
+        <item>162</item>
+        <item>245</item>
+        <item>162</item>
+        <item>359</item>
+        <item>162</item>
+        <item>315</item>
+        <item>22</item>
+        <item>28</item>
+        <item>16</item>
+    </integer-array>
+    <integer-array name="fieldsz_small">
+        <item>269</item>
+        <item>465</item>
+        <item>19</item>
+        <item>19</item>
+        <item>200</item>
+        <item>200</item>
+        <item>2</item>
+        <item>2</item>
+    </integer-array>
+    <item type="integer" name="small_deltaX">5</item>
+    <item type="integer" name="small_deltaY">7</item>
+    <integer-array name="fieldsz_editor">
+        <item>32</item>
+        <item>148</item>
+        <item>42</item>
+        <item>42</item>
+        <item>420</item>
+        <item>420</item>
+        <item>3</item>
+        <item>3</item>
+    </integer-array>
+    <integer-array name="fieldsz_top_edit">
+        <item>32</item>
+        <item>572</item>
+        <item>42</item>
+        <item>42</item>
+        <item>210</item>
+        <item>168</item>
+        <item>3</item>
+        <item>3</item>
+    </integer-array>
+
+</common>

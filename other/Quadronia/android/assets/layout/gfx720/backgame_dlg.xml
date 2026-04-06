@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window name="dialog" title="" bg="win_bg_frame" type="nine" w="667" h="375" sw="720"
+        dx="0"
+        dy="0"
+        font="def"
+        startx="600"
+        starty="67">
+   <img name="close" x="17" y="10" img="icon_close"/>
+   <img name="hline" x="27" y="10" img="win_bg_frame" h="2" w="467"/>
+   <lbl name="titlelbl" y="7" x="17" text="Leave the game?" font="def" alignx="right"
+        fscale="0.9"
+        fcolor="myLightBlue"/>
+   <lbl name="scorelbl" y="10" x="33" text="scorelbl" font="m30" alignx="left"
+        fscale="1.0"
+        fcolor="myYellow"/>
+   <lbl name="scoreval" y="10" x="33" text="23028" font="d40" alignx="right"
+        fscale="0.9"
+        fcolor="myWhite"/>
+   <lbl name="bonuslbl" y="10" x="33" text="fraglbl" font="m30" alignx="left"
+        fscale="1.0"
+        fcolor="myYellow"/>
+   <lbl name="bonusval" y="10" x="33" text="2302" font="d40" alignx="right"
+        fscale="0.9"
+        fcolor="myWhite"/>
+   <lbl name="perklbl" y="10" x="33" text="perklbl" font="m30" alignx="left"
+        fscale="1.0"
+        fcolor="myYellow"/>
+   <lbl name="perkval" y="10" x="33" text="4300" font="d40" alignx="right" fscale="0.9"
+        fcolor="myWhite"/>
+   <img name="hline2" x="60" y="10" img="win_bg_frame" h="2" w="400"/>
+   <lbl name="totallbl" y="10" x="33" text="totallbl" font="m30" alignx="left"
+        fscale="1.0"
+        fcolor="myYellow"/>
+   <lbl name="totalval" y="10" x="33" text="4300" font="d40" alignx="right"
+        fscale="1.0"
+        fcolor="myWhite"/>
+   <tbl name="adbut" y="20" w="467" h="113" img="blue" type="nine"/>
+   <lbl name="adbutlbl1" y="10" x="0" text="saveand" font="def" alignx="center"
+        fscale="1.0"
+        fcolor="myWhite"/>
+   <lbl name="adbutlbl2" y="7" x="0" text="playlater" font="def" alignx="center"
+        fscale="1.0"
+        fcolor="myWhite"/>
+   <tbl name="endbut" y="20" w="467" h="60" img="red" type="nine"/>
+   <lbl name="endbutlbl1" y="10" x="0" text="endgame" font="def" alignx="center"
+        fscale="0.9"
+        fcolor="myWhite"/>
+</window>

@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen name="screen" fill="none" bg="qbg" scale="1" w="1080" h="1920" sw="1080" dx="-40" dy="0" bgtype="nine">
+
+ <!-- Main Menu Subscreen config -->
+ <grp name="main_subscreen" x="0" y="290" w="1080" h="1630"/>
+
+ <grp name="mnu_user_panel" x="0" y="1280" w="1080" h="265"/>
+
+ <grp name="mnu_gplusbut" x="36" y="146" w="121" h="121"/>
+ <img name="mnu_gplusback" img="sq_g" x="61" y="61" w="121" h="121" align="center"/>
+ <img name="mnu_gplusfront" img="i_google" x="61" y="61" w="121" h="121" align="center"/>
+
+ <grp name="mnu_gleaderbut" x="788" y="146" w="121" h="121"/>
+ <img name="mnu_gleaderback" img="sq_g" x="61" y="61" w="121" h="121" align="center"/>
+ <img name="mnu_gleaderfront" img="i_leader" x="61" y="61" w="121" h="121" align="center"/>
+
+ <grp name="mnu_gachivbut" x="924" y="146" w="121" h="121"/>
+ <img name="mnu_gachivback" img="sq_g" x="61" y="61" w="121" h="121" align="center"/>
+ <img name="mnu_gachivfront" img="i_g_achiv" x="61" y="61" w="121" h="121" align="center"/>
+
+ <grp name="mnu_sharebut" x="36" y="0" w="121" h="121"/>
+ <img name="mnu_shareback" img="sq_w" x="61" y="61" w="121" h="121" align="center" type="nine"/>
+ <img name="mnu_sharefront" img="i_share" x="61" y="61" w="121" h="121" align="center"/>
+
+ <grp name="mnu_coinsbut" x="788" y="0" w="256" h="121"/>
+ <img name="mnu_coinsbg" img="sq_w" x="128" y="61" w="256" h="121" align="center" type="nine"/>
+ <img name="mnu_coinsfront" img="coins_icon" x="49" y="61" align="center"/>
+ <lbl name="mnu_coinstext" text="12743" x="85" y="40" w="150" h="50" alignx="right" aligny="center" fcolor="white" font="d40" fscale="0.8"/>
+
+ <grp name="mnu_namebut" x="36" y="146" w="734" h="121"/>
+ <img name="mnu_nameback" img="sq_dark" x="367" y="61" w="734" h="121" align="center"/>
+ <lbl name="mnu_nametext" text="SOMEONE" x="35" y="0" w="664" h="120" alignx="left" aligny="center" fcolor="white" font="def" fscale="1"/>
+
+ <lbl name="mnu_gametypetext" text="CLASSIC" x="178" y="75" alignx="left" aligny="center" fcolor="white" font="m30" fscale="0.9"/>
+ <lbl name="mnu_subtitletext" text="SCORE   FRAGMENTS   LEVEL" x="435" y="80" alignx="left" aligny="center" fcolor="white" font="m20" fscale="1"/>
+ <lbl name="mnu_leveltext" text="198" x="690" y="10" w="80" alignx="right" aligny="center" fcolor="white" font="m30" fscale="0.9"/>
+ <lbl name="mnu_fragstext" text="2.798 |" x="530" y="10" w="160" alignx="right" aligny="center" fcolor="white" font="m30" fscale="0.9"/>
+ <lbl name="mnu_scoretext" text="2.654.798 |" x="250" y="10" w="280" alignx="right" aligny="center" fcolor="white" font="m30" fscale="0.9"/>
+
+
+ <grp name="botpager" x="0" y="0" w="1080" h="290"/>
+ <img name="botpage0" img="screen_active" x="340" y="145" align="center"/>
+ <img name="botpage1" img="screen_active" x="440" y="145" align="center"/>
+ <img name="botpage2" img="screen_active" x="540" y="145" align="center"/>
+ <img name="botpage3" img="screen_active" x="640" y="145" align="center"/>
+ <img name="botpage4" img="screen_active" x="740" y="145" align="center"/>
+
+ <grp name="setup_subscreen" x="0" y="290" w="1080" h="1630"/>
+ <img name="setup_icon" img="set_settings_icon" x="540" y="1483" w="224" h="224" align="center"/>
+ <img name="setup_blot" img="set_blot" x="610" y="0" w="465" h="515"/>
+ <img name="setup_topq1" img="sq_w" x="125" y="1435" w="80" h="80" type="nine"/>
+ <img name="setup_topq2" img="sq_w" x="264" y="1414" w="128" h="128" type="nine"/>
+ <img name="setup_topq3" img="sq_w" x="682" y="1414" w="128" h="128" type="nine"/>
+ <img name="setup_topq4" img="sq_w" x="865" y="1435" w="80" h="80" type="nine"/>
+ <lbl name="setup_toptitle" text="S E T T I N G S" x="300" y="1200" w="480" h="120" alignx="center" aligny="center" fcolor="white" font="def" fscale="1.4"/>
+
+ <grp name="setup_set1_grp" x="40" y="1032" w="725" h="124"/>
+ <img name="setup_set1_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="setup_set1_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="setup_set1_icon" img="i_sound" x="40" y="0" w="124" h="124"/>
+ <lbl name="setup_set1_title" text="SOUND" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="setup_set1_sw_switch" x="785" y="1044" w="210" h="100"/>
+ <img name="setup_set1_sw_bg" img="switch_bg" x="0" y="0" />
+ <img name="setup_set1_sw_front" img="switch_active" x="0" y="0" />
+
+
+ <grp name="setup_set2_grp" x="40" y="862" w="725" h="124"/>
+ <img name="setup_set2_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="setup_set2_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="setup_set2_icon" img="i_music" x="40" y="0" w="124" h="124"/>
+ <lbl name="setup_set2_title" text="MUSIC" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="setup_set2_sw_switch" x="785" y="874" w="210" h="100"/>
+ <img name="setup_set2_sw_bg" img="switch_bg" x="0" y="0" />
+ <img name="setup_set2_sw_front" img="switch_active" x="0" y="0" />
+
+ <grp name="setup_set3_grp" x="40" y="692" w="725" h="124"/>
+ <img name="setup_set3_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="setup_set3_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="setup_set3_icon" img="i_vibro" x="40" y="0" w="124" h="124"/>
+ <lbl name="setup_set3_title" text="VIBRATION" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="setup_set3_sw_switch" x="785" y="704" w="210" h="100"/>
+ <img name="setup_set3_sw_bg" img="switch_bg" x="0" y="0" />
+ <img name="setup_set3_sw_front" img="switch_active" x="0" y="0" />
+
+ <grp name="setup_set4_grp" x="40" y="522" w="725" h="124"/>
+ <img name="setup_set4_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="setup_set4_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="setup_set4_icon" img="i_tutor" x="40" y="0" w="124" h="124"/>
+ <lbl name="setup_set4_title" text="TUTORIAL" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="setup_set4_sw_switch" x="785" y="534" w="210" h="100"/>
+ <img name="setup_set4_sw_bg" img="switch_bg" x="0" y="0" />
+ <img name="setup_set4_sw_front" img="switch_active" x="0" y="0" />
+
+ <grp name="setup_set6_grp" x="40" y="522" w="725" h="124"/>
+ <img name="setup_set6_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="setup_set6_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="setup_set6_icon" img="i_theme" x="40" y="0" w="124" h="124"/>
+ <lbl name="setup_set6_title" text="TILES THEME" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+
+ <grp name="setup_set6_o_opt" x="765" y="534" w="300" h="100"/>
+ <img name="setup_set6_o_img1" img="s_gr_o" x="60" y="50" w="100" h="100" align="center"/>
+ <img name="setup_set6_o_img2" img="s_dot_c_r" x="190" y="50" w="100" h="100" align="center"/>
+
+
+ <grp name="setup_set5_grp" x="40" y="352" w="725" h="124"/>
+ <img name="setup_set5_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="setup_set5_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="setup_set5_icon" img="i_mail" x="40" y="0" w="124" h="124"/>
+ <lbl name="setup_set5_title" text="FEEDBACK" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="setup_set5_b_but" x="785" y="364" w="210" h="100"/>
+ <img name="setup_set5_b_back" img="switch_bg" x="105" y="50" w="210" h="100" align="center" imflip="3"/>
+ <lbl name="setup_set5_b_text" text="Send" x="30" y="0" w="160" h="100" alignx="center" aligny="center" fcolor="white" font="def" fscale="0.9"/>
+
+ <grp name="setup_mockupbut" x="390" y="1000" w="300" h="300"/>
+ <img name="setup_mockupfront" img="i_settings" x="150" y="150" w="300" h="300" align="center"/>
+
+ <grp name="shop_subscreen" x="0" y="290" w="1080" h="1630"/>
+ <img name="shop_icon" img="set_shop_icon" x="540" y="1483" w="224" h="224" align="center"/>
+ <img name="shop_topq1" img="sq_w" x="125" y="1435" w="80" h="80" type="nine"/>
+ <img name="shop_topq2" img="sq_w" x="264" y="1414" w="128" h="128" type="nine"/>
+ <img name="shop_topq3" img="sq_w" x="682" y="1414" w="128" h="128" type="nine"/>
+ <img name="shop_topq4" img="sq_w" x="865" y="1435" w="80" h="80" type="nine"/>
+ <lbl name="shop_toptitle" text="S H O P" x="300" y="1200" w="480" h="120" alignx="center" aligny="center" fcolor="white" font="def" fscale="1.4"/>
+
+ <grp name="shop_set1_grp" x="40" y="1032" w="700" h="124"/>
+ <img name="shop_set1_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="shop_set1_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="shop_set1_icon" img="i_helper" x="40" y="0" w="124" h="124"/>
+ <lbl name="shop_set1_title" text="HINT" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="shop_set1_sw_spin" x="760" y="1044" w="290" h="100"/>
+ <img name="shop_set1_sw_bg" img="oval_bg" x="0" y="0" w="290" h="100" type="nine"/>
+ <img name="shop_set1_sw_plus" img="plus_but" x="50" y="50" align="center" />
+ <img name="shop_set1_sw_minus" img="minus_but" x="240" y="50" align="center" />
+ <lbl name="shop_set1_sw_val" text="12" x="100" y="24" w="90" h="56" aligny="center" alignx="center" fcolor="white" font="def" fscale="0.8"/>
+
+
+ <grp name="shop_set2_grp" x="40" y="862" w="700" h="124"/>
+ <img name="shop_set2_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="shop_set2_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="shop_set2_icon" img="i_bomb" x="40" y="0" w="124" h="124"/>
+ <lbl name="shop_set2_title" text="BOMBER" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="shop_set2_sw_spin" x="760" y="874" w="290" h="100"/>
+ <img name="shop_set2_sw_bg" img="oval_bg" x="0" y="0" w="290" h="100" type="nine"/>
+ <img name="shop_set2_sw_plus" img="plus_but" x="50" y="50" align="center" />
+ <img name="shop_set2_sw_minus" img="minus_but" x="240" y="50" align="center" />
+ <lbl name="shop_set2_sw_val" text="12" x="100" y="24" w="90" h="56" aligny="center" alignx="center" fcolor="white" font="def" fscale="0.8"/>
+
+ <grp name="shop_set3_grp" x="40" y="692" w="700" h="124"/>
+ <img name="shop_set3_bg" img="set_settings_item_bg" x="0" y="12" w="725" h="100" type="nine"/>
+ <img name="shop_set3_bg2" img="screen_active" x="40" y="0" w="124" h="124"/>
+ <img name="shop_set3_icon" img="i_reshuffle" x="40" y="0" w="124" h="124"/>
+ <lbl name="shop_set3_title" text="RESHUFFLE" x="215" y="32" w="480" h="56" aligny="center" fcolor="white" font="def" fscale="1"/>
+ <grp name="shop_set3_sw_spin" x="760" y="704" w="290" h="100"/>
+ <img name="shop_set3_sw_bg" img="oval_bg" x="0" y="0" w="290" h="100" type="nine"/>
+ <img name="shop_set3_sw_plus" img="plus_but" x="50" y="50" align="center" />
+ <img name="shop_set3_sw_minus" img="minus_but" x="240" y="50" align="center" />
+ <lbl name="shop_set3_sw_val" text="12" x="100" y="24" w="90" h="56" aligny="center" alignx="center" fcolor="white" font="def" fscale="0.8"/>
+
+ <img name="shop_bank_img" img="bank" x="370" y="450"/>
+ <lbl name="shop_mon_val" text="0" x="300" y="320" w="480" h="120" alignx="center" aligny="center" fcolor="white" font="def" fscale="1.4"/>
+
+ <grp name="shop_backbut" x="60" y="150" w="356" h="128"/>
+ <img name="shop_backfront" img="backarrow" x="64" y="64" w="110" h="110" align="center"/>
+ <lbl name="shop_backtext" text="Back to game" x="185" y="40" w="200" h="50" alignx="left" aligny="center" fcolor="white" font="def" fscale="0.9"/>
+
+
+ <grp name="info_subscreen" x="0" y="200" w="1080" h="1720"/>
+ <grp name="info_mockupbut" x="240" y="1200" w="600" h="600"/>
+ <img name="info_mockupfront" img="v3_intro" x="300" y="300" w="600" h="600" align="center"/>
+ <img name="info_logo" img="v3_intro" x="540" y="1320" w="554" h="500" align="center"/>
+
+ <grp name="info_moregbut" x="190" y="520" w="700" h="160"/>
+ <img name="info_moregback" img="bgbrown" x="350" y="80" w="700" h="160" align="center"/>
+ <lbl name="info_moregtext" text="Check our other games!" x="0" y="50" w="700" h="60" alignx="center" aligny="center" fcolor="white" font="def" fscale="1"/>
+
+ <lbl name="info_copyright" text="Copyright (c) NorthernCaptain, 2023" x="190" y="200" w="700" h="30" alignx="center" aligny="center" fcolor="white" font="def" fscale="0.6"/>
+ <lbl name="info_musicby" text="Music by Sergio Prosvirini from Pixabay" x="190" y="145" w="700" h="30" alignx="center" aligny="center" fcolor="white" font="def" fscale="0.5"/>
+ <lbl name="info_appversion" text="version 1.3.3" x="180" y="915" w="680" h="30" alignx="right" aligny="center" fcolor="white" font="def" fscale="0.7"/>
+ <img name="info_quadronia" img="quadronia" x="540" y="1000" align="center"/>
+
+ <grp name="mnu_buttons" x="0" y="275" w="1080" h="704"/>
+ <img name="mnu_frm31" img="nmenu_sq_i" x="68" y="0" w="220" h="220" type="nine"/>
+ <img name="mnu_frm32" img="nmenu_sq_b" x="310" y="0" w="220" h="220" type="nine"/>
+ <img name="mnu_frm33" img="nmenu_sq_y" x="554" y="0" w="220" h="220" type="nine"/>
+ <img name="mnu_frm34" img="nmenu_sq_i" x="795" y="0" w="220" h="220" type="nine"/>
+
+ <img name="mnu_quadronia" img="quadronia" x="540" y="1115" align="center"/>
+
+
+ <grp name="settingsbut" x="68" y="480" w="220" h="220"/>
+ <img name="settingsbg" img="nmenu_sq_y" w="220" h="220" type="nine"/>
+ <img name="settingsback" img="nmenu_sq_sm" x="110" y="110" w="136" h="136" type="nine" align="center"/>
+ <img name="settingsfront" img="i_settings" x="110" y="110" align="center"/>
+
+ <grp name="infobut" x="68" y="240" w="220" h="220"/>
+ <img name="infobg" img="nmenu_sq_r" w="220" h="220" type="nine"/>
+ <img name="infoback" img="nmenu_sq_sm" x="110" y="110" w="136" h="136" type="nine" align="center"/>
+ <img name="infofront" img="i_info" x="110" y="110" align="center"/>
+
+ <grp name="shopbut" x="795" y="480" w="220" h="220"/>
+ <img name="shopbg" img="nmenu_sq_r" w="220" h="220" type="nine"/>
+ <img name="shopback" img="nmenu_sq_sm" x="110" y="110" w="136" h="136" type="nine" align="center"/>
+ <img name="shopfront" img="i_shop" x="110" y="110" align="center"/>
+
+ <grp name="achivbut" x="795" y="240" w="220" h="220"/>
+ <img name="achivbg" img="nmenu_sq_g" w="220" h="220" type="nine"/>
+ <img name="achivback" img="nmenu_sq_sm" x="110" y="110" w="136" h="136" type="nine" align="center"/>
+ <img name="achivfront" img="i_achiv" x="110" y="110" align="center"/>
+
+ <grp name="playbut" x="310" y="240" w="464" h="464"/>
+ <img name="playback" img="logo" x="0" y="0" />
+ <lbl name="playtext" text="START" x="0" y="70" w="464" h="100" alignx="center" aligny="center" fcolor="white" font="def" fscale="1.3"/>
+
+ <grp name="gametypeswitch" x="540" y="50" w="690" h="100" align="center"/>
+ <img name="gametypebg" img="switch_bg" x="240" y="0" />
+ <img name="gametypefront" img="switch_active" x="0" y="0" />
+ <lbl name="classictext" text="CLASSIC" x="0" y="0" w="390" h="100" alignx="right" aligny="center" fcolor="white" font="def" fscale="0.8"/>
+ <lbl name="sprinttext" text="SPRINT" x="695" y="0" w="300" h="100" alignx="left" aligny="center" fcolor="white" font="def" fscale="0.8"/>
+
+
+
+
+ <!-- Old stuff from main menu screen -->
+   <img name="logo" img="v3_intro" x="0" y="0"/>
+    <img name="toplogo" img="logo" x="0" y="50"/>
+
+   <tbut name="but_quit" img="v3_text_fld_bg" text="quit_game" font="def"
+         alignx="center"
+         y="18"
+         w="157"
+         h="147"
+         text_y="23"/>
+    <tbut name="but_new" img="v3_text_fld_bg" text="arcadelbl" font="def"
+          alignx="center"
+          y="18"
+          w="157"
+          h="147"
+          text_y="23"/>
+    <tbut name="but_new2" img="v3_text_fld_bg" text="expresslbl" font="def"
+          alignx="center"
+          y="18"
+          w="157"
+          h="147"
+          text_y="23"/>
+    <tbut name="but_new3" img="v3_text_fld_bg" text="questlbl" font="def"
+          alignx="center"
+          y="18"
+          w="157"
+          h="147"
+          text_y="23"/>
+    <lbl name="modelbl" text="3 + 2" font="def" fscale="0.8"
+         y="96" x="80" fcolor="myLightBlue"/>
+    <lbl name="scorelbl" font="d40" fcolor="myLightBlue"
+         y="10" x="80"/>
+    <lbl name="fraglbl" font="d40" fcolor="myGreen"
+         y="10" x="80"/>
+    <lbl name="circlbl" font="d40" fcolor="myLightBlue"
+         y="10" x="80"/>
+    <lbl name="lvllbl" font="d40" fcolor="myYellow"
+         y="10" x="80"/>
+
+    <img name="easybg" img="button_active" x="560" y="30"/>
+    <img name="easybgin" img="button_inactive" x="560" y="30"/>
+    <img name="easydn" img="button_choosen" x="560" y="30"/>
+    <img name="easyglow" img="button_glow" x="530" y="0"/>
+    <lbl name="easylbl" font="def" alignx="center" y="90" x="580" w="100"
+         fcolor="myWhite" text="easylbl" fscale="1"/>
+
+    <img name="mediumbg" img="button_active" x="660" y="230"/>
+    <img name="mediumbgin" img="button_inactive" x="660" y="230"/>
+    <img name="mediumdn" img="button_choosen" x="660" y="230"/>
+    <img name="mediumglow" img="button_glow" x="630" y="200"/>
+    <lbl name="mediumlbl" font="def" alignx="center" y="290" x="680" w="100"
+         fcolor="myWhite" text="mediumlbl" fscale="1"/>
+
+    <img name="hardbg" img="button_active" x="860" y="330"/>
+    <img name="hardbgin" img="button_inactive" x="860" y="330"/>
+    <img name="harddn" img="button_choosen" x="860" y="330"/>
+    <img name="hardglow" img="button_glow" x="830" y="300"/>
+    <lbl name="hardlbl" font="def" alignx="center" y="390" x="880" w="100"
+         fcolor="myWhite" text="hardlbl" fscale="1"/>
+
+    <lbl name="unamelbl" font="def" alignx="left" y="-420" x="80" w="400" h="50"
+         fcolor="myLightBlue" fscale="1.2"/>
+    <img name="coin" img="coin" x="80" y="-536"/>
+    <lbl name="coinlbl" font="def" alignx="left" y="-520" x="180" w="250" h="50"
+         text="500" fcolor="myLightBlue" fscale="1.2"/>
+
+    <tbl name="coinTbl" x="80" y="-540" w="250" h="70"/>
+
+    <img name="blead" img="v3_crown" x="30" y="1280"/>
+    <img name="bachieve" img="v3_achievement" x="30" y="40"/>
+    <img name="bshare" img="v3_share" x="30" y="40"/>
+    <img name="bopt" img="options_icon" x="30" y="40"/>
+
+    <img name="ubar" img="infobarblue9" x="0" y="340" w="1080" h="250" type="nine"/>
+
+
+    <ibut name="ibut_new" img="mode_arcade" text="arcadelbl"
+          font="def" fcolor="myLightBlue" fscale="1.2"
+          alignx="left"
+          y="150"
+          x="50"
+          h="260" w="260"
+          />
+    <ibut name="ibut_new2" img="mode_express" text="expresslbl"
+          font="def" fcolor="myLightBlue" fscale="1.2"
+          alignx="left"
+          y="150"
+          h="260" w="260"
+          x="50"
+          />
+    <ibut name="ibut_new3" img="mode_quest" text="questlbl"
+          font="def" fcolor="myLightBlue" fscale="1.2"
+          alignx="left"
+          y="100"
+          x="50"
+          h="260" w="260"
+          />
+    <ibut name="ibut_quit" img="mode_achieve" text="quit_game"
+          font="def" fcolor="myLightBlue" fscale="1.2"
+          alignx="left"
+          y="100"
+          x="50"
+          h="260" w="260"
+          />
+
+</screen>

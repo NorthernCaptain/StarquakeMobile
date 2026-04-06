@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screen name="screen" fill="none" bg="pattern881" scale="1" w="720" h="1280" sw="720"
+        dx="-27"
+        dy="0">
+   <img name="logo" img="v3_intro" x="0" y="0"/>
+   <img name="toplogo" img="logo" x="0" y="33"/>
+   <tbut name="but_quit" img="v3_text_fld_bg" text="quit_game" font="def"
+         alignx="center"
+         y="12"
+         w="105"
+         h="98"
+         text_y="15"/>
+   <tbut name="but_new" img="v3_text_fld_bg" text="arcadelbl" font="def" alignx="center"
+         y="12"
+         w="105"
+         h="98"
+         text_y="15"/>
+   <tbut name="but_new2" img="v3_text_fld_bg" text="expresslbl" font="def"
+         alignx="center"
+         y="12"
+         w="105"
+         h="98"
+         text_y="15"/>
+   <tbut name="but_new3" img="v3_text_fld_bg" text="questlbl" font="def" alignx="center"
+         y="12"
+         w="105"
+         h="98"
+         text_y="15"/>
+   <lbl name="modelbl" text="3 + 2" font="def" fscale="0.8" y="57" x="53"
+        fcolor="myLightBlue"/>
+   <lbl name="scorelbl" font="d40" fcolor="myLightBlue" y="7" x="53"/>
+   <lbl name="fraglbl" font="d40" fcolor="myGreen" y="7" x="53"/>
+   <lbl name="circlbl" font="d40" fcolor="myLightBlue" y="7" x="53"/>
+   <lbl name="lvllbl" font="d40" fcolor="myYellow" y="7" x="53"/>
+   <img name="easybg" img="button_active" x="373" y="20"/>
+   <img name="easybgin" img="button_inactive" x="373" y="20"/>
+   <img name="easydn" img="button_choosen" x="373" y="20"/>
+   <img name="easyglow" img="button_glow" x="353" y="0"/>
+   <lbl name="easylbl" font="def" alignx="center" y="60" x="387" w="67"
+        fcolor="myWhite"
+        text="easylbl"
+        fscale="1"/>
+   <img name="mediumbg" img="button_active" x="440" y="153"/>
+   <img name="mediumbgin" img="button_inactive" x="440" y="153"/>
+   <img name="mediumdn" img="button_choosen" x="440" y="153"/>
+   <img name="mediumglow" img="button_glow" x="420" y="133"/>
+   <lbl name="mediumlbl" font="def" alignx="center" y="193" x="453" w="67"
+        fcolor="myWhite"
+        text="mediumlbl"
+        fscale="1"/>
+   <img name="hardbg" img="button_active" x="573" y="220"/>
+   <img name="hardbgin" img="button_inactive" x="573" y="220"/>
+   <img name="harddn" img="button_choosen" x="573" y="220"/>
+   <img name="hardglow" img="button_glow" x="553" y="200"/>
+   <lbl name="hardlbl" font="def" alignx="center" y="260" x="587" w="67"
+        fcolor="myWhite"
+        text="hardlbl"
+        fscale="1"/>
+   <lbl name="unamelbl" font="def" alignx="left" y="-280" x="53" w="267" h="33"
+        fcolor="myLightBlue"
+        fscale="1.2"/>
+   <img name="coin" img="coin" x="53" y="-357"/>
+   <lbl name="coinlbl" font="def" alignx="left" y="-347" x="120" w="167" h="33"
+        text="333"
+        fcolor="myLightBlue"
+        fscale="1.2"/>
+   <tbl name="coinTbl" x="53" y="-360" w="167" h="47"/>
+   <img name="blead" img="v3_crown" x="20" y="853"/>
+   <img name="bachieve" img="v3_achievement" x="20" y="27"/>
+   <img name="bshare" img="v3_share" x="20" y="27"/>
+    <img name="bopt" img="options_icon" x="20" y="27"/>
+   <img name="ubar" img="infobarblue9" x="0" y="227" w="720" h="167" type="nine"/>
+   <ibut name="ibut_new" img="mode_arcade" text="arcadelbl" font="def"
+         fcolor="myLightBlue"
+         fscale="1.2"
+         alignx="left"
+         y="100"
+         x="33"
+         h="173"
+         w="173"/>
+   <ibut name="ibut_new2" img="mode_express" text="expresslbl" font="def"
+         fcolor="myLightBlue"
+         fscale="1.2"
+         alignx="left"
+         y="100"
+         h="173"
+         w="173"
+         x="33"/>
+   <ibut name="ibut_new3" img="mode_quest" text="questlbl" font="def"
+         fcolor="myLightBlue"
+         fscale="1.2"
+         alignx="left"
+         y="67"
+         x="33"
+         h="173"
+         w="173"/>
+   <ibut name="ibut_quit" img="mode_achieve" text="quit_game" font="def"
+         fcolor="myLightBlue"
+         fscale="1.2"
+         alignx="left"
+         y="67"
+         x="33"
+         h="173"
+         w="173"/>
+</screen>

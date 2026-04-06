@@ -1,0 +1,91 @@
+
+atlas.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+logo
+  rotate: false
+  xy: 1, 267
+  size: 724, 227
+  orig: 724, 227
+  offset: 0, 0
+  index: -1
+mode_achieve
+  rotate: false
+  xy: 727, 194
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+mode_arcade
+  rotate: false
+  xy: 1029, 194
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+mode_express
+  rotate: false
+  xy: 1331, 194
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+mode_quest
+  rotate: false
+  xy: 1633, 194
+  size: 300, 300
+  orig: 300, 300
+  offset: 0, 0
+  index: -1
+quit
+  rotate: false
+  xy: 1, 5
+  size: 260, 260
+  orig: 260, 260
+  offset: 0, 0
+  index: -1
+v3_achievement
+  rotate: false
+  xy: 263, 111
+  size: 144, 154
+  orig: 144, 154
+  offset: 0, 0
+  index: -1
+v3_crown
+  rotate: false
+  xy: 409, 111
+  size: 144, 154
+  orig: 144, 154
+  offset: 0, 0
+  index: -1
+v3_share
+  rotate: false
+  xy: 555, 111
+  size: 144, 154
+  orig: 144, 154
+  offset: 0, 0
+  index: -1
+qbg
+  rotate: false
+  xy: 1935, 294
+  size: 75, 200
+  split: 25, 25, 25, 25
+  orig: 75, 200
+  offset: 0, 0
+  index: -1
+options_icon
+  rotate: false
+  xy: 263, 1
+  size: 102, 108
+  orig: 102, 108
+  offset: 0, 0
+  index: -1
+infobarblue9
+  rotate: false
+  xy: 1935, 228
+  size: 64, 64
+  split: 9, 10, 7, 7
+  orig: 64, 64
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,142 @@
+
+atlas.png
+size: 512,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+background
+  rotate: false
+  xy: 2, 58
+  size: 168, 153
+  orig: 168, 153
+  offset: 0, 0
+  index: -1
+cursor_normal
+  rotate: false
+  xy: 172, 179
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+cursor_warn
+  rotate: false
+  xy: 341, 459
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+cursor_warn_block
+  rotate: false
+  xy: 172, 145
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+gradient2
+  rotate: false
+  xy: 2, 2
+  size: 32, 2
+  orig: 32, 2
+  offset: 0, 0
+  index: -1
+im_footer
+  rotate: false
+  xy: 2, 6
+  size: 240, 20
+  orig: 240, 20
+  offset: 0, 0
+  index: -1
+im_header
+  rotate: false
+  xy: 2, 28
+  size: 240, 28
+  orig: 240, 28
+  offset: 0, 0
+  index: -1
+particle
+  rotate: false
+  xy: 206, 179
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+particle2
+  rotate: false
+  xy: 172, 86
+  size: 3, 23
+  orig: 3, 23
+  offset: 0, 0
+  index: -1
+semiblue
+  rotate: false
+  xy: 329, 427
+  size: 10, 64
+  orig: 10, 64
+  offset: 0, 0
+  index: -1
+semiblue2
+  rotate: false
+  xy: 329, 387
+  size: 10, 38
+  orig: 10, 38
+  offset: 0, 0
+  index: -1
+semiblue3
+  rotate: false
+  xy: 206, 137
+  size: 6, 6
+  orig: 6, 6
+  offset: 0, 0
+  index: -1
+semidark
+  rotate: false
+  xy: 375, 459
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+star4
+  rotate: false
+  xy: 409, 475
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
+v3_framed
+  rotate: false
+  xy: 172, 111
+  size: 32, 32
+  split: 8, 8, 8, 7
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+v3_input_cursor
+  rotate: false
+  xy: 341, 421
+  size: 7, 36
+  orig: 7, 36
+  offset: 0, 0
+  index: -1
+v3_intro
+  rotate: false
+  xy: 2, 213
+  size: 325, 278
+  orig: 325, 278
+  offset: 0, 0
+  index: -1
+v3_text_fld_bg
+  rotate: false
+  xy: 206, 145
+  size: 32, 32
+  split: 10, 9, 8, 7
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+v3_text_fld_bg_framed
+  rotate: false
+  xy: 240, 179
+  size: 32, 32
+  split: 8, 8, 8, 7
+  orig: 32, 32
+  offset: 0, 0
+  index: -1

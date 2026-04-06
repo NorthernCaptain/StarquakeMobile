@@ -1,0 +1,28 @@
+sourceSets.main.java.srcDirs = ["src/"]
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.24'
+    }
+}
+apply plugin: "robovm"
+
+sourceCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+ext {
+    mainClassName = "com.starquake.game.ios.IOSLauncher"
+}
+
+launchIPhoneSimulator.dependsOn build
+launchIPadSimulator.dependsOn build
+launchIOSDevice.dependsOn build
+createIPA.dependsOn build
+
+robovm {
+    iosSkipSigning = true
+    archs = "arm64"
+}

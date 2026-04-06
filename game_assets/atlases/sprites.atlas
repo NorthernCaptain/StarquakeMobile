@@ -1,0 +1,279 @@
+
+sprites.png
+size: 2048, 512
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+blob_walk_left
+  rotate: false
+  xy: 1, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 0
+blob_walk_left
+  rotate: false
+  xy: 1, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 1
+blob_walk_left
+  rotate: false
+  xy: 147, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 2
+blob_walk_left
+  rotate: false
+  xy: 1, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 3
+blob_walk_right
+  rotate: false
+  xy: 147, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 0
+blob_walk_right
+  rotate: false
+  xy: 293, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 1
+blob_walk_right
+  rotate: false
+  xy: 1, 99
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 2
+blob_walk_right
+  rotate: false
+  xy: 147, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 3
+enemy
+  rotate: false
+  xy: 293, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 0
+enemy
+  rotate: false
+  xy: 439, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 1
+enemy
+  rotate: false
+  xy: 1, 1
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 2
+enemy
+  rotate: false
+  xy: 147, 99
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 3
+enemy
+  rotate: false
+  xy: 293, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 4
+enemy
+  rotate: false
+  xy: 439, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 5
+enemy
+  rotate: false
+  xy: 585, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 6
+enemy
+  rotate: false
+  xy: 147, 1
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 7
+enemy
+  rotate: false
+  xy: 293, 99
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 8
+enemy
+  rotate: false
+  xy: 439, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 9
+enemy
+  rotate: false
+  xy: 585, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 10
+enemy
+  rotate: false
+  xy: 731, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 11
+enemy
+  rotate: false
+  xy: 293, 1
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 12
+enemy
+  rotate: false
+  xy: 439, 99
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 13
+enemy
+  rotate: false
+  xy: 585, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 14
+enemy
+  rotate: false
+  xy: 731, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 15
+enemy
+  rotate: false
+  xy: 877, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 16
+enemy
+  rotate: false
+  xy: 439, 1
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 17
+enemy
+  rotate: false
+  xy: 585, 99
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 18
+laser
+  rotate: false
+  xy: 731, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 0
+laser
+  rotate: false
+  xy: 877, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 1
+laser
+  rotate: false
+  xy: 1023, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 2
+laser
+  rotate: false
+  xy: 585, 1
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 3
+laser
+  rotate: false
+  xy: 731, 99
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 4
+laser
+  rotate: false
+  xy: 877, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 5
+laser
+  rotate: false
+  xy: 1023, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 6
+laser
+  rotate: false
+  xy: 1169, 393
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 7
+materialise
+  rotate: false
+  xy: 731, 1
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 0
+materialise
+  rotate: false
+  xy: 877, 99
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 1
+materialise
+  rotate: false
+  xy: 1023, 197
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 2
+materialise
+  rotate: false
+  xy: 1169, 295
+  size: 144, 96
+  orig: 144, 96
+  offset: 0, 0
+  index: 3

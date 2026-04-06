@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_id">885854342375</string>
+    <string name="leaderboard_classic">CgkI55miiOQZEAIQAQ</string>
+    <string name="leaderboard_express_5_mins">CgkI55miiOQZEAIQAg</string>
+
+    <string name="achievement_first_level">CgkIgbzUyoEQEAIQAw</string>
+    <string name="achievement_express_first_time">CgkIgbzUyoEQEAIQBA</string>
+    <string name="achievement_2000_score_points">CgkIgbzUyoEQEAIQBQ</string>
+    <string name="achievement_10000_score_points">CgkIgbzUyoEQEAIQBg</string>
+    <string name="achievement_50000_score_points">CgkIgbzUyoEQEAIQBw</string>
+    <string name="achievement_100k_score_points">CgkIgbzUyoEQEAIQCA</string>
+    <string name="achievement_express_2000">CgkIgbzUyoEQEAIQCQ</string>
+    <string name="achievement_express_10k">CgkIgbzUyoEQEAIQCg</string>
+    <string name="achievement_express_50k">CgkIgbzUyoEQEAIQCw</string>
+
+    <!--achievement It's a start-->
+    <string name="achievement_its_a_start" translatable="false">CgkI55miiOQZEAIQAw</string>
+    <!--achievement First sprint-->
+    <string name="achievement_first_sprint" translatable="false">CgkI55miiOQZEAIQBA</string>
+    <!--achievement Classic 500-->
+    <string name="achievement_classic_500" translatable="false">CgkI55miiOQZEAIQBQ</string>
+    <!--achievement Sprint 500-->
+    <string name="achievement_sprint_500" translatable="false">CgkI55miiOQZEAIQBg</string>
+    <!--achievement Classic 3000-->
+    <string name="achievement_classic_3000" translatable="false">CgkI55miiOQZEAIQBw</string>
+    <!--achievement Sprint 3000-->
+    <string name="achievement_sprint_3000" translatable="false">CgkI55miiOQZEAIQCA</string>
+    <!--achievement Classic 7000-->
+    <string name="achievement_classic_7000" translatable="false">CgkI55miiOQZEAIQCQ</string>
+    <!--achievement Sprint 7000-->
+    <string name="achievement_sprint_7000" translatable="false">CgkI55miiOQZEAIQCg</string>
+    <!--achievement Classic 15k-->
+    <string name="achievement_classic_15k" translatable="false">CgkI55miiOQZEAIQCw</string>
+    <!--achievement Sprint 15k-->
+    <string name="achievement_sprint_15k" translatable="false">CgkI55miiOQZEAIQDA</string>
+    <!--achievement Classic 50k-->
+    <string name="achievement_classic_50k" translatable="false">CgkI55miiOQZEAIQDQ</string>
+    <!--achievement Sprint 35k-->
+    <string name="achievement_sprint_35k" translatable="false">CgkI55miiOQZEAIQDg</string>
+    <!--achievement Classic 100k-->
+    <string name="achievement_classic_100k" translatable="false">CgkI55miiOQZEAIQDw</string>
+    <!--achievement Sprint 50k-->
+    <string name="achievement_sprint_50k" translatable="false">CgkI55miiOQZEAIQEA</string>
+    <!--achievement Insane 200k-->
+    <string name="achievement_insane_200k" translatable="false">CgkI55miiOQZEAIQEQ</string>
+    <!--achievement Furious 80k-->
+    <string name="achievement_furious_80k" translatable="false">CgkI55miiOQZEAIQEg</string>
+    <!--achievement Unbelievable 500k-->
+    <string name="achievement_unbelievable_500k" translatable="false">CgkI55miiOQZEAIQEw</string>
+    <!--achievement Impossible 200k-->
+    <string name="achievement_impossible_200k" translatable="false">CgkI55miiOQZEAIQFA</string>
+</resources>

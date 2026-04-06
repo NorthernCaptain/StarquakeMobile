@@ -1,0 +1,16 @@
+{
+        pot: true,
+        rotation: false,
+        minWidth: 32,
+        minHeight: 32,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        stripWhitespaceX: false,
+        stripWhitespaceY: false,
+        alphaThreshold: 0,
+        filterMin: Linear,
+        filterMag: Linear,
+        format: RGBA8888,
+        alias: true,
+        outputFormat: png,
+}
