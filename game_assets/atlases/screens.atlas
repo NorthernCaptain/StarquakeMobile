@@ -1,0 +1,41 @@
+
+screens.png
+size: 2048, 256
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+circuit_board
+  rotate: false
+  xy: 1, 1
+  size: 320, 200
+  orig: 320, 200
+  offset: 0, 0
+  index: -1
+hud_gameplay
+  rotate: false
+  xy: 323, 1
+  size: 320, 200
+  orig: 320, 200
+  offset: 0, 0
+  index: -1
+teleport
+  rotate: false
+  xy: 645, 1
+  size: 320, 200
+  orig: 320, 200
+  offset: 0, 0
+  index: -1
+title
+  rotate: false
+  xy: 967, 1
+  size: 320, 200
+  orig: 320, 200
+  offset: 0, 0
+  index: -1
+trading_pyramid
+  rotate: false
+  xy: 1289, 1
+  size: 320, 200
+  orig: 320, 200
+  offset: 0, 0
+  index: -1

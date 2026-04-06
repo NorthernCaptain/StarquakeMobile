@@ -958,5 +958,21 @@
     "height": 24,
     "width_param": 8,
     "empty": false
+  },
+  {
+    "index": 120,
+    "ptr": "0x34670",
+    "width": 32,
+    "height": 24,
+    "width_param": 8,
+    "empty": false
+  },
+  {
+    "index": 121,
+    "ptr": "0x347F4",
+    "width": 32,
+    "height": 24,
+    "width_param": 8,
+    "empty": false
   }
 ]

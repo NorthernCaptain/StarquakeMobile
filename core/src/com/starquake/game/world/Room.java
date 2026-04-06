@@ -1,87 +1,74 @@
 package com.starquake.game.world;
 
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.JsonValue;
 import com.starquake.game.Assets;
 
-import java.util.Arrays;
-
+/**
+ * Room data built from the Atari ST metadata.
+ *
+ * Each room contains 12 big-platform indices (4 cols × 3 rows).
+ * Each big platform contains 4 tile indices (TL, TR, BL, BR).
+ * Palette index determines the room's color scheme (0–25).
+ *
+ * The room owns its terrain FrameBuffer. Call {@link #dispose()} when the
+ * room is no longer visible (e.g. after a transition completes).
+ */
 public class Room {
+    public static final int WIDTH = 256;
+    public static final int HEIGHT = 144;
+
     public final int roomIndex;
-    public final String color;
-    public final int colorIndex;
-    public final int[] bigPlatformIds;   // 12 entries: row-major 4 cols x 3 rows
-    public final boolean[][] collision;  // [18 rows][32 cols] of 48px blocks
-    public final String[][] behaviorMap; // same grid
+    public final int paletteIndex;
+    public final int[] bigPlatformIds;
 
-    // Quad offsets: tl, tr, bl, br
-    private static final int[] QUAD_QCOL = {0, 1, 0, 1};
-    private static final int[] QUAD_QROW = {1, 1, 0, 0};
-    private static final String[] QUAD_KEY = {"tl", "tr", "bl", "br"};
+    private FrameBuffer fbo;
+    private TextureRegion terrainRegion;
 
-    private Room(int roomIndex, String color, int colorIndex,
-                 int[] bigPlatformIds, boolean[][] collision, String[][] behaviorMap) {
+    private Room(int roomIndex, int paletteIndex, int[] bigPlatformIds) {
         this.roomIndex      = roomIndex;
-        this.color          = color;
-        this.colorIndex     = colorIndex;
+        this.paletteIndex   = paletteIndex;
         this.bigPlatformIds = bigPlatformIds;
-        this.collision      = collision;
-        this.behaviorMap    = behaviorMap;
     }
 
-    /** Builds room data from pre-loaded assets. Call on room entry. */
     public static Room build(Assets assets, int roomIndex) {
-        JsonValue roomData = assets.metadata.get("rooms").get(roomIndex);
-        String color       = roomData.getString("color");
-        int colorIndex     = roomData.getInt("color_index");
+        JsonValue roomData = assets.getRoom(roomIndex);
+        int palette        = roomData.getInt("palette");
         int[] bpIds        = roomData.get("big_platforms").asIntArray();
+        return new Room(roomIndex, palette, bpIds);
+    }
 
-        boolean[][] collision  = new boolean[18][32];
-        String[][] behaviorMap = new String[18][32];
-        for (String[] row : behaviorMap)
-            Arrays.fill(row, "");
-
-        JsonValue bigPlatforms = assets.metadata.get("big_platforms");
-
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 4; col++) {
-                JsonValue bp = bigPlatforms.get(bpIds[row * 4 + col]);
-
-                for (int qi = 0; qi < 4; qi++) {
-                    int tileIdx = bp.getInt(QUAD_KEY[qi]);
-                    int qCol    = QUAD_QCOL[qi];
-                    int qRow    = QUAD_QROW[qi];
-
-                    JsonValue tile = (tileIdx < assets.tilesById.length) ? assets.tilesById[tileIdx] : null;
-                    if (tile == null) continue;
-
-                    String behavior    = tile.getString("behavior", "");
-                    JsonValue solidity = tile.get("solidity");
-                    if (solidity == null || solidity.size == 0) continue;
-
-                    // Base block in 32-wide x 18-tall grid (each block = 48px)
-                    // 4 blocks per tile width, 3 blocks per tile height
-                    // Y is flipped: row 0 (top of room in data) → row 12 in libGDX coords
-                    int baseCol = (col * 2 + qCol) * 4;
-                    int baseRow = (2 - row) * 6 + (1 - qRow) * 3;
-
-                    for (int tr = 0; tr < solidity.size; tr++) {
-                        JsonValue solidRow = solidity.get(tr);
-                        for (int tc = 0; tc < solidRow.size; tc++) {
-                            int cr = baseRow + tr;
-                            int cc = baseCol + tc;
-                            if (cr < 0 || cr >= 18 || cc < 0 || cc >= 32) continue;
-                            JsonValue cell = solidRow.get(tc);
-                            if (cell.isNull()) continue;  // skip empty cells in sparse tiles
-                            if (cell.asBoolean())
-                                collision[cr][cc] = true;
-                            if (!behavior.isEmpty())
-                                behaviorMap[cr][cc] = behavior;
-                        }
-                    }
-                }
-            }
+    /** Returns the FBO for rendering terrain into. Creates on first call. */
+    public FrameBuffer ensureFbo() {
+        if (fbo == null) {
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, WIDTH, HEIGHT, false);
+            fbo.getColorBufferTexture().setFilter(
+                    Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            terrainRegion = new TextureRegion(fbo.getColorBufferTexture());
+            terrainRegion.flip(false, true);
         }
+        return fbo;
+    }
 
-        return new Room(roomIndex, color, colorIndex, bpIds, collision, behaviorMap);
+    /** Returns the terrain as an RGBA texture region. Null if not yet rendered. */
+    public TextureRegion getTerrainRegion() {
+        return terrainRegion;
+    }
+
+    /** Returns true if terrain has been rendered into the FBO. */
+    public boolean isRendered() {
+        return fbo != null;
+    }
+
+    /** Releases the FBO. Call when the room goes fully off-screen. */
+    public void dispose() {
+        if (fbo != null) {
+            fbo.dispose();
+            fbo = null;
+            terrainRegion = null;
+        }
     }
 }

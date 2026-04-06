@@ -13,18 +13,21 @@ import os
 import json
 from PIL import Image
 
-# === Memory addresses (from RAM analysis) ===
-ADDR_BIGPLAT_TABLE = 0x211B0    # 128 entries x 4 bytes
-ADDR_ROOM_LAYOUT   = 0x213B0    # 512 rooms x 12 bytes
+# === Memory addresses (verified via 68000 disassembly) ===
+ADDR_BIGPLAT_TABLE = 0x211C0    # 355 entries x 4 bytes (BR/BL/TR/TL), ends at 0x2174C
+ADDR_ROOM_LAYOUT   = 0x2174C    # 512 rooms x 24 bytes (12 x 16-bit big plat indices)
 ADDR_TILE_PTRS     = 0x2474C    # 120 x 32-bit pointers
-ADDR_PALETTE_TABLE = 0x3AE9A    # 27 palettes x 32 bytes
+ADDR_PALETTE_TABLE = 0x3AE1A    # Palette table base (index 0 = HUD palette)
+                                # Room palettes at indices 4-25 (room_pal_map values)
+                                # Each palette = 16 x 16-bit ST colors = 32 bytes
 ADDR_ROOM_PAL_IDX  = 0x3B1FA    # 512 bytes, palette index per room
 ADDR_SCREEN        = 0xF8000    # 32000 bytes screen buffer
 
-NUM_TILES = 120
-NUM_BIGPLATS = 128
+NUM_TILES = 122              # Tile pointer table has entries 0-121
+NUM_BIGPLATS = 355
 NUM_ROOMS = 512
-NUM_PALETTES = 27
+NUM_PALETTES = 26              # Indices 0-25 used (0=HUD, 4-25=rooms, 26=runtime-only)
+ROOM_STRIDE = 24               # 12 entries x 2 bytes each
 
 HUD_PALETTE = [0x000, 0x333, 0x444, 0x666, 0x003, 0x005, 0x007,
                0x033, 0x055, 0x077, 0x030, 0x050, 0x300, 0x500, 0x700, 0x777]
@@ -74,19 +77,30 @@ def render_pixels(pixels, palette_rgb, scale=2, transparent_bg=False):
         return Image.new('RGBA', (1, 1), (0, 0, 0, 0))
     h = len(pixels)
     w = len(pixels[0])
-    mode = 'RGBA' if transparent_bg else 'RGB'
-    img = Image.new(mode, (w * scale, h * scale), (0, 0, 0, 0) if transparent_bg else (0, 0, 0))
-    for y in range(h):
-        for x in range(w):
-            ci = pixels[y][x]
-            if transparent_bg and ci == 0:
-                continue
-            color = palette_rgb[ci % 16]
-            if transparent_bg:
-                color = color + (255,)
-            for dy in range(scale):
-                for dx in range(scale):
-                    img.putpixel((x * scale + dx, y * scale + dy), color)
+
+    # Build 1x image first, then resize for scale
+    if transparent_bg:
+        data = bytearray(w * h * 4)
+        for y in range(h):
+            for x in range(w):
+                ci = pixels[y][x]
+                off = (y * w + x) * 4
+                if ci != 0:
+                    r, g, b = palette_rgb[ci % 16]
+                    data[off] = r; data[off+1] = g; data[off+2] = b; data[off+3] = 255
+        img = Image.frombytes('RGBA', (w, h), bytes(data))
+    else:
+        data = bytearray(w * h * 3)
+        for y in range(h):
+            for x in range(w):
+                ci = pixels[y][x]
+                off = (y * w + x) * 3
+                r, g, b = palette_rgb[ci % 16]
+                data[off] = r; data[off+1] = g; data[off+2] = b
+        img = Image.frombytes('RGB', (w, h), bytes(data))
+
+    if scale != 1:
+        img = img.resize((w * scale, h * scale), Image.NEAREST)
     return img
 
 
@@ -133,7 +147,7 @@ def extract_tiles(ram, outdir, palettes):
     os.makedirs(tiledir, exist_ok=True)
 
     # Default palette for rendering: use palette index 8 (neutral gray 222/444/666)
-    default_pal = palettes[min(8, len(palettes) - 1)]
+    default_pal = palettes[min(12, len(palettes) - 1)]
     default_rgb = [st_color_to_rgb(c) for c in default_pal]
 
     tile_info = []
@@ -236,14 +250,16 @@ def render_masked_sprite(pixels, masks, palette_rgb, scale=6):
     """Render a masked sprite as a PIL Image with transparency."""
     h = len(pixels)
     w = len(pixels[0])
-    img = Image.new('RGBA', (w * scale, h * scale), (0, 0, 0, 0))
+    data = bytearray(w * h * 4)
     for y in range(h):
         for x in range(w):
             if masks[y][x] == 0:  # opaque
-                color = palette_rgb[pixels[y][x] % 16] + (255,)
-                for dy in range(scale):
-                    for dx in range(scale):
-                        img.putpixel((x * scale + dx, y * scale + dy), color)
+                off = (y * w + x) * 4
+                r, g, b = palette_rgb[pixels[y][x] % 16]
+                data[off] = r; data[off+1] = g; data[off+2] = b; data[off+3] = 255
+    img = Image.frombytes('RGBA', (w, h), bytes(data))
+    if scale != 1:
+        img = img.resize((w * scale, h * scale), Image.NEAREST)
     return img
 
 
@@ -259,7 +275,7 @@ def extract_sprites(ram, outdir, palettes):
     spritedir = os.path.join(outdir, "sprites")
     os.makedirs(spritedir, exist_ok=True)
 
-    default_pal = palettes[min(8, len(palettes) - 1)]
+    default_pal = palettes[min(12, len(palettes) - 1)]
     default_rgb = [st_color_to_rgb(c) for c in default_pal]
 
     # Build frame list: (address, height, needs_swap, section_name)
@@ -348,84 +364,133 @@ def extract_sprites(ram, outdir, palettes):
     return sprite_info
 
 
+def render_tile_at(ram, tile_idx, pal_rgb, img, px, py, scale=2):
+    """Render a single tile onto an image at the given pixel position."""
+    if tile_idx >= NUM_TILES:
+        return
+    ptr_off = ADDR_TILE_PTRS + tile_idx * 4
+    ptr = struct.unpack_from('>I', ram, ptr_off)[0]
+    if ptr == 0 or ptr + 4 >= len(ram):
+        return
+    height = struct.unpack_from('>H', ram, ptr)[0]
+    width_param = struct.unpack_from('>H', ram, ptr + 2)[0]
+    if height == 0 or width_param == 0:
+        return
+    width_groups = width_param // 4
+    pixels = decode_bitplane_block(ram, ptr + 4, width_groups, height)
+    tile_img = render_pixels(pixels, pal_rgb, scale=scale, transparent_bg=True)
+    img.paste(tile_img, (px, py), tile_img)
+
+
 def extract_big_platforms(ram, outdir, tile_info, palettes):
-    """Extract big platform compositions (2x2 tile grids)."""
+    """Extract big platform compositions (2x2 tile grids).
+
+    Big platform format at 0x211C0: 4 bytes = [BR, BL, TR, TL] tile indices.
+    Same byte ordering as ZX Spectrum version.
+    """
     platdir = os.path.join(outdir, "platforms")
     os.makedirs(platdir, exist_ok=True)
 
-    default_pal = palettes[min(8, len(palettes) - 1)]
+    default_pal = palettes[min(12, len(palettes) - 1)]
     default_rgb = [st_color_to_rgb(c) for c in default_pal]
 
     plat_info = []
+    non_empty = 0
 
     for i in range(NUM_BIGPLATS):
         off = ADDR_BIGPLAT_TABLE + i * 4
-        tl, tr, bl, br = ram[off], ram[off + 1], ram[off + 2], ram[off + 3]
-        plat_info.append({"index": i, "tiles": [tl, tr, bl, br]})
+        br, bl, tr, tl = ram[off], ram[off + 1], ram[off + 2], ram[off + 3]
+        plat_info.append({"index": i, "tiles_BR_BL_TR_TL": [br, bl, tr, tl]})
 
-        # Compose from tiles — each tile is 32x24 (standard)
-        # Big platform = 64x48
         img = Image.new('RGBA', (64 * 2, 48 * 2), (0, 0, 0, 0))
-
-        for slot, (tile_idx, dx, dy) in enumerate([
+        for tile_idx, dx, dy in [
             (tl, 0, 0), (tr, 32, 0), (bl, 0, 24), (br, 32, 24)
-        ]):
-            if tile_idx >= NUM_TILES:
-                continue
+        ]:
+            render_tile_at(ram, tile_idx, default_rgb, img, dx * 2, dy * 2)
 
-            ptr_off = ADDR_TILE_PTRS + tile_idx * 4
-            ptr = struct.unpack_from('>I', ram, ptr_off)[0]
-            if ptr == 0 or ptr + 4 >= len(ram):
-                continue
-
-            height = struct.unpack_from('>H', ram, ptr)[0]
-            width_param = struct.unpack_from('>H', ram, ptr + 2)[0]
-            if height == 0 or width_param == 0:
-                continue
-
-            width_groups = width_param // 4
-            pixels = decode_bitplane_block(ram, ptr + 4, width_groups, height)
-            tile_img = render_pixels(pixels, default_rgb, scale=2, transparent_bg=True)
-            img.paste(tile_img, (dx * 2, dy * 2), tile_img)
-
-        # Check if entirely empty
         has_content = any(img.getpixel((x, y))[3] > 0
                          for x in range(0, img.width, 8)
                          for y in range(0, img.height, 8))
         if has_content:
             img.save(os.path.join(platdir, f"bigplat_{i:03d}.png"))
+            non_empty += 1
 
     with open(os.path.join(platdir, "bigplat_info.json"), "w") as f:
         json.dump(plat_info, f, indent=2)
 
-    non_empty = sum(1 for i in range(NUM_BIGPLATS)
-                    if os.path.exists(os.path.join(platdir, f"bigplat_{i:03d}.png")))
     print(f"  Extracted {non_empty}/{NUM_BIGPLATS} non-empty big platforms")
     return plat_info
 
 
-def extract_rooms(ram, outdir, palettes, room_pal_map, count=64):
-    """Extract room screenshots. Does first `count` rooms by default."""
+def decode_all_tiles(ram):
+    """Pre-decode all tile pixel data. Returns dict of tile_idx -> pixel_2d_array."""
+    tile_pixels = {}
+    for t in range(NUM_TILES):
+        ptr_off = ADDR_TILE_PTRS + t * 4
+        ptr = struct.unpack_from('>I', ram, ptr_off)[0]
+        if ptr == 0 or ptr + 4 >= len(ram):
+            continue
+        h = struct.unpack_from('>H', ram, ptr)[0]
+        w = struct.unpack_from('>H', ram, ptr + 2)[0]
+        if h == 0 or w == 0:
+            continue
+        width_groups = w // 4
+        pixels = decode_bitplane_block(ram, ptr + 4, width_groups, h)
+        tile_pixels[t] = pixels
+    return tile_pixels
+
+
+def render_tile_cached(tile_pixels, tile_idx, pal_rgb, scale):
+    """Render a tile from pre-decoded pixel data. Returns RGBA Image or None."""
+    if tile_idx not in tile_pixels:
+        return None
+    return render_pixels(tile_pixels[tile_idx], pal_rgb, scale=scale, transparent_bg=True)
+
+
+def extract_rooms(ram, outdir, palettes, room_pal_map, count=512):
+    """Extract all 512 room screenshots.
+
+    Room data at 0x2174C: 24 bytes per room = 12 x 16-bit big platform indices.
+    Layout: row-major (4 cols x 3 rows), top-to-bottom, left-to-right.
+    Big platform table at 0x211C0: [BR, BL, TR, TL] per entry.
+    """
     roomdir = os.path.join(outdir, "rooms")
     os.makedirs(roomdir, exist_ok=True)
 
+    # Pre-decode all tile pixel data (decode once, render per palette)
+    tile_pixels = decode_all_tiles(ram)
+
+    scale = 2
     rendered = 0
+    # Cache rendered tiles per palette (pal_idx -> {tile_idx -> Image})
+    tile_cache = {}
+
     for room_idx in range(min(count, NUM_ROOMS)):
         x = room_idx % 16
         y = room_idx // 16
 
-        # Get room's palette
         pal_idx = room_pal_map[room_idx] if room_idx < len(room_pal_map) else 0
         pal = palettes[min(pal_idx, len(palettes) - 1)]
+        if all(c == 0 for c in pal):
+            pal = palettes[12]
+            pal_idx = 12
         pal_rgb = [st_color_to_rgb(c) for c in pal]
 
-        # Read room layout: 12 big platform indices (4 cols x 3 rows)
-        room_off = ADDR_ROOM_LAYOUT + room_idx * 12
-        bp_indices = list(ram[room_off:room_off + 12])
+        # Get or create tile image cache for this palette
+        if pal_idx not in tile_cache:
+            cache = {}
+            for t in tile_pixels:
+                img = render_tile_cached(tile_pixels, t, pal_rgb, scale)
+                if img:
+                    cache[t] = img
+            tile_cache[pal_idx] = cache
+        cache = tile_cache[pal_idx]
 
-        # Compose room: 4 cols x 3 rows of big platforms
-        # Each big plat = 64x48 native, render at 2x = 128x96
-        img = Image.new('RGBA', (256 * 2, 144 * 2), (0, 0, 0, 255))
+        room_off = ADDR_ROOM_LAYOUT + room_idx * ROOM_STRIDE
+        bp_indices = [struct.unpack_from('>H', ram, room_off + i * 2)[0]
+                      for i in range(12)]
+
+        img = Image.new('RGBA', (256 * scale, 144 * scale), (0, 0, 0, 255))
 
         for row in range(3):
             for col in range(4):
@@ -434,32 +499,19 @@ def extract_rooms(ram, outdir, palettes, room_pal_map, count=64):
                     continue
 
                 bp_off = ADDR_BIGPLAT_TABLE + bp_idx * 4
-                tl, tr, bl, br = ram[bp_off], ram[bp_off + 1], ram[bp_off + 2], ram[bp_off + 3]
+                br, bl, tr, tl = ram[bp_off], ram[bp_off + 1], ram[bp_off + 2], ram[bp_off + 3]
 
+                base_x = col * 64 * scale
+                base_y = row * 48 * scale
                 for tile_idx, tdx, tdy in [
-                    (tl, 0, 0), (tr, 32, 0), (bl, 0, 24), (br, 32, 24)
+                    (tl, 0, 0), (tr, 32 * scale, 0),
+                    (bl, 0, 24 * scale), (br, 32 * scale, 24 * scale)
                 ]:
-                    if tile_idx >= NUM_TILES:
-                        continue
-                    ptr_off = ADDR_TILE_PTRS + tile_idx * 4
-                    ptr = struct.unpack_from('>I', ram, ptr_off)[0]
-                    if ptr == 0 or ptr + 4 >= len(ram):
-                        continue
+                    if tile_idx in cache:
+                        img.paste(cache[tile_idx],
+                                  (base_x + tdx, base_y + tdy),
+                                  cache[tile_idx])
 
-                    height = struct.unpack_from('>H', ram, ptr)[0]
-                    width_param = struct.unpack_from('>H', ram, ptr + 2)[0]
-                    if height == 0 or width_param == 0:
-                        continue
-
-                    width_groups = width_param // 4
-                    pixels = decode_bitplane_block(ram, ptr + 4, width_groups, height)
-                    tile_img = render_pixels(pixels, pal_rgb, scale=2, transparent_bg=True)
-
-                    px = (col * 64 + tdx) * 2
-                    py = (row * 48 + tdy) * 2
-                    img.paste(tile_img, (px, py), tile_img)
-
-        # Convert to RGB for saving
         rgb_img = Image.new('RGB', img.size, (0, 0, 0))
         rgb_img.paste(img, mask=img.split()[3])
         rgb_img.save(os.path.join(roomdir, f"room_{room_idx:03d}_x{x:02d}_y{y:02d}.png"))
@@ -523,8 +575,8 @@ def main():
     print("\n4. Extracting big platforms...")
     plat_info = extract_big_platforms(ram, outdir, tile_info, palettes)
 
-    print("\n5. Extracting rooms (first 64)...")
-    extract_rooms(ram, outdir, palettes, room_pal_map, count=64)
+    print("\n5. Extracting rooms (all 512)...")
+    extract_rooms(ram, outdir, palettes, room_pal_map)
 
     print("\n6. Extracting current screen...")
     extract_screen(ram, outdir, palettes, room_pal_map)

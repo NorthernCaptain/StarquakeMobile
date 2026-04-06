@@ -2,48 +2,48 @@ package com.starquake.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Assets {
     public final AssetManager manager = new AssetManager();
 
-    // Set after loading completes — null before that
-    public TextureAtlas fixedAtlas;
+    /** Tile index map atlas — grayscale, pixel value = palette index * 17 */
+    public TextureAtlas tilesAtlas;
     public TextureAtlas spritesAtlas;
-    public TextureAtlas fontAtlas;
-    public final Map<String, TextureAtlas> terrainAtlases = new HashMap<>();
+    public TextureAtlas itemsAtlas;
+    public TextureAtlas screensAtlas;
 
-    /** Game metadata parsed from metadata.json. Available after update() returns true. */
-    public JsonValue metadata;
-    /** Tiles indexed by integer tile index (0–89) for O(1) lookup. Available after update(). */
-    public JsonValue[] tilesById;
+    /** 16×26 palette lookup texture (row = palette index, col = color index) */
+    public Texture paletteTexture;
 
-    /** Key: region name as packed in atlas, e.g. "tile_014_red" */
-    public final Map<String, TextureRegion> terrainRegions = new HashMap<>();
-    /** Key: tile index */
-    public final IntMap<TextureRegion> fixedRegions = new IntMap<>();
-    /** ASCII code 0–127 → glyph region, null if absent */
-    public final TextureRegion[] fontRegions = new TextureRegion[128];
+    /** BMFont built from the font atlas */
+    public BitmapFont font;
 
-    private static final String[] COLORS = {"red", "magenta", "cyan", "yellow", "green", "white"};
+    /** Tile regions keyed by tile index */
+    public final IntMap<TextureRegion> tileRegions = new IntMap<>();
+    /** Screen background regions keyed by name */
+    public TextureRegion hudScreen, teleportScreen, titleScreen, tradingScreen, circuitScreen;
+
+    private JsonValue metadata;
+    private JsonValue roomsNode;
+    private JsonValue bigPlatformsNode;
+
     private boolean cachesBuilt = false;
 
     public Assets() {
-        for (String color : COLORS)
-            manager.load("atlases/terrain_" + color + ".atlas", TextureAtlas.class);
-        manager.load("atlases/fixed.atlas",   TextureAtlas.class);
+        manager.load("atlases/tiles.atlas", TextureAtlas.class);
         manager.load("atlases/sprites.atlas", TextureAtlas.class);
-        manager.load("atlases/font.atlas",    TextureAtlas.class);
+        manager.load("atlases/items.atlas", TextureAtlas.class);
+        manager.load("atlases/screens.atlas", TextureAtlas.class);
+        manager.load("atlases/font.atlas", TextureAtlas.class);
     }
 
-    /** Called each frame from LoadingScreen. Returns true when fully loaded and cached. */
     public boolean update() {
         if (!manager.update()) return false;
         if (!cachesBuilt) buildCaches();
@@ -57,38 +57,65 @@ public class Assets {
     private void buildCaches() {
         cachesBuilt = true;
 
-        // Parse metadata once — shared across all screens for the lifetime of the app
         metadata = new JsonReader().parse(Gdx.files.internal("metadata.json"));
+        roomsNode = metadata.get("rooms");
+        bigPlatformsNode = metadata.get("big_platforms");
 
-        // Pre-index tiles by integer id for O(1) lookup (avoids per-draw string key scan)
-        JsonValue tilesNode = metadata.get("tiles");
-        tilesById = new JsonValue[90];
-        for (int i = 0; i < 90; i++)
-            tilesById[i] = tilesNode.get(String.valueOf(i));
+        // Tile index map atlas — set nearest filtering for pixel-perfect palette lookup
+        tilesAtlas = manager.get("atlases/tiles.atlas");
+        for (Texture t : tilesAtlas.getTextures())
+            t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        for (TextureAtlas.AtlasRegion r : tilesAtlas.getRegions())
+            tileRegions.put(r.index, r);
 
-        for (String color : COLORS) {
-            TextureAtlas atlas = manager.get("atlases/terrain_" + color + ".atlas");
-            terrainAtlases.put(color, atlas);
-            for (TextureAtlas.AtlasRegion r : atlas.getRegions())
-                terrainRegions.put(r.name, r);  // name is already "tile_NNN_color"
-        }
+        // Palette texture — loaded directly (not through atlas)
+        paletteTexture = new Texture(Gdx.files.internal("palettes.png"), false);
+        paletteTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        fixedAtlas   = manager.get("atlases/fixed.atlas");
+        // Sprites
         spritesAtlas = manager.get("atlases/sprites.atlas");
-        fontAtlas    = manager.get("atlases/font.atlas");
+        for (Texture t : spritesAtlas.getTextures())
+            t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        for (TextureAtlas.AtlasRegion r : fixedAtlas.getRegions())
-            fixedRegions.put(r.index, r);
+        // Items
+        itemsAtlas = manager.get("atlases/items.atlas");
+        for (Texture t : itemsAtlas.getTextures())
+            t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
 
-        for (TextureAtlas.AtlasRegion r : fontAtlas.getRegions())
-            if (r.index >= 0 && r.index < 128) fontRegions[r.index] = r;
+        // Screens
+        screensAtlas = manager.get("atlases/screens.atlas");
+        for (Texture t : screensAtlas.getTextures())
+            t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        hudScreen = screensAtlas.findRegion("hud_gameplay");
+        teleportScreen = screensAtlas.findRegion("teleport");
+        titleScreen = screensAtlas.findRegion("title");
+        tradingScreen = screensAtlas.findRegion("trading_pyramid");
+        circuitScreen = screensAtlas.findRegion("circuit_board");
 
-        Gdx.app.log("Assets", "Loaded " + terrainRegions.size() + " terrain regions, "
-                + fixedRegions.size + " fixed regions, "
-                + spritesAtlas.getRegions().size + " sprite regions");
+        // Font
+        TextureAtlas fontAtlas = manager.get("atlases/font.atlas");
+        for (Texture t : fontAtlas.getTextures())
+            t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+        font = new BitmapFont(Gdx.files.internal("atlases/font.fnt"));
+        font.setUseIntegerPositions(true);
+
+        Gdx.app.log("Assets", "Loaded " + tileRegions.size + " tiles, "
+                + spritesAtlas.getRegions().size + " sprites, "
+                + itemsAtlas.getRegions().size + " items");
+    }
+
+    public JsonValue getRoom(int index) {
+        return roomsNode.get(index);
+    }
+
+    public JsonValue getBigPlatform(int index) {
+        if (index < 0 || index >= bigPlatformsNode.size) return null;
+        return bigPlatformsNode.get(index);
     }
 
     public void dispose() {
         manager.dispose();
+        if (paletteTexture != null) paletteTexture.dispose();
+        if (font != null) font.dispose();
     }
 }

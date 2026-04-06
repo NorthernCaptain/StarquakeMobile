@@ -2,7 +2,7 @@
 
 ## Context
 
-We're building a mobile clone of Starquake (1985 ZX Spectrum) using libGDX 1.14.0 targeting Android and iOS (plus desktop for testing). All game assets are already extracted and packed into texture atlases at 6x scale. The game data (512 rooms, tiles, collision, teleporters) is in `game_assets/metadata.json`. We follow the Quadronia project structure (`other/Quadronia/`) as a template for gradle setup and module organization, but simplified — no multi-resolution assets, no NCore/NContext framework, no Google Play Services.
+We're building a mobile clone of Starquake (1985) using libGDX 1.14.0 targeting Android and iOS (plus desktop for testing). Game assets are extracted from the **Atari ST** version (tiles, sprites, palettes, screens) with collectible items from the **ZX Spectrum** version. Tiles use a **palette shader** for runtime color swapping — stored as grayscale index maps, colored at draw time via a 16×26 palette texture. The game data (512 rooms, 355 big platforms, 122 tiles, 26 palettes) is in `game_assets/metadata.json`.
 
 ## Project Structure
 
@@ -61,33 +61,27 @@ Starquake/
 
 ## Key Architectural Decisions
 
-### Viewport: Dual-viewport system
-- **Game viewport**: `FitViewport(1536, 1152)` — game area centered, letterboxed on wide screens
-- **Overlay viewport**: `ScreenViewport` covering full physical screen — for touch controls in the letterbox margins
-- On 19.5:9 phones: ~25% side margins each side for controls
-- On 4:3 tablets: controls overlay semi-transparently on game edges
+### Viewport
+- **Game viewport**: `FitViewport(256, 144)` — native Atari ST room resolution, scaled up with GL_NEAREST
+- Room area: 256×144 (4×3 big platforms). Full screen with HUD: 320×200 (future)
+- **Overlay viewport** (Phase 2): `ScreenViewport` for touch controls in letterbox margins
 
-### On-Screen Controls Layout
-```
-|  LEFT CONTROLS  |     GAME AREA (4:3)      |  RIGHT CONTROLS  |
-|  [SHOOT]        |   1536x1152 viewport      |    [UP]          |
-|  [PLATFORM]     |   (FitViewport centered)  |  [LEFT][RIGHT]   |
-|  [PICKUP]       |                           |    [DOWN]        |
-```
-- Right side: D-pad for movement (left/right/up/down)
-- Left side: Action buttons (shoot, lay platform, pick up)
-- Multi-touch required (move + shoot simultaneously)
-- Desktop fallback: arrow keys + Z/X/C
+### Rendering: Palette shader + offscreen FBO
+- **Terrain tiles**: grayscale index maps rendered through a palette-lookup fragment shader into an offscreen FrameBuffer (256×144 RGBA). Each Room owns its FBO — two rooms can have live FBOs during transitions.
+- **Sprites, HUD, items**: drawn directly to screen with standard SpriteBatch (no shader)
+- **Room transitions**: both rooms' FBO textures are composited as plain RGBA quads (scroll, wipe, etc.)
+- FBO only re-renders when entering a new room. Per-frame cost is one textured quad.
 
-### Assets: Single resolution, pre-cached
-- 9 atlases loaded via AssetManager (~953KB total)
-- All TextureRegion lookups pre-cached at init into maps (avoid runtime `findRegion()`)
-- metadata.json parsed once with libGDX `JsonReader`, held in memory
+### Assets
+- 5 atlases: tiles (index maps), sprites, items, screens, font (~134KB total)
+- 1 standalone palette texture: `palettes.png` (16×26 RGBA)
+- BitmapFont from `.fnt` + font atlas
+- metadata.json parsed once, accessed via `Assets.getRoom()` / `Assets.getBigPlatform()`
 
 ### No heavy framework
-- Standard libGDX `Game` + `Screen` pattern (no NCore/NContext/ScreenWorkflow)
-- No FreeType — using the atlas-based pixel font
-- No multi-resolution folders — single set of 6x assets
+- Standard libGDX `Game` + `Screen` pattern
+- No FreeType — atlas-based pixel BitmapFont
+- All assets at native 1x resolution — GPU scaling via GL_NEAREST
 
 ## Build Configuration
 
@@ -103,20 +97,23 @@ Follow Quadronia patterns with these key values:
 ## Core Class Details
 
 ### `Assets.java`
-- Loads 9 atlases + metadata.json
-- Stores terrain atlases in `Map<String, TextureAtlas>` keyed by color
-- Pre-caches: terrain regions → `Map<String, TextureRegion>` (key: `"tileIdx_color"`), fixed regions → `IntMap<TextureRegion>`, sprite regions, font regions → `TextureRegion[128]`
+- Loads 5 atlases (tiles, sprites, items, screens, font) + `palettes.png` texture
+- Tile regions keyed by index in `IntMap<TextureRegion>`
+- Screen backgrounds: `hudScreen`, `teleportScreen`, `titleScreen`, `tradingScreen`, `circuitScreen`
+- BitmapFont from `font.fnt` + font atlas
+- `getRoom(index)` / `getBigPlatform(index)` accessors — metadata is private
 
 ### `Room.java`
-- Built from metadata on room entry: `Room.build(metadata, roomIndex)`
-- Contains: `boolean[18][32]` collision map, `String[18][32]` behavior map, room color, big platform IDs
-- Collision built per ATLAS_GUIDE.md algorithm (Y-flipped for libGDX: `(2-row)*2*3 + (1-qRow)*3`)
+- Built from metadata: `Room.build(assets, roomIndex)`
+- Contains: `paletteIndex` (int 0–25), `bigPlatformIds` (int[12])
+- Owns its terrain `FrameBuffer` — created on first render, disposed when room goes off-screen
+- `ensureFbo()`, `getTerrainRegion()`, `isRendered()`, `dispose()`
 
 ### `RoomRenderer.java`
-- Iterates 4x3 big platform grid → 2x2 tile quadrants per big platform
-- Draws terrain tiles from room's color atlas, fixed tiles from fixed atlas
-- Position: `x = (col*2 + qCol) * 192`, `y = ((2-row)*2 + qRow) * 144`
-- Uses actual region dimensions for draw (handles non-standard tile sizes)
+- Stateless — renders tiles into whichever Room's FBO is requested
+- Uses palette shader: binds `palettes.png` to texture unit 1, sets `u_paletteRow` uniform
+- Own `SpriteBatch` + `OrthographicCamera` for FBO rendering (separate from screen batch)
+- Position: `x = (col*2 + qCol) * 32`, `y = ((2-row)*2 + (1-qRow)) * 24`
 
 ### `Blob.java`
 - Position in room pixels, 144x96px hitbox (3x2 blocks)
@@ -133,7 +130,37 @@ Follow Quadronia patterns with these key values:
 
 ## Implementation Phases
 
-### Phase 1: Project skeleton + room rendering
+### Phase 1: Project skeleton + room rendering ✅ COMPLETE
+
+**What was built:**
+- Gradle multi-module project (android, core, desktop, ios) with libGDX 1.14.0
+- Platform launchers for Android (sensorLandscape, immersive), Desktop (1280×960), iOS (landscape)
+- `Assets.java` — loads 5 texture atlases + palette texture + BitmapFont, parses metadata.json
+- `Room.java` — room data with palette index and big platform IDs, owns its terrain FrameBuffer
+- `RoomRenderer.java` — palette-lookup shader renders indexed tiles to Room's FBO
+- `GameScreen.java` — draws room FBO to FitViewport(256×144), scaled with GL_NEAREST
+- `LoadingScreen.java` — async asset loading with progress bar
+- Palette shader (`palette.vert` + `palette.frag`) — converts grayscale tile indices to colored pixels
+
+**Asset pipeline (Atari ST extraction):**
+- 122 tiles extracted as grayscale index maps (pixel value = palette index × 17)
+- 26 palettes in a single 16×26 RGBA texture
+- 76 sprites (11 BLOB + 3 laser + 24 effects + 38 enemies) as 1x RGBA
+- 35 collectible item icons from ZX Spectrum reference as 1x RGBA
+- 5 screen backgrounds (HUD, teleport, trading, title, circuit board) as 1x RGBA
+- 61 font characters as 1x RGBA with BMFont `.fnt` file
+- 512 rooms with palette mapping, 355 big platforms with tile compositions
+- All packed into 5 libGDX texture atlases (~134KB total)
+
+**Key files:**
+- `tools/extract_st_graphics.py` — Atari ST RAM dump → tiles, sprites, palettes, rooms
+- `tools/pack_atlases.py` — packs game_assets/ into libGDX atlases
+- `game_assets/ATLAS_GUIDE.md` — documents asset format and rendering approach
+- `android/assets/shaders/palette.{vert,frag}` — palette lookup shader
+
+---
+
+_Original detailed steps preserved below for reference:_
 
 #### Step 1.1 — Gradle wrapper
 

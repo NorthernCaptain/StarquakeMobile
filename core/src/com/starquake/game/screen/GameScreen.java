@@ -4,32 +4,27 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.starquake.game.StarquakeGame;
 import com.starquake.game.world.Room;
 import com.starquake.game.world.RoomRenderer;
 
 public class GameScreen implements Screen {
-    public static final int VIEWPORT_W = 1536;
-    public static final int VIEWPORT_H = 1152;
+    public static final int VIEWPORT_W = Room.WIDTH;
+    public static final int VIEWPORT_H = Room.HEIGHT;
 
     private final StarquakeGame game;
     private final SpriteBatch batch = new SpriteBatch();
-
-    // Letterboxed 4:3 game area
     private final FitViewport gameViewport = new FitViewport(VIEWPORT_W, VIEWPORT_H);
-    // Full-screen overlay for touch controls (Phase 2+)
-    private final ScreenViewport overlayViewport = new ScreenViewport();
+    private final RoomRenderer roomRenderer;
 
     private Room room;
-    private final RoomRenderer roomRenderer;
 
     public GameScreen(StarquakeGame game, int startRoom) {
         this.game    = game;
-        // metadata and tilesById are already parsed in Assets.buildCaches()
-        room         = Room.build(game.assets, startRoom);
         roomRenderer = new RoomRenderer(game.assets);
+        room         = Room.build(game.assets, startRoom);
     }
 
     @Override
@@ -39,15 +34,18 @@ public class GameScreen implements Screen {
 
         gameViewport.apply();
         batch.setProjectionMatrix(gameViewport.getCamera().combined);
+
+        TextureRegion terrain = roomRenderer.getTerrainTexture(room);
+
         batch.begin();
-        roomRenderer.render(batch, room);
+        batch.draw(terrain, 0, 0, VIEWPORT_W, VIEWPORT_H);
+        // TODO: sprites, items, HUD drawn here on top
         batch.end();
     }
 
     @Override
     public void resize(int width, int height) {
         gameViewport.update(width, height, true);
-        overlayViewport.update(width, height, true);
     }
 
     @Override public void show() {}
@@ -58,5 +56,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         batch.dispose();
+        roomRenderer.dispose();
+        room.dispose();
     }
 }
