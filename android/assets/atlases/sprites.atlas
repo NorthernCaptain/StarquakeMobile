@@ -536,3 +536,10 @@ laser
   orig: 16, 8
   offset: 0, 0
   index: 2
+platform
+  rotate: false
+  xy: 235, 117
+  size: 16, 8
+  orig: 16, 8
+  offset: 0, 0
+  index: -1

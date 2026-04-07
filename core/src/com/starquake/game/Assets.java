@@ -2,6 +2,7 @@ package com.starquake.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -27,6 +28,8 @@ public class Assets {
 
     /** Tile regions keyed by tile index */
     public final IntMap<TextureRegion> tileRegions = new IntMap<>();
+    /** Per-pixel collision data for each tile. Indexed by tile ID. null = fully empty. */
+    private boolean[][][] tilePixels; // [tileId][row][col] — row 0 = top of tile
     /** Screen background regions keyed by name */
     public TextureRegion hudScreen, teleportScreen, titleScreen, tradingScreen, circuitScreen;
 
@@ -68,6 +71,43 @@ public class Assets {
         for (TextureAtlas.AtlasRegion r : tilesAtlas.getRegions())
             tileRegions.put(r.index, r);
 
+        // Build per-pixel collision data from tile atlas
+        // Read the atlas page as a Pixmap to access raw pixel data
+        int maxTile = metadata.getInt("num_tiles", 122);
+        tilePixels = new boolean[maxTile][][];
+        java.util.Set<Integer> nonSolid = new java.util.HashSet<>();
+        JsonValue nsList = metadata.get("non_solid_tiles");
+        if (nsList != null) {
+            for (JsonValue v = nsList.child; v != null; v = v.next)
+                nonSolid.add(v.asInt());
+        }
+        // Extract pixel data from the atlas texture using TextureData
+        Texture atlasTexture = tilesAtlas.getTextures().first();
+        if (!atlasTexture.getTextureData().isPrepared())
+            atlasTexture.getTextureData().prepare();
+        Pixmap atlasPixmap = atlasTexture.getTextureData().consumePixmap();
+        for (int id = 0; id < maxTile; id++) {
+            if (nonSolid.contains(id)) continue;
+            TextureRegion r = tileRegions.get(id);
+            if (r == null) continue;
+            int rw = r.getRegionWidth();
+            int rh = r.getRegionHeight();
+            boolean[][] px = new boolean[rh][rw];
+            boolean hasAny = false;
+            for (int ty = 0; ty < rh; ty++) {
+                for (int tx = 0; tx < rw; tx++) {
+                    int pixel = atlasPixmap.getPixel(r.getRegionX() + tx, r.getRegionY() + ty);
+                    // Grayscale index map: any non-zero value = has content = solid
+                    if ((pixel >>> 24) > 0 && (pixel & 0xFF) > 0) {
+                        px[ty][tx] = true;
+                        hasAny = true;
+                    }
+                }
+            }
+            if (hasAny) tilePixels[id] = px;
+        }
+        atlasPixmap.dispose();
+
         // Palette texture — loaded directly (not through atlas)
         paletteTexture = new Texture(Gdx.files.internal("palettes.png"), false);
         paletteTexture.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
@@ -106,6 +146,15 @@ public class Assets {
 
     public JsonValue getRoom(int index) {
         return roomsNode.get(index);
+    }
+
+    /**
+     * Returns the per-pixel collision bitmap for a tile, or null if the tile
+     * is fully passable. Array is [row][col], row 0 = top of tile.
+     */
+    public boolean[][] getTilePixels(int tileIndex) {
+        if (tileIndex < 0 || tileIndex >= tilePixels.length) return null;
+        return tilePixels[tileIndex];
     }
 
     public JsonValue getBigPlatform(int index) {
