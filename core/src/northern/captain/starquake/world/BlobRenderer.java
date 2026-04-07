@@ -79,13 +79,30 @@ public class BlobRenderer {
                     currentFrame = TURN_L2R_START - step;
                 }
                 break;
+
+            case FLYING:
+                // Idle frame only — no walk animation while flying
+                currentFrame = blob.facingRight ? WALK_RIGHT_START : WALK_LEFT_START;
+                wasTurning = false;
+                break;
+
+            case TRANSITION:
+                // Invisible — transition effect handles rendering
+                return;
         }
 
         // Clamp to valid range
         currentFrame = Math.max(0, Math.min(currentFrame, frames.size - 1));
 
         TextureRegion frame = frames.get(currentFrame);
+        float alpha = blob.getAlpha();
+        if (alpha < 1f) {
+            batch.setColor(1, 1, 1, alpha);
+        }
         batch.draw(frame, blob.x, blob.y, Blob.SIZE, Blob.SIZE);
+        if (alpha < 1f) {
+            batch.setColor(1, 1, 1, 1);
+        }
     }
 
     /** Ping-pong within [start, end]: 0,1,2,3,2,1,0,1,2,3... */

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
@@ -28,10 +29,17 @@ public class Assets {
 
     /** Tile regions keyed by tile index */
     public final IntMap<TextureRegion> tileRegions = new IntMap<>();
-    /** Per-pixel collision data for each tile. Indexed by tile ID. null = fully empty. */
-    private boolean[][][] tilePixels; // [tileId][row][col] — row 0 = top of tile
+    /** Fast non-solid lookup indexed by tile ID. */
+    private boolean[] nonSolidTile;
     /** Screen background regions keyed by name */
     public TextureRegion hudScreen, teleportScreen, titleScreen, tradingScreen, circuitScreen;
+
+    /** Shared 1×1 white pixel for shader effects (lightning, etc.) */
+    public TextureRegion whitePixel;
+    /** Palette lookup shader — reusable for drawing indexed tiles outside FBO. */
+    public ShaderProgram paletteShader;
+    /** Lightning shader used by ElectricShocker. */
+    public ShaderProgram lightningShader;
 
     private JsonValue metadata;
     private JsonValue roomsNode;
@@ -71,42 +79,16 @@ public class Assets {
         for (TextureAtlas.AtlasRegion r : tilesAtlas.getRegions())
             tileRegions.put(r.index, r);
 
-        // Build per-pixel collision data from tile atlas
-        // Read the atlas page as a Pixmap to access raw pixel data
+        // Build non-solid tile lookup
         int maxTile = metadata.getInt("num_tiles", 122);
-        tilePixels = new boolean[maxTile][][];
-        java.util.Set<Integer> nonSolid = new java.util.HashSet<>();
+        nonSolidTile = new boolean[maxTile];
         JsonValue nsList = metadata.get("non_solid_tiles");
         if (nsList != null) {
-            for (JsonValue v = nsList.child; v != null; v = v.next)
-                nonSolid.add(v.asInt());
-        }
-        // Extract pixel data from the atlas texture using TextureData
-        Texture atlasTexture = tilesAtlas.getTextures().first();
-        if (!atlasTexture.getTextureData().isPrepared())
-            atlasTexture.getTextureData().prepare();
-        Pixmap atlasPixmap = atlasTexture.getTextureData().consumePixmap();
-        for (int id = 0; id < maxTile; id++) {
-            if (nonSolid.contains(id)) continue;
-            TextureRegion r = tileRegions.get(id);
-            if (r == null) continue;
-            int rw = r.getRegionWidth();
-            int rh = r.getRegionHeight();
-            boolean[][] px = new boolean[rh][rw];
-            boolean hasAny = false;
-            for (int ty = 0; ty < rh; ty++) {
-                for (int tx = 0; tx < rw; tx++) {
-                    int pixel = atlasPixmap.getPixel(r.getRegionX() + tx, r.getRegionY() + ty);
-                    // Grayscale index map: any non-zero value = has content = solid
-                    if ((pixel >>> 24) > 0 && (pixel & 0xFF) > 0) {
-                        px[ty][tx] = true;
-                        hasAny = true;
-                    }
-                }
+            for (JsonValue v = nsList.child; v != null; v = v.next) {
+                int id = v.asInt();
+                if (id >= 0 && id < maxTile) nonSolidTile[id] = true;
             }
-            if (hasAny) tilePixels[id] = px;
         }
-        atlasPixmap.dispose();
 
         // Palette texture — loaded directly (not through atlas)
         paletteTexture = new Texture(Gdx.files.internal("palettes.png"), false);
@@ -139,6 +121,28 @@ public class Assets {
         font = new BitmapFont(Gdx.files.internal("atlases/font.fnt"));
         font.setUseIntegerPositions(true);
 
+        // Shared white pixel for shader effects
+        Pixmap px = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        px.setColor(1, 1, 1, 1);
+        px.fill();
+        whitePixel = new TextureRegion(new Texture(px));
+        px.dispose();
+
+        // Palette shader (for drawing indexed tiles outside the FBO)
+        ShaderProgram.pedantic = false;
+        paletteShader = new ShaderProgram(
+                Gdx.files.internal("shaders/palette.vert"),
+                Gdx.files.internal("shaders/palette.frag"));
+        if (!paletteShader.isCompiled())
+            Gdx.app.error("Assets", "Palette shader error:\n" + paletteShader.getLog());
+
+        // Lightning shader
+        lightningShader = new ShaderProgram(
+                Gdx.files.internal("shaders/palette.vert"),
+                Gdx.files.internal("shaders/lightning.frag"));
+        if (!lightningShader.isCompiled())
+            Gdx.app.error("Assets", "Lightning shader error:\n" + lightningShader.getLog());
+
         Gdx.app.log("Assets", "Loaded " + tileRegions.size + " tiles, "
                 + spritesAtlas.getRegions().size + " sprites, "
                 + itemsAtlas.getRegions().size + " items");
@@ -148,13 +152,10 @@ public class Assets {
         return roomsNode.get(index);
     }
 
-    /**
-     * Returns the per-pixel collision bitmap for a tile, or null if the tile
-     * is fully passable. Array is [row][col], row 0 = top of tile.
-     */
-    public boolean[][] getTilePixels(int tileIndex) {
-        if (tileIndex < 0 || tileIndex >= tilePixels.length) return null;
-        return tilePixels[tileIndex];
+    /** Returns true if this tile has no collision (empty, decorative, pickup, etc). */
+    public boolean isTileNonSolid(int tileId) {
+        if (tileId < 0 || tileId >= nonSolidTile.length) return true;
+        return nonSolidTile[tileId];
     }
 
     public JsonValue getBigPlatform(int index) {
@@ -166,5 +167,8 @@ public class Assets {
         manager.dispose();
         if (paletteTexture != null) paletteTexture.dispose();
         if (font != null) font.dispose();
+        if (paletteShader != null) paletteShader.dispose();
+        if (lightningShader != null) lightningShader.dispose();
+        if (whitePixel != null) whitePixel.getTexture().dispose();
     }
 }

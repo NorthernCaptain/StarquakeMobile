@@ -4,17 +4,26 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.JsonValue;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.world.objects.GameObject;
+import northern.captain.starquake.world.objects.GameObjectRegistry;
+
+import java.util.ArrayList;
 
 /**
  * Room data built from the Atari ST metadata.
  *
  * Each room is a 4×3 grid of big platforms. Each big platform is 2×2 tiles.
- * Total: 256×144 pixels.
+ * Total: 256×144 pixels (8×6 tiles, each 32×24).
  *
- * Collision is pixel-perfect: a 256×144 boolean bitmap built by stamping each
- * tile's pixel data into room coordinates. ~37KB per room.
+ * Collision is tile-based:
+ * - Solid terrain tiles are full 32×24 collision boxes.
+ * - Non-solid tiles (empty, decorative) have no collision.
+ * - Special tiles delegate collision to their GameObject.
+ * - Temp platforms are checked as an overlay on top.
  */
 public class Room {
     public static final int WIDTH = 256;
@@ -35,17 +44,26 @@ public class Room {
     public final int paletteIndex;
     public final int[] bigPlatformIds;
 
-    /** Pixel collision bitmap: [row][col], row 0 = top of room. */
-    private final boolean[][] collision;
+    /** Tile ID grid: [row][col], row 0 = top of room. */
+    private final int[][] tileGrid = new int[TILE_ROWS][TILE_COLS];
+    private Assets assets;
+
+    /** Game objects indexed by tile key (row*8+col) for O(1) lookup. */
+    private final IntMap<Array<GameObject>> objectMap = new IntMap<>();
+    /** Flat list for iteration (update/render). */
+    private final Array<GameObject> objects = new Array<>();
+
+    /** Active temp platforms — checked as collision overlay. */
+    private final ArrayList<TempPlatform> tempPlatforms = new ArrayList<>();
 
     private FrameBuffer fbo;
     private TextureRegion terrainRegion;
 
-    private Room(int roomIndex, int paletteIndex, int[] bigPlatformIds, boolean[][] collision) {
+    private Room(int roomIndex, int paletteIndex, int[] bigPlatformIds, Assets assets) {
         this.roomIndex      = roomIndex;
         this.paletteIndex   = paletteIndex;
         this.bigPlatformIds = bigPlatformIds;
-        this.collision      = collision;
+        this.assets         = assets;
     }
 
     public int getX() { return roomIndex % GRID_COLS; }
@@ -59,40 +77,97 @@ public class Room {
     }
 
     /**
-     * Pixel-perfect collision check.
+     * Tile-based collision check.
      * Coordinates use libGDX convention: y=0 at bottom.
      */
     public boolean isSolidAt(float worldX, float worldY) {
-        int px = (int) worldX;
-        int py = (HEIGHT - 1) - (int) worldY; // flip: libGDX y=0 bottom → row 0 top
-        if (px < 0 || px >= WIDTH || py < 0 || py >= HEIGHT) return false;
-        return collision[py][px];
+        if (worldX < 0 || worldX >= WIDTH || worldY < 0 || worldY >= HEIGHT) return false;
+
+        int col = (int) (worldX / TILE_W);
+        int row = (TILE_ROWS - 1) - (int) (worldY / TILE_H);
+        if (col >= TILE_COLS || row < 0 || row >= TILE_ROWS) return false;
+
+        // Game objects override all collision for their tile
+        Array<GameObject> objs = objectMap.get(GameObject.tileKey(col, row));
+        if (objs != null) {
+            for (int i = 0, n = objs.size; i < n; i++) {
+                if (objs.get(i).isSolidAt(worldX, worldY)) return true;
+            }
+            return checkTempPlatforms(worldX, worldY);
+        }
+
+        // Non-solid tile
+        int tileId = tileGrid[row][col];
+        if (assets.isTileNonSolid(tileId)) {
+            return checkTempPlatforms(worldX, worldY);
+        }
+
+        // Regular solid terrain — entire tile is a collision box
+        return true;
     }
 
-    /**
-     * Stamp a rectangular block of solid pixels into the collision bitmap.
-     * Coordinates use libGDX convention (y=0 at bottom).
-     */
-    public void setCollisionRect(int worldX, int worldY, int w, int h, boolean solid) {
-        for (int dy = 0; dy < h; dy++) {
-            int py = (HEIGHT - 1) - (worldY + dy);
-            if (py < 0 || py >= HEIGHT) continue;
-            for (int dx = 0; dx < w; dx++) {
-                int px = worldX + dx;
-                if (px >= 0 && px < WIDTH) {
-                    collision[py][px] = solid;
-                }
+    private boolean checkTempPlatforms(float worldX, float worldY) {
+        if (tempPlatforms.isEmpty()) return false;
+        for (int i = 0, n = tempPlatforms.size(); i < n; i++) {
+            TempPlatform p = tempPlatforms.get(i);
+            if (!p.isExpired()
+                    && worldX >= p.x && worldX < p.x + TempPlatform.WIDTH
+                    && worldY >= p.y && worldY < p.y + TempPlatform.HEIGHT) {
+                return true;
             }
         }
+        return false;
+    }
+
+    public void addTempPlatform(TempPlatform p) {
+        tempPlatforms.add(p);
+    }
+
+    public void removeTempPlatform(TempPlatform p) {
+        tempPlatforms.remove(p);
+    }
+
+    public void clearTempPlatforms() {
+        tempPlatforms.clear();
+    }
+
+    /** Returns game objects at the given world coordinates, or null. */
+    public Array<GameObject> getObjectsAt(float worldX, float worldY) {
+        if (worldX < 0 || worldY < 0) return null;
+        int col = (int) (worldX / TILE_W);
+        int row = (TILE_ROWS - 1) - (int) (worldY / TILE_H);
+        if (col >= TILE_COLS || row < 0 || row >= TILE_ROWS) return null;
+        return objectMap.get(GameObject.tileKey(col, row));
+    }
+
+    /** All game objects in this room. */
+    public Array<GameObject> getObjects() {
+        return objects;
+    }
+
+    private void addObject(GameObject obj) {
+        objects.add(obj);
+        int key = obj.getTileKey();
+        Array<GameObject> list = objectMap.get(key);
+        if (list == null) {
+            list = new Array<>(2);
+            objectMap.put(key, list);
+        }
+        list.add(obj);
+        obj.onAddedToRoom(this);
     }
 
     public static Room build(Assets assets, int roomIndex) {
+        return build(assets, roomIndex, null);
+    }
+
+    public static Room build(Assets assets, int roomIndex, GameObjectRegistry registry) {
         JsonValue roomData = assets.getRoom(roomIndex);
         int palette        = roomData.getInt("palette");
         int[] bpIds        = roomData.get("big_platforms").asIntArray();
 
-        // Build pixel collision bitmap by stamping tile pixel data
-        boolean[][] collision = new boolean[HEIGHT][WIDTH];
+        Room room = new Room(roomIndex, palette, bpIds, assets);
+
         for (int bpRow = 0; bpRow < 3; bpRow++) {
             for (int bpCol = 0; bpCol < 4; bpCol++) {
                 int bpIdx = bpIds[bpRow * 4 + bpCol];
@@ -101,28 +176,21 @@ public class Room {
 
                 for (int qi = 0; qi < 4; qi++) {
                     int tileIdx = bp.getInt(QUAD_KEY[qi]);
-                    boolean[][] tilePx = assets.getTilePixels(tileIdx);
-                    if (tilePx == null) continue;
-
                     int tileCol = bpCol * 2 + QUAD_DCOL[qi];
                     int tileRow = bpRow * 2 + QUAD_DROW[qi];
-                    int baseX = tileCol * TILE_W;
-                    int baseY = tileRow * TILE_H;
 
-                    int th = tilePx.length;
-                    int tw = tilePx[0].length;
-                    for (int ty = 0; ty < th && baseY + ty < HEIGHT; ty++) {
-                        for (int tx = 0; tx < tw && baseX + tx < WIDTH; tx++) {
-                            if (tilePx[ty][tx]) {
-                                collision[baseY + ty][baseX + tx] = true;
-                            }
-                        }
+                    room.tileGrid[tileRow][tileCol] = tileIdx;
+
+                    // Spawn game object if this tile is registered
+                    if (registry != null && registry.isRegistered(tileIdx)) {
+                        GameObject obj = registry.create(tileIdx, assets, tileCol, tileRow);
+                        if (obj != null) room.addObject(obj);
                     }
                 }
             }
         }
 
-        return new Room(roomIndex, palette, bpIds, collision);
+        return room;
     }
 
     public FrameBuffer ensureFbo() {
