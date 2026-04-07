@@ -1,6 +1,6 @@
 android {
     compileSdk 35
-    namespace 'com.starquake.game.android'
+    namespace 'northern.captain.starquake.android'
 
     packagingOptions {
         exclude 'META-INF/INDEX.LIST'
@@ -31,7 +31,7 @@ android {
     defaultConfig {
         minSdkVersion 24
         targetSdk 35
-        applicationId 'com.starquake.game.android'
+        applicationId 'northern.captain.starquake.android'
         versionName "1.0"
         versionCode 1
         ndk {
