@@ -15,6 +15,10 @@ public class GameEvent {
         BLOB_SPAWNED,
         BLOB_MOUNTED_PLATFORM,
         BLOB_DISMOUNTED_PLATFORM,
+        LIFT_STARTED,
+        ENTER_TELEPORT,
+        ENTER_TRADE,
+        TUNNEL_TELEPORT,
         ROOM_CHANGED
     }
 
@@ -29,4 +33,7 @@ public class GameEvent {
     public static final GameEvent BLOB_SPAWNED = new GameEvent(Type.BLOB_SPAWNED);
     public static final GameEvent BLOB_MOUNTED_PLATFORM = new GameEvent(Type.BLOB_MOUNTED_PLATFORM);
     public static final GameEvent BLOB_DISMOUNTED_PLATFORM = new GameEvent(Type.BLOB_DISMOUNTED_PLATFORM);
+    public static final GameEvent LIFT_STARTED = new GameEvent(Type.LIFT_STARTED);
+    // ENTER_TELEPORT uses EnterTeleportEvent subclass (carries roomIndex)
+    public static final GameEvent ENTER_TRADE = new GameEvent(Type.ENTER_TRADE);
 }

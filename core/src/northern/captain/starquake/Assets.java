@@ -158,6 +158,29 @@ public class Assets {
         return nonSolidTile[tileId];
     }
 
+    /**
+     * Lightweight tile ID lookup from room metadata — no Room object built.
+     * Returns the tile ID at (tileCol, tileRow) in the given room, or -1 if invalid.
+     * Row 0 = top of room.
+     */
+    public int getTileIdAt(int roomIndex, int tileCol, int tileRow) {
+        if (roomIndex < 0 || roomIndex >= roomsNode.size) return -1;
+        if (tileCol < 0 || tileCol >= 8 || tileRow < 0 || tileRow >= 6) return -1;
+
+        JsonValue roomData = roomsNode.get(roomIndex);
+        int[] bpIds = roomData.get("big_platforms").asIntArray();
+        int bpRow = tileRow / 2;
+        int bpCol = tileCol / 2;
+        int bpIdx = bpIds[bpRow * 4 + bpCol];
+
+        JsonValue bp = getBigPlatform(bpIdx);
+        if (bp == null) return -1;
+
+        int qi = (tileRow % 2) * 2 + (tileCol % 2);
+        String[] keys = {"tl", "tr", "bl", "br"};
+        return bp.getInt(keys[qi]);
+    }
+
     public JsonValue getBigPlatform(int index) {
         if (index < 0 || index >= bigPlatformsNode.size) return null;
         return bigPlatformsNode.get(index);

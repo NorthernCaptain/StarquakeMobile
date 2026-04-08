@@ -86,6 +86,12 @@ public class BlobRenderer {
                 wasTurning = false;
                 break;
 
+            case LIFTING:
+                // Idle frame — visible while being lifted
+                currentFrame = blob.facingRight ? WALK_RIGHT_START : WALK_LEFT_START;
+                wasTurning = false;
+                break;
+
             case TRANSITION:
                 // Invisible — transition effect handles rendering
                 return;

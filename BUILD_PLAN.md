@@ -1004,3 +1004,92 @@ After Phase 1 implementation:
 1. `cd Starquake && ./gradlew :desktop:run` — should open a 1280x960 window showing room 0 with correct tiles and colors
 2. Check that all 9 atlases load without errors in console
 3. Navigate to different rooms by changing the hardcoded room index — verify different room colors render correctly
+
+---
+
+### Phase 2: Touch Controls + Room Navigation + BLOB ✅ COMPLETE
+
+**Package renamed**: `com.starquake.game` → `northern.captain.starquake` (git mv, history preserved)
+
+**What was built:**
+- `InputManager.java` — event-driven input: keyboard (InputAdapter), gamepad (ControllerAdapter), touch. Actions: LEFT, RIGHT, UP, DOWN, ACTION_A, ACTION_B
+- `TouchControls.java` — ShapeRenderer D-pad + action buttons, ScreenViewport, multi-touch, density-scaled
+- `Blob.java` — player character with gravity, walk speed 48px/s, pixel-scan collision resolution
+- `BlobRenderer.java` — 11-frame animation: walk right (0-3), turn (4-6), walk left (7-10), ping-pong walk cycle
+- Room transitions with pow2 interpolation slide animation (0.4s)
+- BLOB spawns at top, falls with gravity, exits room at edges
+
+---
+
+### Phase 3: Tile-Based Collision + Game Objects ✅ COMPLETE
+
+**Collision system replaced**: pixel-perfect `boolean[144][256]` → tile-based `int[6][8]` grid.
+
+**Game Object system:**
+- `GameObject` base class — `isSolidAt()`, `onEnter()`, `onAction()`, `render()`, `renderForeground()`
+- `GameObjectRegistry` — tile ID → factory map, `createDefault()` has all registrations
+- `Collidable` interface — BLOB/enemy abstraction with `getType()`, position, size
+- `CollisionTile` — single-rect collision with edge insets
+- `MultiCollisionTile` — multiple solid rects per tile
+- `KillerTile` — collision + kill zone (extends CollisionTile)
+
+**Registered tiles** (see CLAUDE.md for full table):
+- Tiles 0-3: Lift (tube/entrances)
+- Tiles 4-6: Passage (walk-through/dead-ends with 70% foreground)
+- Tile 7: ElectricShocker.hanging() — periodic lightning, kills BLOB
+- Tiles 25-35: Various collision shapes
+- Tile 32: HoverStand — mount/dismount hover platform
+- Tile 36: Teleporter entrance
+- Tiles 37-38: TradeEntrance (left/right)
+- Tile 39: CollisionTile
+- Tile 40: ElectricShocker.sidePoles()
+- Tiles 43-44: TunnelTeleporter (horizontal tunnel between rooms)
+- Tile 45: Door (placeholder)
+- Tiles 46, 82: KillerTile variants
+- Tiles 48, 58, 59, 83, 85: CollisionTile variants
+
+---
+
+### Phase 4: Event Bus + Effects + Controllers ✅ COMPLETE
+
+**Event Bus** (`EventBus.get()`):
+- Synchronous, singleton, `GameEvent` class with `Type` enum
+- Subclass for data: `EnterTeleportEvent`, `TunnelTeleportEvent`
+- Events: BLOB_DIED, BLOB_SPAWNED, BLOB_MOUNTED/DISMOUNTED_PLATFORM, LIFT_STARTED, ENTER_TELEPORT, ENTER_TRADE, TUNNEL_TELEPORT
+
+**BLOB states**: IDLE, WALK, TURNING, FLYING, TRANSITION, LIFTING
+- Flying: hover platform, 4-directional at 64px/s, taller hitbox (24px)
+- Transition: invisible, no physics (death/spawn/tunnel effects)
+- Lifting: visible, no physics (lift tube moves blob)
+- Immunity: 2s post-respawn, flashing 20-80% opacity
+
+**Transition system** (`BlobTransition` interface + `BlobTransitionManager`):
+- `ExplosionTransition` — libGDX ParticleEffect, 100 particles burst
+- `AssemblyTransition` — CPU particles converge from radius 100 to center
+- `PauseTransition` — silent timer
+- `SuckInTransition` — CPU pixel particles from blob sprite texture sub-regions: explode with wind bias → converge to hole
+- `BlowOutTransition` — reverse: hole → scatter → converge to blob shape
+- Death sequence: Explosion → 2s pause → Assembly
+- Spawn sequence: Assembly only
+
+**Temp platforms**: 16x8, dissolve shader (1s solid + 1s dissolve), `wouldCollide()` check before placement
+
+**Controllers:**
+- `LiftController` — moves blob upward through lift tiles at FLY_SPEED, handles cross-room transitions, stops when fully ejected. 2px solid cap on lift tiles prevents re-entry.
+- `TunnelController` — receives TUNNEL_TELEPORT event, finds exit via `Assets.getTileIdAt()` (lightweight JSON lookup), runs suck-in → room slide → blow-out sequence. GameScreen just creates it.
+
+**Shaders:**
+- `dissolve.frag` — noise-based pixel dissolve with game-pixel snapping
+- `lightning.frag` — animated electric arc, layered sine waves, taper to endpoints
+
+---
+
+### Phase 5: TODO — HUD, Inventory, Enemies
+
+- HUD overlay with score, lives, resource bars
+- Inventory system (key cards, items)
+- Door opening mechanic (key card interaction)
+- Teleport chooser screen
+- Trade/exchange screen
+- Enemy system (patrol AI, collision with Collidable interface)
+- Sound effects and music

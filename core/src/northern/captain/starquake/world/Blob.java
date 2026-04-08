@@ -38,7 +38,7 @@ public class Blob implements Collidable {
      * - TURNING: rotating from one facing to the other, no horizontal movement
      * - FLYING: riding hover platform, no gravity, 4-directional, rotate only
      */
-    public enum State { IDLE, WALK, TURNING, FLYING, TRANSITION }
+    public enum State { IDLE, WALK, TURNING, FLYING, TRANSITION, LIFTING }
 
     /** Rendered under BLOB when flying. Set by the object that grants flight. */
     public Renderable attachment;
@@ -95,8 +95,12 @@ public class Blob implements Collidable {
     }
 
     public void endTransition() {
+        endTransition(true);
+    }
+
+    public void endTransition(boolean grantImmunity) {
         state = State.IDLE;
-        immunityTimer = IMMUNITY_DURATION;
+        if (grantImmunity) immunityTimer = IMMUNITY_DURATION;
     }
 
     /** Called when something kills BLOB. Posts BLOB_DIED event. */
@@ -123,8 +127,18 @@ public class Blob implements Collidable {
         return state == State.TRANSITION;
     }
 
+    public void startLifting() {
+        state = State.LIFTING;
+        vx = 0;
+        vy = 0;
+    }
+
+    public void stopLifting() {
+        state = State.IDLE;
+    }
+
     public void applyInput(boolean wantLeft, boolean wantRight, boolean wantUp, boolean wantDown) {
-        if (state == State.TRANSITION) return;
+        if (state == State.TRANSITION || state == State.LIFTING) return;
         if (state == State.FLYING) {
             applyFlyingInput(wantLeft, wantRight, wantUp, wantDown);
             return;
@@ -179,7 +193,7 @@ public class Blob implements Collidable {
     }
 
     public void update(float delta, Room room) {
-        if (state == State.TRANSITION) return;
+        if (state == State.TRANSITION || state == State.LIFTING) return;
         if (immunityTimer > 0) immunityTimer -= delta;
 
         float bottom = getBottom();

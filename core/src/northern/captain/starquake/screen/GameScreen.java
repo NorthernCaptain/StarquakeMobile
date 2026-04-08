@@ -16,6 +16,8 @@ import northern.captain.starquake.input.InputManager.Action;
 import northern.captain.starquake.input.TouchControls;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.BlobRenderer;
+import northern.captain.starquake.world.LiftController;
+import northern.captain.starquake.world.TunnelController;
 import northern.captain.starquake.world.PlatformRenderer;
 import northern.captain.starquake.world.Room;
 import northern.captain.starquake.world.RoomRenderer;
@@ -50,6 +52,8 @@ public class GameScreen implements Screen {
     private final PlatformRenderer platformRenderer;
     private final GameObjectRegistry objectRegistry;
     private final BlobTransitionManager transitionManager = new BlobTransitionManager();
+    private final LiftController liftController = new LiftController();
+    private final TunnelController tunnelController;
 
     private Room room;
     private Blob blob;
@@ -67,6 +71,7 @@ public class GameScreen implements Screen {
         platformRenderer = new PlatformRenderer(game.assets);
 
         objectRegistry = GameObjectRegistry.createDefault();
+        tunnelController = new TunnelController(game.assets);
 
         inputManager = new InputManager();
         touchControls = new TouchControls(inputManager, false);
@@ -79,8 +84,26 @@ public class GameScreen implements Screen {
         game.assets.font.getData().setScale(1f);
         game.assets.font.setUseIntegerPositions(true);
 
+        // Set up tunnel controller
+        tunnelController.setBlob(blob);
+        tunnelController.setRoom(room);
+        tunnelController.setTransitionHandler(dx -> {
+            int next = Room.adjacentIndex(room.roomIndex, dx, 0);
+            if (next < 0) return null;
+            room.clearTempPlatforms();
+            platforms.clear();
+            prevRoom = room;
+            room = Room.build(game.assets, next, objectRegistry);
+            tunnelController.setRoom(room);
+            transitionDx = dx;
+            transitionDy = 0;
+            transitionTime = 0;
+            return room;
+        });
+
         // Register event listeners
         EventBus.get().register(GameEvent.Type.BLOB_DIED, e -> triggerDeath());
+        EventBus.get().register(GameEvent.Type.LIFT_STARTED, e -> startLift());
         HoverStand.registerEvents();
 
         // Birth effect on initial spawn
@@ -95,6 +118,23 @@ public class GameScreen implements Screen {
         transitionManager.start(blob, new BlobTransition[]{
                 new AssemblyTransition()
         }, () -> EventBus.get().post(GameEvent.BLOB_SPAWNED));
+    }
+
+    private void startLift() {
+        liftController.start(blob, room);
+        liftController.setTransitionHandler(() -> {
+            int next = Room.adjacentIndex(room.roomIndex, 0, -1); // up in grid
+            if (next < 0) return null;
+            room.clearTempPlatforms();
+            platforms.clear();
+            prevRoom = room;
+            room = Room.build(game.assets, next, objectRegistry);
+            liftController.setRoom(room);
+            // No slide transition for lift — instant room switch
+            prevRoom.dispose();
+            prevRoom = null;
+            return room;
+        });
     }
 
     private void triggerDeath() {
@@ -113,14 +153,21 @@ public class GameScreen implements Screen {
         touchControls.poll();
 
         // --- Update ---
-        // Always update blob transition effects
+        // Always update blob transition effects and tunnel controller
         transitionManager.update(delta);
+        tunnelController.update(delta);
 
         if (isRoomTransitioning()) {
             transitionTime += delta;
             if (transitionTime >= TRANSITION_DURATION) {
                 prevRoom.dispose();
                 prevRoom = null;
+            }
+        } else if (blob.state == Blob.State.LIFTING) {
+            // Lift in progress — controller moves blob
+            liftController.update(delta);
+            for (GameObject obj : room.getObjects()) {
+                obj.update(delta);
             }
         } else if (!blob.isInTransition()) {
             // Normal gameplay — only when blob is alive and not in a transition
@@ -244,6 +291,7 @@ public class GameScreen implements Screen {
 
             // Transition effects (explosion/assembly particles)
             transitionManager.render(batch);
+            tunnelController.render(batch);
 
             // BLOB sprite (BlobRenderer handles TRANSITION state by not drawing)
             blobRenderer.render(batch, blob, delta);
