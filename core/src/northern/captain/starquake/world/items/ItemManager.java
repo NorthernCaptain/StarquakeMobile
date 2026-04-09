@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.IntMap;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.Room;
 
 import java.util.ArrayList;
@@ -41,9 +42,6 @@ public class ItemManager {
         int[] keyRooms = {150, 198, 200, 246};
         placeItem(ItemType.KEY, keyRooms[rng.nextInt(keyRooms.length)], rng);
 
-        // DEBUG: access card in room 176 for space lock testing
-        placeItem(ItemType.ACCESS_CARD, 176, rng);
-
         // Required core elements (7 entries with 2 candidate rooms each)
         int[][] coreRoomPairs = {
             {436, 422}, {236, 222}, {52, 16}, {502, 504},
@@ -77,7 +75,7 @@ public class ItemManager {
         distributeBoosts(rng);
     }
 
-    private ItemType[] getPartPool() {
+    public ItemType[] getPartPool() {
         // All 15 collectible core part types
         return new ItemType[]{
             ItemType.PART_A0, ItemType.PART_A1, ItemType.PART_A2,
@@ -106,6 +104,7 @@ public class ItemManager {
 
         // Distribute across rooms (1 per room max, skip rooms that already have items)
         boolean[] used = new boolean[512];
+        used[CoreAssembly.CORE_ROOM] = true; // Core room is special — no items
         // Mark rooms already used by core elements / key / card
         for (IntMap.Entry<Array<ItemPlacement>> entry : placements) {
             used[entry.key] = true;

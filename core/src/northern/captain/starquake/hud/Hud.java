@@ -5,10 +5,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.GameState;
 import northern.captain.starquake.world.Inventory;
 import northern.captain.starquake.world.Room;
 import northern.captain.starquake.world.items.ItemType;
+import northern.captain.starquake.world.objects.CoreTrigger;
 
 /**
  * Renders the HUD bar at the top of the screen (256×24).
@@ -126,6 +128,15 @@ public class Hud {
                 }
             }
             slotX += 17;
+        }
+
+        // Red flash overlay on inventory when core assembly has no matches
+        CoreAssembly core = CoreTrigger.getCoreAssembly();
+        if (core != null && core.isInventoryFlashRed()) {
+            batch.setColor(0.8f, 0.1f, 0.1f, 0.6f);
+            float flashX = HUD_W - 4 * 17 - 4;
+            float flashY = HUD_Y + (HUD_H - 20) / 2f;
+            batch.draw(pixel, flashX, flashY, 4 * 17 + 4, 20);
         }
 
         batch.setColor(Color.WHITE);

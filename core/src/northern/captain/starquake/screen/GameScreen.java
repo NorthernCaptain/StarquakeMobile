@@ -30,6 +30,7 @@ import northern.captain.starquake.world.TempPlatform;
 import northern.captain.starquake.event.EventBus;
 import northern.captain.starquake.event.GameEvent;
 import northern.captain.starquake.world.objects.GameObject;
+import northern.captain.starquake.world.objects.CoreTrigger;
 import northern.captain.starquake.world.objects.GameObjectRegistry;
 import northern.captain.starquake.world.objects.HoverStand;
 import northern.captain.starquake.world.transitions.AssemblyTransition;
@@ -91,7 +92,9 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(new InputMultiplexer(inputManager.getKeyboardListener()));
 
         room = Room.build(game.assets, startRoom, objectRegistry);
-        itemManager.initializeGame(System.currentTimeMillis());
+        long seed = System.currentTimeMillis();
+        CoreTrigger.initCoreAssembly(game.assets, seed, itemManager.getPartPool());
+        itemManager.initializeGame(seed);
         itemManager.populateRoom(room);
         blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
 
@@ -109,7 +112,7 @@ public class GameScreen implements Screen {
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
-            tunnelController.setRoom(room);
+                tunnelController.setRoom(room);
             transitionDx = dx;
             transitionDy = 0;
             transitionTime = 0;
@@ -126,7 +129,7 @@ public class GameScreen implements Screen {
         triggerSpawn();
     }
 
-    private boolean isRoomTransitioning() {
+private boolean isRoomTransitioning() {
         return prevRoom != null;
     }
 
@@ -146,7 +149,7 @@ public class GameScreen implements Screen {
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
-            liftController.setRoom(room);
+                liftController.setRoom(room);
             // No slide transition for lift — instant room switch
             prevRoom.dispose();
             prevRoom = null;
@@ -251,7 +254,7 @@ public class GameScreen implements Screen {
                     prevRoom = room;
                     room = Room.build(game.assets, next, objectRegistry);
                     itemManager.populateRoom(room);
-                    transitionDx = exit.dx;
+                                transitionDx = exit.dx;
                     transitionDy = exit.dy;
                     transitionTime = 0;
 

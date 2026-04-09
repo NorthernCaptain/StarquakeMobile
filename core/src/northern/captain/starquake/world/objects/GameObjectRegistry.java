@@ -98,6 +98,8 @@ public class GameObjectRegistry {
         r.register(82, (a, col, row) -> new KillerTile(a, col, row,
                 8, 8, 8, 0,
                 10, 0, 12, 16));
+        // Tile 122: core room trigger — invisible, starts assembly animation
+        r.register(CoreTrigger.TILE_ID, CoreTrigger::new);
         return r;
     }
 
