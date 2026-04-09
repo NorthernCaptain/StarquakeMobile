@@ -10,16 +10,16 @@ import northern.captain.starquake.event.GameEvent;
  * Read by Hud for display.
  */
 public class GameState {
-    public static final int MAX_LIVES = 5;
+    public static final int MAX_LIVES = 10;
     public static final int MAX_HEALTH = 100;
     public static final int MAX_PLATFORMS = 20;
     public static final int MAX_LASER = 100;
 
-    private int lives = MAX_LIVES;
+    private int lives = MAX_LIVES/2;
     private int score;
-    private static final float HEALTH_REGEN_RATE = 5f;    // units per second
-    private static final float PLATFORM_REGEN_RATE = 2f;  // units per second
-    private static final float LASER_REGEN_RATE = 16f;    // units per second
+    private static final float HEALTH_REGEN_RATE = 3f;    // units per second
+    private static final float PLATFORM_REGEN_RATE = 1f;  // units per second
+    private static final float LASER_REGEN_RATE = 6f;    // units per second
 
     private int health = MAX_HEALTH;
     private int platforms = MAX_PLATFORMS;

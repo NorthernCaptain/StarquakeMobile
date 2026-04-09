@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.input.InputManager.Action;
@@ -75,7 +76,7 @@ public class GameScreen implements Screen {
     private int transitionDx, transitionDy;
 
     public GameScreen(StarquakeGame game, int startRoom) {
-        this.game    = game;
+        this.game = game;
         roomRenderer = new RoomRenderer(game.assets);
         blobRenderer = new BlobRenderer(game.assets);
         platformRenderer = new PlatformRenderer(game.assets);
@@ -112,7 +113,7 @@ public class GameScreen implements Screen {
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
-                tunnelController.setRoom(room);
+            tunnelController.setRoom(room);
             transitionDx = dx;
             transitionDy = 0;
             transitionTime = 0;
@@ -129,7 +130,7 @@ public class GameScreen implements Screen {
         triggerSpawn();
     }
 
-private boolean isRoomTransitioning() {
+    private boolean isRoomTransitioning() {
         return prevRoom != null;
     }
 
@@ -149,7 +150,7 @@ private boolean isRoomTransitioning() {
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
-                liftController.setRoom(room);
+            liftController.setRoom(room);
             // No slide transition for lift — instant room switch
             prevRoom.dispose();
             prevRoom = null;
@@ -169,115 +170,129 @@ private boolean isRoomTransitioning() {
     public void render(float delta) {
         delta = Math.min(delta, 1 / 15f);
 
-        // --- Input ---
         touchControls.poll();
+        updateWorld(delta);
+        renderWorld(delta);
+        inputManager.update();
+    }
 
-        // --- Update ---
-        // Always update blob transition effects, tunnel controller, item respawns
+    private void updateWorld(float delta) {
         transitionManager.update(delta);
         tunnelController.update(delta);
         itemManager.update(delta);
 
         if (isRoomTransitioning()) {
-            transitionTime += delta;
-            if (transitionTime >= TRANSITION_DURATION) {
-                prevRoom.dispose();
-                prevRoom = null;
-            }
+            updateRoomTransition(delta);
         } else if (blob.state == Blob.State.LIFTING) {
-            // Lift in progress — controller moves blob
-            liftController.update(delta);
-            for (GameObject obj : room.getObjects()) {
-                obj.update(delta);
-            }
+            updateLifting(delta);
         } else if (!blob.isInTransition()) {
-            // Normal gameplay — only when blob is alive and not in a transition
-            blob.applyInput(
-                    inputManager.isPressed(Action.LEFT),
-                    inputManager.isPressed(Action.RIGHT),
-                    inputManager.isPressed(Action.UP),
-                    inputManager.isPressed(Action.DOWN));
-
-            // Place temp platform on DOWN press (only when not flying)
-            if (blob.state != Blob.State.FLYING && inputManager.isJustPressed(Action.DOWN)) {
-                float px = blob.x;
-                float py = blob.y;
-                float newBlobY = py + TempPlatform.HEIGHT;
-                // Only place if we have platforms and BLOB won't collide at the new position
-                if (gameState.getPlatforms() > 0 && !blob.wouldCollide(newBlobY, room)) {
-                    gameState.usePlatform();
-                    TempPlatform plat = new TempPlatform(px, py);
-                    platforms.add(plat);
-                    room.addTempPlatform(plat);
-                    blob.y = newBlobY;
-                    blob.vy = 0;
-                }
-            }
-
-            // Update temp platforms
-            Iterator<TempPlatform> it = platforms.iterator();
-            while (it.hasNext()) {
-                TempPlatform p = it.next();
-                p.update(delta);
-                if (p.isExpired()) {
-                    room.removeTempPlatform(p);
-                    it.remove();
-                }
-            }
-
-            // Update game objects
-            for (GameObject obj : room.getObjects()) {
-                obj.update(delta);
-            }
-
-            // Update BLOB attachment
-            if (blob.attachment != null) {
-                blob.attachment.update(delta);
-            }
-
-            blob.update(delta, room);
-            gameState.update(delta);
-
-            // Dispatch input actions and notify overlapping game objects
-            Array<GameObject> overlapping = getOverlappingObjects();
-            dispatchObjectActions(overlapping);
-            checkObjectCollisions(overlapping);
-
-            // Room transition on edge exit
-            if (blob.exit != Blob.Exit.NONE) {
-                Blob.Exit exit = blob.exit;
-                int next = Room.adjacentIndex(room.roomIndex, exit.dx, exit.dy);
-                if (next >= 0) {
-                    room.clearTempPlatforms();
-                    platforms.clear();
-
-                    prevRoom = room;
-                    room = Room.build(game.assets, next, objectRegistry);
-                    itemManager.populateRoom(room);
-                                transitionDx = exit.dx;
-                    transitionDy = exit.dy;
-                    transitionTime = 0;
-
-                    if (exit.dx != 0) blob.x = exit.dx > 0 ? 0 : Room.WIDTH - Blob.SIZE;
-                    if (exit.dy != 0) blob.y = exit.dy > 0 ? Room.HEIGHT - Blob.SIZE : 0;
-                } else {
-                    blob.x = Math.max(0, Math.min(blob.x, Room.WIDTH - Blob.SIZE));
-                    blob.y = Math.max(0, Math.min(blob.y, Room.HEIGHT - Blob.SIZE));
-                    blob.exit = Blob.Exit.NONE;
-                }
-            }
+            updateGameplay(delta);
         } else {
-            // Blob is in transition but still update game objects (shockers animate)
-            for (GameObject obj : room.getObjects()) {
-                obj.update(delta);
+            updateObjectsOnly(delta);
+        }
+    }
+
+    private void updateRoomTransition(float delta) {
+        transitionTime += delta;
+        if (transitionTime >= TRANSITION_DURATION) {
+            prevRoom.dispose();
+            prevRoom = null;
+        }
+    }
+
+    private void updateLifting(float delta) {
+        liftController.update(delta);
+        for (GameObject obj : room.getObjects()) {
+            obj.update(delta);
+        }
+    }
+
+    private void updateGameplay(float delta) {
+        blob.applyInput(
+                inputManager.isPressed(Action.LEFT),
+                inputManager.isPressed(Action.RIGHT),
+                inputManager.isPressed(Action.UP),
+                inputManager.isPressed(Action.DOWN));
+
+        updateTempPlatforms(delta);
+
+        for (GameObject obj : room.getObjects()) {
+            obj.update(delta);
+        }
+        if (blob.attachment != null) {
+            blob.attachment.update(delta);
+        }
+
+        blob.update(delta, room);
+        gameState.update(delta);
+
+        Array<GameObject> overlapping = getOverlappingObjects();
+        dispatchObjectActions(overlapping);
+        checkObjectCollisions(overlapping);
+
+        checkRoomExit();
+    }
+
+    private void updateTempPlatforms(float delta) {
+        if (blob.state != Blob.State.FLYING && inputManager.isJustPressed(Action.DOWN)) {
+            float px = blob.x;
+            float py = blob.y;
+            float newBlobY = py + TempPlatform.HEIGHT;
+            if (gameState.getPlatforms() > 0 && !blob.wouldCollide(newBlobY, room)) {
+                gameState.usePlatform();
+                TempPlatform plat = new TempPlatform(px, py);
+                platforms.add(plat);
+                room.addTempPlatform(plat);
+                blob.y = newBlobY;
+                blob.vy = 0;
             }
         }
 
-        // --- Render FBOs ---
+        Iterator<TempPlatform> it = platforms.iterator();
+        while (it.hasNext()) {
+            TempPlatform p = it.next();
+            p.update(delta);
+            if (p.isExpired()) {
+                room.removeTempPlatform(p);
+                it.remove();
+            }
+        }
+    }
+
+    private void checkRoomExit() {
+        if (blob.exit == Blob.Exit.NONE) return;
+        Blob.Exit exit = blob.exit;
+        int next = Room.adjacentIndex(room.roomIndex, exit.dx, exit.dy);
+        if (next >= 0) {
+            room.clearTempPlatforms();
+            platforms.clear();
+
+            prevRoom = room;
+            room = Room.build(game.assets, next, objectRegistry);
+            itemManager.populateRoom(room);
+            transitionDx = exit.dx;
+            transitionDy = exit.dy;
+            transitionTime = 0;
+
+            if (exit.dx != 0) blob.x = exit.dx > 0 ? 0 : Room.WIDTH - Blob.SIZE;
+            if (exit.dy != 0) blob.y = exit.dy > 0 ? Room.HEIGHT - Blob.SIZE : 0;
+        } else {
+            blob.x = Math.max(0, Math.min(blob.x, Room.WIDTH - Blob.SIZE));
+            blob.y = Math.max(0, Math.min(blob.y, Room.HEIGHT - Blob.SIZE));
+            blob.exit = Blob.Exit.NONE;
+        }
+    }
+
+    private void updateObjectsOnly(float delta) {
+        for (GameObject obj : room.getObjects()) {
+            obj.update(delta);
+        }
+    }
+
+    private void renderWorld(float delta) {
         TextureRegion terrainCur = roomRenderer.getTerrainTexture(room);
         TextureRegion terrainPrev = isRoomTransitioning() ? roomRenderer.getTerrainTexture(prevRoom) : null;
 
-        // --- Draw ---
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         gameViewport.apply();
@@ -285,58 +300,50 @@ private boolean isRoomTransitioning() {
         batch.begin();
 
         if (isRoomTransitioning()) {
-            float t = Interpolation.pow2.apply(
-                    Math.min(transitionTime / TRANSITION_DURATION, 1f));
-            float roomW = Room.WIDTH;
-            float roomH = Room.HEIGHT;
-            float offsetX = roomW * transitionDx * (1f - t);
-            float offsetY = roomH * -transitionDy * (1f - t);
-            float prevOffsetX = -roomW * transitionDx * t;
-            float prevOffsetY = roomH * transitionDy * t;
-            batch.draw(terrainPrev, prevOffsetX, prevOffsetY, roomW, roomH);
-            batch.draw(terrainCur, offsetX, offsetY, roomW, roomH);
+            renderRoomTransition(terrainCur, terrainPrev);
         } else {
-            batch.draw(terrainCur, 0, 0, Room.WIDTH, Room.HEIGHT);
+            renderRoom(terrainCur, delta);
         }
 
-        if (!isRoomTransitioning()) {
-            // Game objects
-            for (GameObject obj : room.getObjects()) {
-                obj.render(batch, delta);
-            }
-
-            // Temp platforms
-            for (TempPlatform p : platforms) {
-                platformRenderer.render(batch, p);
-            }
-
-            // BLOB attachment
-            if (blob.attachment != null && !blob.isInTransition()) {
-                blob.attachment.render(batch, blob.x, blob.y - Blob.PLATFORM_HEIGHT);
-            }
-
-            // Transition effects (explosion/assembly particles)
-            transitionManager.render(batch);
-            tunnelController.render(batch);
-
-            // BLOB sprite (BlobRenderer handles TRANSITION state by not drawing)
-            blobRenderer.render(batch, blob, delta);
-
-            // Foreground layer — game objects that draw in front of BLOB
-            for (GameObject obj : room.getObjects()) {
-                obj.renderForeground(batch, delta);
-            }
-        }
-
-        // HUD
         hud.render(batch, gameState);
         batch.end();
 
-        // Touch controls overlay
         touchControls.render();
+    }
 
-        // --- End of frame ---
-        inputManager.update();
+    private void renderRoomTransition(TextureRegion terrainCur, TextureRegion terrainPrev) {
+        float t = Interpolation.pow2.apply(
+                Math.min(transitionTime / TRANSITION_DURATION, 1f));
+        float roomW = Room.WIDTH;
+        float roomH = Room.HEIGHT;
+        batch.draw(terrainPrev,
+                -roomW * transitionDx * t,
+                roomH * transitionDy * t, roomW, roomH);
+        batch.draw(terrainCur,
+                roomW * transitionDx * (1f - t),
+                roomH * -transitionDy * (1f - t), roomW, roomH);
+    }
+
+    private void renderRoom(TextureRegion terrain, float delta) {
+        batch.draw(terrain, 0, 0, Room.WIDTH, Room.HEIGHT);
+
+        for (GameObject obj : room.getObjects()) {
+            obj.render(batch, delta);
+        }
+        for (TempPlatform p : platforms) {
+            platformRenderer.render(batch, p);
+        }
+        if (blob.attachment != null && !blob.isInTransition()) {
+            blob.attachment.render(batch, blob.x, blob.y - Blob.PLATFORM_HEIGHT);
+        }
+
+        transitionManager.render(batch);
+        tunnelController.render(batch);
+        blobRenderer.render(batch, blob, delta);
+
+        for (GameObject obj : room.getObjects()) {
+            obj.renderForeground(batch, delta);
+        }
     }
 
     private static final InputManager.Action[] ACTIONS = InputManager.Action.values();
@@ -399,10 +406,21 @@ private boolean isRoomTransitioning() {
         touchControls.resize(width, height);
     }
 
-    @Override public void show() {}
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
+    @Override
+    public void show() {
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
 
     @Override
     public void dispose() {

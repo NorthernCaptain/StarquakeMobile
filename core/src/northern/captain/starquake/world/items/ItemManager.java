@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.IntMap;
 import northern.captain.starquake.Assets;
 import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.Room;
+import northern.captain.starquake.world.objects.CoreTrigger;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -42,21 +43,23 @@ public class ItemManager {
         int[] keyRooms = {150, 198, 200, 246};
         placeItem(ItemType.KEY, keyRooms[rng.nextInt(keyRooms.length)], rng);
 
+        // Get the actual required parts from CoreAssembly (initialized before us)
+        CoreAssembly core = CoreTrigger.getCoreAssembly();
+        ItemType[] requiredParts = (core != null) ? core.getRequiredParts() : new ItemType[0];
+
         // Required core elements (7 entries with 2 candidate rooms each)
+        // First 5 entries place the actual required parts, remaining 2 get random decoys
         int[][] coreRoomPairs = {
             {436, 422}, {236, 222}, {52, 16}, {502, 504},
             {296, 314}, {72, 106}, {310, 278}
         };
-
-        // Choose 5 random core part types for the missing core slots
         ItemType[] partPool = getPartPool();
-        shuffle(partPool, rng);
-        // First 5 of the shuffled pool are "required" core parts
-        // Entries 0-4 use required parts, entries 5-6 use random parts
         for (int i = 0; i < coreRoomPairs.length; i++) {
             int[] pair = coreRoomPairs[i];
             int room = pair[rng.nextInt(2)];
-            ItemType part = partPool[i % partPool.length];
+            ItemType part = (i < requiredParts.length && requiredParts[i] != null)
+                ? requiredParts[i]
+                : partPool[rng.nextInt(partPool.length)];
             placeItem(part, room, rng);
         }
 
@@ -87,8 +90,7 @@ public class ItemManager {
     }
 
     private void distributeBoosts(Random rng) {
-        // Build the boost type list: 96 health + 32 laser + 32 platform + 32 life + 32 universal + 32 pyramid
-        // BBC had 3 energy variants (32 each). We split as: 32 small, 32 full, 32 small (alternating)
+        // 256 boost items: 96 health (48s+48f) + 32 laser (16s+16f) + 32 platform (16s+16f) + 32 life + 32 universal + 32 pyramid
         ItemType[] boostTypes = new ItemType[256];
         int idx = 0;
         for (int i = 0; i < 48; i++) boostTypes[idx++] = ItemType.HEALTH_SMALL;

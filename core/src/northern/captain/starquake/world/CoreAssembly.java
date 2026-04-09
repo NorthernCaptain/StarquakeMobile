@@ -148,7 +148,7 @@ public class CoreAssembly {
             case SCAN:         updateScan(); break;
             case DELIVER:      updateDeliver(); break;
             case LIGHTNING:    updateLightning(); break;
-            case FADE_IN:      if (phaseTimer >= FADE_IN_TIME) setPhase(Phase.PAUSE_MERGE); break;
+            case FADE_IN:      if (phaseTimer >= FADE_IN_TIME) { fadeInIdx = -1; setPhase(Phase.PAUSE_MERGE); } break;
             case PAUSE_MERGE:  if (phaseTimer >= PAUSE_AFTER_MERGE) { currentSlot = 0; setPhase(Phase.SCAN); } break;
             case FLASH_RED:    updateFlashRed(); break;
             case ASSEMBLE:     updateAssemble(); break;

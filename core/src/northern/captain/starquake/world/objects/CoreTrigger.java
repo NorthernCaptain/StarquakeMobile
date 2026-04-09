@@ -65,7 +65,7 @@ public class CoreTrigger extends GameObject {
         Blob blob = (Blob) entity;
         if (blob.state != Blob.State.IDLE && blob.state != Blob.State.WALK) return;
 
-        // Check if BLOB overlaps the 4px-wide trigger zone
+        // Check if BLOB overlaps the trigger zone
         float triggerLeft = x + TRIGGER_X_OFFSET;
         float triggerRight = triggerLeft + TRIGGER_WIDTH;
         float blobLeft = blob.getX();
