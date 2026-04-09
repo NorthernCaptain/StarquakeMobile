@@ -71,3 +71,7 @@ python tools/extract_graphics.py research/assets/starquake.z80
 - [BBC Micro disassembly (GitHub)](https://github.com/reubenscratton/starquake) — full buildable source
 - [Complete ZX Spectrum map](https://maps.speccy.cz/map.php?id=Starquake) — 4096x4656 fan-made map
 - [TileMap interactive viewer](https://simonowen.com/articles/tilemap/) — technical analysis of room system
+
+## License
+
+Copyright (c) 2026 NorthernCaptain. Licensed under the [PolyForm Noncommercial 1.0.0](LICENSE).
