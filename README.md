@@ -74,4 +74,4 @@ python tools/extract_graphics.py research/assets/starquake.z80
 
 ## License
 
-Copyright (c) 2026 NorthernCaptain. Licensed under the [PolyForm Noncommercial 1.0.0](LICENSE).
+Copyright (c) 2026 NorthernCaptain. Licensed under the [PolyForm Noncommercial 1.0.0](LICENSE.md).
