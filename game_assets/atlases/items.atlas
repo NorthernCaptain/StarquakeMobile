@@ -1,251 +1,258 @@
 
 items.png
-size: 128, 128
+size: 256, 512
 format: RGBA8888
 filter: Nearest, Nearest
 repeat: none
-item
-  rotate: false
-  xy: 1, 109
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: 0
 item
   rotate: false
   xy: 1, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 1
+  index: 0
 item
   rotate: false
-  xy: 19, 109
+  xy: 203, 373
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 2
+  index: 1
 item
   rotate: false
   xy: 1, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
-  index: 3
+  index: 2
 item
   rotate: false
   xy: 19, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
+  index: 3
+item
+  rotate: false
+  xy: 203, 355
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
   index: 4
 item
   rotate: false
-  xy: 37, 109
+  xy: 221, 373
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 5
 item
   rotate: false
-  xy: 1, 55
+  xy: 239, 373
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 6
 item
   rotate: false
-  xy: 19, 73
+  xy: 1, 55
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 7
 item
   rotate: false
-  xy: 37, 91
+  xy: 19, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 8
 item
   rotate: false
-  xy: 55, 109
+  xy: 37, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 9
 item
   rotate: false
-  xy: 1, 37
+  xy: 203, 337
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 10
 item
   rotate: false
-  xy: 19, 55
+  xy: 221, 355
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 11
 item
   rotate: false
-  xy: 37, 73
+  xy: 239, 355
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 12
 item
   rotate: false
-  xy: 55, 91
+  xy: 1, 37
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 13
 item
   rotate: false
-  xy: 73, 109
+  xy: 19, 55
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 14
 item
   rotate: false
-  xy: 1, 19
+  xy: 37, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 15
 item
   rotate: false
-  xy: 19, 37
+  xy: 55, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 16
 item
   rotate: false
-  xy: 37, 55
+  xy: 203, 319
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 17
 item
   rotate: false
-  xy: 55, 73
+  xy: 221, 337
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 18
 item
   rotate: false
-  xy: 73, 91
+  xy: 239, 337
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 19
 item
   rotate: false
-  xy: 91, 109
+  xy: 1, 19
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 20
 item
   rotate: false
-  xy: 1, 1
+  xy: 19, 37
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 21
 item
   rotate: false
-  xy: 19, 19
+  xy: 37, 55
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 22
 item
   rotate: false
-  xy: 37, 37
+  xy: 55, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 23
 item
   rotate: false
-  xy: 55, 55
+  xy: 73, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 24
 item
   rotate: false
-  xy: 73, 73
+  xy: 203, 301
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 25
 item
   rotate: false
-  xy: 91, 91
+  xy: 221, 319
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 26
 item
   rotate: false
-  xy: 109, 109
+  xy: 239, 319
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 27
 item
   rotate: false
-  xy: 19, 1
+  xy: 1, 1
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 28
 item
   rotate: false
-  xy: 37, 19
+  xy: 19, 19
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 29
 item
   rotate: false
-  xy: 55, 37
+  xy: 37, 37
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 30
 item
   rotate: false
-  xy: 73, 55
+  xy: 55, 55
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 31
 item
   rotate: false
-  xy: 91, 73
+  xy: 73, 73
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 32
 item
   rotate: false
-  xy: 109, 91
+  xy: 91, 91
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 33
 item
   rotate: false
-  xy: 37, 1
+  xy: 203, 283
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 34
+item_sheet
+  rotate: false
+  xy: 1, 109
+  size: 200, 280
+  orig: 200, 280
+  offset: 0, 0
+  index: -1

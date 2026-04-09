@@ -26,6 +26,7 @@ public class RoomRenderer {
     private static final String[] QUAD_KEY = {"tl", "tr", "bl", "br"};
     private static final int[] QUAD_DCOL = {0, 1, 0, 1};
     private static final int[] QUAD_DROW = {0, 0, 1, 1};
+    private static final int SKIP_TILE_DOOR = 45; // Door draws itself when locked
 
     private final Assets assets;
     private final ShaderProgram paletteShader;
@@ -83,6 +84,7 @@ public class RoomRenderer {
 
                 for (int qi = 0; qi < 4; qi++) {
                     int tileIdx = bp.getInt(QUAD_KEY[qi]);
+                    if (tileIdx == SKIP_TILE_DOOR) continue; // Door draws itself
                     TextureRegion region = assets.tileRegions.get(tileIdx);
                     if (region == null) continue;
 

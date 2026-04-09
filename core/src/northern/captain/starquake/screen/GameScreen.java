@@ -14,8 +14,13 @@ import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.input.InputManager.Action;
 import northern.captain.starquake.input.TouchControls;
+import northern.captain.starquake.hud.Hud;
 import northern.captain.starquake.world.Blob;
+import northern.captain.starquake.world.Inventory;
+import northern.captain.starquake.world.items.ItemManager;
+import northern.captain.starquake.world.items.ItemPickup;
 import northern.captain.starquake.world.BlobRenderer;
+import northern.captain.starquake.world.GameState;
 import northern.captain.starquake.world.LiftController;
 import northern.captain.starquake.world.TunnelController;
 import northern.captain.starquake.world.PlatformRenderer;
@@ -37,8 +42,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class GameScreen implements Screen {
-    public static final int VIEWPORT_W = Room.WIDTH;
-    public static final int VIEWPORT_H = Room.HEIGHT;
+    public static final int VIEWPORT_W = Room.WIDTH;       // 256
+    public static final int VIEWPORT_H = Room.HEIGHT + 24; // 168 (144 room + 24 HUD)
     private static final float TRANSITION_DURATION = 0.4f;
 
     private final StarquakeGame game;
@@ -52,6 +57,10 @@ public class GameScreen implements Screen {
     private final PlatformRenderer platformRenderer;
     private final GameObjectRegistry objectRegistry;
     private final BlobTransitionManager transitionManager = new BlobTransitionManager();
+    private final GameState gameState = new GameState();
+    private final Inventory inventory = new Inventory();
+    private final ItemManager itemManager;
+    private final Hud hud;
     private final LiftController liftController = new LiftController();
     private final TunnelController tunnelController;
 
@@ -72,6 +81,9 @@ public class GameScreen implements Screen {
 
         objectRegistry = GameObjectRegistry.createDefault();
         tunnelController = new TunnelController(game.assets);
+        itemManager = new ItemManager(game.assets);
+        ItemPickup.init(gameState, inventory, itemManager);
+        hud = new Hud(game.assets, inventory);
 
         inputManager = new InputManager();
         touchControls = new TouchControls(inputManager, false);
@@ -79,6 +91,8 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(new InputMultiplexer(inputManager.getKeyboardListener()));
 
         room = Room.build(game.assets, startRoom, objectRegistry);
+        itemManager.initializeGame(System.currentTimeMillis());
+        itemManager.populateRoom(room);
         blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
 
         game.assets.font.getData().setScale(1f);
@@ -94,6 +108,7 @@ public class GameScreen implements Screen {
             platforms.clear();
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
+            itemManager.populateRoom(room);
             tunnelController.setRoom(room);
             transitionDx = dx;
             transitionDy = 0;
@@ -102,6 +117,7 @@ public class GameScreen implements Screen {
         });
 
         // Register event listeners
+        gameState.registerEvents();
         EventBus.get().register(GameEvent.Type.BLOB_DIED, e -> triggerDeath());
         EventBus.get().register(GameEvent.Type.LIFT_STARTED, e -> startLift());
         HoverStand.registerEvents();
@@ -129,6 +145,7 @@ public class GameScreen implements Screen {
             platforms.clear();
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
+            itemManager.populateRoom(room);
             liftController.setRoom(room);
             // No slide transition for lift — instant room switch
             prevRoom.dispose();
@@ -153,9 +170,10 @@ public class GameScreen implements Screen {
         touchControls.poll();
 
         // --- Update ---
-        // Always update blob transition effects and tunnel controller
+        // Always update blob transition effects, tunnel controller, item respawns
         transitionManager.update(delta);
         tunnelController.update(delta);
+        itemManager.update(delta);
 
         if (isRoomTransitioning()) {
             transitionTime += delta;
@@ -182,8 +200,9 @@ public class GameScreen implements Screen {
                 float px = blob.x;
                 float py = blob.y;
                 float newBlobY = py + TempPlatform.HEIGHT;
-                // Only place if BLOB won't collide at the new position
-                if (!blob.wouldCollide(newBlobY, room)) {
+                // Only place if we have platforms and BLOB won't collide at the new position
+                if (gameState.getPlatforms() > 0 && !blob.wouldCollide(newBlobY, room)) {
+                    gameState.usePlatform();
                     TempPlatform plat = new TempPlatform(px, py);
                     platforms.add(plat);
                     room.addTempPlatform(plat);
@@ -214,6 +233,7 @@ public class GameScreen implements Screen {
             }
 
             blob.update(delta, room);
+            gameState.update(delta);
 
             // Dispatch input actions and notify overlapping game objects
             Array<GameObject> overlapping = getOverlappingObjects();
@@ -230,6 +250,7 @@ public class GameScreen implements Screen {
 
                     prevRoom = room;
                     room = Room.build(game.assets, next, objectRegistry);
+                    itemManager.populateRoom(room);
                     transitionDx = exit.dx;
                     transitionDy = exit.dy;
                     transitionTime = 0;
@@ -263,14 +284,16 @@ public class GameScreen implements Screen {
         if (isRoomTransitioning()) {
             float t = Interpolation.pow2.apply(
                     Math.min(transitionTime / TRANSITION_DURATION, 1f));
-            float offsetX = VIEWPORT_W * transitionDx * (1f - t);
-            float offsetY = VIEWPORT_H * -transitionDy * (1f - t);
-            float prevOffsetX = -VIEWPORT_W * transitionDx * t;
-            float prevOffsetY = VIEWPORT_H * transitionDy * t;
-            batch.draw(terrainPrev, prevOffsetX, prevOffsetY, VIEWPORT_W, VIEWPORT_H);
-            batch.draw(terrainCur, offsetX, offsetY, VIEWPORT_W, VIEWPORT_H);
+            float roomW = Room.WIDTH;
+            float roomH = Room.HEIGHT;
+            float offsetX = roomW * transitionDx * (1f - t);
+            float offsetY = roomH * -transitionDy * (1f - t);
+            float prevOffsetX = -roomW * transitionDx * t;
+            float prevOffsetY = roomH * transitionDy * t;
+            batch.draw(terrainPrev, prevOffsetX, prevOffsetY, roomW, roomH);
+            batch.draw(terrainCur, offsetX, offsetY, roomW, roomH);
         } else {
-            batch.draw(terrainCur, 0, 0, VIEWPORT_W, VIEWPORT_H);
+            batch.draw(terrainCur, 0, 0, Room.WIDTH, Room.HEIGHT);
         }
 
         if (!isRoomTransitioning()) {
@@ -302,9 +325,8 @@ public class GameScreen implements Screen {
             }
         }
 
-        // Debug text
-        game.assets.font.draw(batch, "ROOM " + room.roomIndex
-                + " X" + room.getX() + " Y" + room.getY(), 2, VIEWPORT_H - 2);
+        // HUD
+        hud.render(batch, gameState);
         batch.end();
 
         // Touch controls overlay

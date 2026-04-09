@@ -6,539 +6,553 @@ filter: Nearest, Nearest
 repeat: none
 blob
   rotate: false
-  xy: 1, 109
+  xy: 1, 87
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
 blob
   rotate: false
-  xy: 1, 91
+  xy: 20, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 blob
   rotate: false
-  xy: 19, 109
+  xy: 1, 69
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
 blob
   rotate: false
-  xy: 1, 73
+  xy: 38, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 3
 blob
   rotate: false
-  xy: 19, 91
+  xy: 1, 51
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 4
 blob
   rotate: false
-  xy: 37, 109
+  xy: 56, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 5
 blob
   rotate: false
-  xy: 1, 55
+  xy: 1, 33
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 6
 blob
   rotate: false
-  xy: 19, 73
+  xy: 74, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 7
 blob
   rotate: false
-  xy: 37, 91
+  xy: 1, 15
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 8
 blob
   rotate: false
-  xy: 55, 109
+  xy: 92, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 9
 blob
   rotate: false
-  xy: 1, 37
+  xy: 110, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 10
 effect
   rotate: false
-  xy: 19, 55
+  xy: 128, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 0
 effect
   rotate: false
-  xy: 37, 73
+  xy: 146, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 1
 effect
   rotate: false
-  xy: 55, 91
+  xy: 164, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 2
 effect
   rotate: false
-  xy: 73, 109
+  xy: 182, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 3
 effect
   rotate: false
-  xy: 1, 19
+  xy: 200, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 4
 effect
   rotate: false
-  xy: 19, 37
+  xy: 218, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 5
 effect
   rotate: false
-  xy: 37, 55
+  xy: 236, 111
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 6
 effect
   rotate: false
-  xy: 55, 73
+  xy: 20, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 7
 effect
   rotate: false
-  xy: 73, 91
+  xy: 38, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 8
 effect
   rotate: false
-  xy: 91, 109
+  xy: 56, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 9
 effect
   rotate: false
-  xy: 1, 1
+  xy: 74, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 10
 effect
   rotate: false
-  xy: 19, 19
+  xy: 92, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 11
 effect
   rotate: false
-  xy: 37, 37
+  xy: 110, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 12
 effect
   rotate: false
-  xy: 55, 55
+  xy: 128, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 13
 effect
   rotate: false
-  xy: 73, 73
+  xy: 146, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 14
 effect
   rotate: false
-  xy: 91, 91
+  xy: 164, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 15
 effect
   rotate: false
-  xy: 109, 109
+  xy: 182, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 16
 effect
   rotate: false
-  xy: 19, 1
+  xy: 200, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 17
 effect
   rotate: false
-  xy: 37, 19
+  xy: 218, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 18
 effect
   rotate: false
-  xy: 55, 37
+  xy: 236, 93
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 19
 effect
   rotate: false
-  xy: 73, 55
+  xy: 19, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 20
 effect
   rotate: false
-  xy: 91, 73
+  xy: 19, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 21
 effect
   rotate: false
-  xy: 109, 91
+  xy: 37, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 22
 effect
   rotate: false
-  xy: 127, 109
+  xy: 19, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 23
 enemy
   rotate: false
-  xy: 37, 1
+  xy: 37, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 24
 enemy
   rotate: false
-  xy: 55, 19
+  xy: 55, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 25
 enemy
   rotate: false
-  xy: 73, 37
+  xy: 19, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 26
 enemy
   rotate: false
-  xy: 91, 55
+  xy: 37, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 27
 enemy
   rotate: false
-  xy: 109, 73
+  xy: 55, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 28
 enemy
   rotate: false
-  xy: 127, 91
+  xy: 73, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 29
 enemy
   rotate: false
-  xy: 145, 109
+  xy: 37, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 30
 enemy
   rotate: false
-  xy: 55, 1
+  xy: 55, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 31
 enemy
   rotate: false
-  xy: 73, 19
+  xy: 73, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 32
 enemy
   rotate: false
-  xy: 91, 37
+  xy: 91, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 33
 enemy
   rotate: false
-  xy: 109, 55
+  xy: 55, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 34
 enemy
   rotate: false
-  xy: 127, 73
+  xy: 73, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 35
 enemy
   rotate: false
-  xy: 145, 91
+  xy: 91, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 36
 enemy
   rotate: false
-  xy: 163, 109
+  xy: 109, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 37
 enemy
   rotate: false
-  xy: 73, 1
+  xy: 73, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 38
 enemy
   rotate: false
-  xy: 91, 19
+  xy: 91, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 39
 enemy
   rotate: false
-  xy: 109, 37
+  xy: 109, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 40
 enemy
   rotate: false
-  xy: 127, 55
+  xy: 127, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 41
 enemy
   rotate: false
-  xy: 145, 73
+  xy: 91, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 42
 enemy
   rotate: false
-  xy: 163, 91
+  xy: 109, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 43
 enemy
   rotate: false
-  xy: 181, 109
+  xy: 127, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 44
 enemy
   rotate: false
-  xy: 91, 1
+  xy: 145, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 45
 enemy
   rotate: false
-  xy: 109, 19
+  xy: 109, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 46
 enemy
   rotate: false
-  xy: 127, 37
+  xy: 127, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 47
 enemy
   rotate: false
-  xy: 145, 55
+  xy: 145, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 48
 enemy
   rotate: false
-  xy: 163, 73
+  xy: 163, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 49
 enemy
   rotate: false
-  xy: 181, 91
+  xy: 127, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 50
 enemy
   rotate: false
-  xy: 199, 109
+  xy: 145, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 51
 enemy
   rotate: false
-  xy: 109, 1
+  xy: 163, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 52
 enemy
   rotate: false
-  xy: 127, 19
+  xy: 181, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 53
 enemy
   rotate: false
-  xy: 145, 37
+  xy: 145, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 54
 enemy
   rotate: false
-  xy: 163, 55
+  xy: 163, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 55
 enemy
   rotate: false
-  xy: 181, 73
+  xy: 181, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 56
 enemy
   rotate: false
-  xy: 199, 91
+  xy: 199, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 57
 enemy
   rotate: false
-  xy: 217, 109
+  xy: 163, 21
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 58
 enemy
   rotate: false
-  xy: 127, 1
+  xy: 181, 39
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 59
 enemy
   rotate: false
-  xy: 145, 19
+  xy: 199, 57
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 60
 enemy
   rotate: false
-  xy: 163, 37
+  xy: 217, 75
   size: 16, 16
   orig: 16, 16
   offset: 0, 0
   index: 61
+hud_heart
+  rotate: false
+  xy: 199, 47
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+hud_vitals
+  rotate: false
+  xy: 1, 105
+  size: 17, 22
+  orig: 17, 22
+  offset: 0, 0
+  index: -1
 laser
   rotate: false
-  xy: 181, 63
+  xy: 1, 5
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
   index: 0
 laser
   rotate: false
-  xy: 199, 81
+  xy: 19, 11
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
   index: 1
 laser
   rotate: false
-  xy: 217, 99
+  xy: 19, 1
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
   index: 2
 platform
   rotate: false
-  xy: 235, 117
+  xy: 181, 29
   size: 16, 8
   orig: 16, 8
   offset: 0, 0

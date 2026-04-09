@@ -66,10 +66,10 @@ public class GameObjectRegistry {
                 new int[][]{{0, 0, 8, 8}, {24, 0, 8, 8}}));
         // Tile 36: teleport entrance
         r.register(Teleporter.TILE_ID, Teleporter::new);
-        // Tile 37: trade entrance from left
-        r.register(TradeEntrance.TILE_LEFT, TradeEntrance::left);
-        // Tile 38: trade entrance from right
-        r.register(TradeEntrance.TILE_RIGHT, TradeEntrance::right);
+        // Tile 37: space lock from left (within-room teleport, requires Access Card)
+        r.register(SpaceLock.TILE_LEFT, SpaceLock::left);
+        // Tile 38: space lock from right
+        r.register(SpaceLock.TILE_RIGHT, SpaceLock::right);
         // Tile 39: bottom 16px empty
         r.register(39, (a, col, row) -> new CollisionTile(a, col, row, 0, 0, 0, 16));
         // Tile 40: electric shocker — horizontal arc between side poles

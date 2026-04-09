@@ -979,10 +979,151 @@ Add BLOB character with physics and collision detection. Rewire controls to move
 - Look up code → warp to target room
 - **Verify**: Teleporting with known codes works
 
-### Phase 9: Items + inventory
-- Pickup detection at pickup-behavior tiles
-- 4-slot FIFO inventory in HUD
-- Resource pickups refill energy/ammo/platforms
+### Phase 9: Items + inventory + trading
+
+#### Item Catalog (Atari ST sprite indices)
+
+| Index | Name | Category | Behavior |
+|-------|------|----------|----------|
+| 0-8 | Core display pieces | CORE_DISPLAY | 3×3 grid shown in core room when corresponding part is delivered |
+| 9-14 | Collectible core parts (set A) | CORE_PART | Found in rooms or obtained via trading |
+| 15 | Access card | ACCESS_CARD | Opens space locks (tiles 37-38) + enables Cheops Pyramid trading. Reusable, not consumed. 1 in game |
+| 16 | Key | KEY | Opens doors (tile 45). Reusable, not consumed. 1 key in the game |
+| 17 | Health boost (small) | PICKUP | Instant: restores partial health |
+| 18 | Health boost (full) | PICKUP | Instant: restores health to max |
+| 19 | Universal boost | PICKUP | Instant: fills lowest vital to max, or extra life if all full |
+| 20 | Platform recharge (small) | PICKUP | Instant: restores partial platforms |
+| 21 | Laser recharge (small) | PICKUP | Instant: restores partial laser |
+| 22 | Laser recharge (full) | PICKUP | Instant: restores laser to max |
+| 23 | Platform recharge (full) | PICKUP | Instant: restores platforms to max |
+| 24 | Extra life | PICKUP | Instant: +1 life |
+| 25 | Cheops pyramid | PYRAMID | Placed randomly in rooms (32 instances). Walk up + press UP to trade. Consumed after 1 trade |
+| 26-34 | Collectible core parts (set B) | CORE_PART | Same as 9-14: found in rooms or obtained via trading |
+
+#### Item Behavior Categories
+
+**PICKUP (items 17-24)**: Consumed instantly on contact. Never enter inventory. Applied directly to GameState (health, platforms, laser, lives).
+
+**CORE_PART (items 9-14, 26-34)**: Go into 4-slot FIFO inventory. Can be traded at Cheops Pyramids. Delivered to core room to restore missing core pieces. 15 possible parts; 5 are randomly chosen as "missing" each game.
+
+**ACCESS_CARD (item 15)**: Goes into inventory. Opens space locks (tiles 37-38) and enables Cheops Pyramid trading. Does NOT open doors. Reusable — NOT consumed on use. When dropped/pushed out, placed back in room like any other item (no self-destruct). Only 1 placed at game start. Most important item in the game.
+
+**KEY (item 16)**: Goes into inventory. Opens doors (tile 45). Does NOT open space locks. Reusable — NOT consumed (BBC disassembly confirms key stays in pocket). When dropped/pushed out, placed back in room like any other item. Only 1 key placed in the world, enough for all 5 doors.
+
+**PYRAMID (item 25)**: Placed randomly in rooms (32 instances at game start). NOT a tile — it's an item object sitting on the ground. BLOB walks up to it and presses UP while carrying the Access Card. After trading, the pyramid is consumed (removed from world). 32 pyramids = 32 max trades per game.
+
+**CORE_DISPLAY (items 0-8)**: Not collectible. Used only for rendering the 3×3 core assembly screen.
+
+#### Tile Clarifications
+
+**Tiles 37-38 = Space Locks (NOT trade entrances)**:
+- BBC: TILE_SPACE_LOCK_LEFT (0x23) / TILE_SPACE_LOCK_RIGHT (0x24)
+- Within-room teleport: BLOB enters one side, appears at the other side of the room
+- **Requires Access Card** (item 15) to pass through
+- Always come in left/right pairs within a single room
+- Flash effect on transition
+- Our current `TradeEntrance.java` needs to be refactored to `SpaceLock.java`
+
+**Tiles 43-44 = Tunnel Teleporters (passages, NO card required)**:
+- BBC equivalent: passage system (cross-room, data-driven)
+- Teleports between adjacent rooms — confirmed NO item required
+- Our implementation is correct as-is
+
+**Tile 45 = Door/Gate**:
+- Opened by KEY (item 16) only — Access Card does NOT open doors
+- Key is NOT consumed — reusable for all 5 doors
+- 5 doors exist across all 512 rooms (rooms 190, 252, 452, 482, 486)
+- Once opened, stays open for rest of session
+
+#### Inventory System
+- **4-slot FIFO**: oldest item is pushed out when picking up a 5th
+- Items that enter inventory: CORE_PART, ACCESS_CARD, KEY
+- Pushed-out items are placed back in the current room as core elements (no self-destruct for any item)
+- HUD shows 4 inventory slots on the right side of the HUD bar
+
+#### Core Assembly
+- Core room has a 3×3 grid of display slots
+- At game start: 4 slots pre-filled with CORE_DISPLAY pieces, **5 randomly replaced** with CORE_PART IDs chosen from the pool of 15 (items 9-14 + 26-34), no duplicates
+- BLOB delivers matching CORE_PART → slot is restored to its CORE_DISPLAY piece
+- All 9 restored = game won
+- Each delivery: +10,000 points
+
+#### Core Element Placement (from BBC `possible_core_element_locations` at &61CD)
+
+Room numbers are in our format (row×16 + column, 0-511):
+
+**Access Card & Key (1 of each, chosen from 4 candidate rooms):**
+
+| Item | Room candidates |
+|------|----------------|
+| ACCESS_CARD (item 15) | 8, 40, 168, 182 |
+| KEY (item 16) | 150, 198, 200, 246 |
+
+**Core elements with required sprites (7 entries, slots matching core positions 2-8):**
+
+| Entry | Room A | Room B |
+|-------|--------|--------|
+| 4 | 436 | 422 |
+| 5 | 236 | 222 |
+| 6 | 52 | 16 |
+| 7 | 502 | 504 |
+| 8 | 296 | 314 |
+| 9 | 72 | 106 |
+| 10 | 310 | 278 |
+
+**Extra core elements with random sprites (11 entries, decoys/trade material):**
+
+| Entry | Room A | Room B |
+|-------|--------|--------|
+| 11 | 56 | 42 |
+| 12 | 416 | 352 |
+| 13 | 140 | 14 |
+| 14 | 266 | 316 |
+| 15 | 476 | 482 |
+| 16 | 84 | 86 |
+| 17 | 478 | 62 |
+| 18 | 80 | 82 |
+| 19 | 226 | 194 |
+| 20 | 114 | 116 |
+| 21 | 466 | 372 |
+
+Per entry, 1 of the 2 rooms is chosen randomly at game start.
+
+#### Boost Item Distribution (256 items, randomly placed)
+
+| Count | BBC Sprite | Our Item | Type |
+|-------|-----------|----------|------|
+| 96 | ENERGY ×3 | 17-18 | Health (3 visual variants, 32 each) |
+| 32 | AMMO | 21-22 | Laser recharge |
+| 32 | FUEL | 20, 23 | Platform recharge |
+| 32 | LIFE | 24 | Extra life |
+| 32 | RANDOM | 19 | Universal boost |
+| 32 | PYRAMID | 25 | Cheops pyramid (consumable trade point) |
+
+Total: 256 boost/pyramid items randomly distributed across rooms (1 per room max).
+
+#### Door Locations (5 gates)
+
+| Room | BBC address |
+|------|-------------|
+| 190 | &0BE |
+| 252 | &0FC |
+| 452 | &1C4 |
+| 486 | &1E6 |
+| 482 | &1E2 |
+
+#### Implementation Tasks
+- `Inventory` class: 4-slot FIFO array, add/remove/drop
+- `ItemPickup` game object: renders item sprite, triggers collection on contact
+- Pickup logic: PICKUP items → apply to GameState; others → add to Inventory
+- `CheopsPyramid` game object: item 25 placed in rooms, press UP to trade (requires Access Card)
+- Refactor `TradeEntrance.java` → `SpaceLock.java`: within-room teleport requiring Access Card
+- HUD inventory display: 4 slots on right side, 16×16 item icons
+- Door.java: check inventory for KEY on action, open permanently
+- Cheops trading screen: exchange UI with 5 options from missing core pieces
+- Core room: 3×3 display grid, delivery mechanic
+- FIFO drop logic: pushed-out items placed back in current room
+- Game initialization: randomize 5 missing core pieces from pool of 15, place 256 boost items + 20 core elements + 1 key + 1 card
 
 ## Critical Reference Files
 
@@ -1084,12 +1225,24 @@ After Phase 1 implementation:
 
 ---
 
-### Phase 5: TODO — HUD, Inventory, Enemies
+### Phase 5: HUD + GameState ✅ PARTIAL
 
-- HUD overlay with score, lives, resource bars
-- Inventory system (key cards, items)
-- Door opening mechanic (key card interaction)
+**Done:**
+- HUD overlay (256×24 at y=144) with score, lives, resource bars
+- GameState: lives, score, health, platforms, laser with auto-regen
+- 3 progress bars: health (green), platforms (blue), laser (yellow)
+- Vital icons from sprites atlas (hud_vitals, hud_heart)
+- Color item sprites replaced (Atari ST extracted, 35 items in items.atlas)
+
+**TODO — Phase 5 remaining:**
+- Refactor `TradeEntrance.java` → `SpaceLock.java` (tiles 37-38 are within-room teleporters requiring Access Card, NOT trade entrances)
+- Inventory system (4-slot FIFO, see Phase 9 spec)
+- HUD inventory display (right side, 4 item icon slots)
+- Item pickup game objects in rooms (boost items + core elements + pyramids)
+- Door opening mechanic (KEY only, reusable)
+- Cheops Pyramid item (item 25): placed in rooms, press UP to trade
+- Cheops trading screen (exchange UI with 5 options)
+- Core room assembly display + delivery mechanic
 - Teleport chooser screen
-- Trade/exchange screen
-- Enemy system (patrol AI, collision with Collidable interface)
+- Enemy system (patrol AI, collision with Collidable)
 - Sound effects and music

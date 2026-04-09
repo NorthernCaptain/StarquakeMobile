@@ -145,7 +145,7 @@ public class Room {
         return objects;
     }
 
-    private void addObject(GameObject obj) {
+    public void addObject(GameObject obj) {
         objects.add(obj);
         int key = obj.getTileKey();
         Array<GameObject> list = objectMap.get(key);
@@ -155,6 +155,16 @@ public class Room {
         }
         list.add(obj);
         obj.onAddedToRoom(this);
+    }
+
+    public void removeObject(GameObject obj) {
+        objects.removeValue(obj, true);
+        int key = obj.getTileKey();
+        Array<GameObject> list = objectMap.get(key);
+        if (list != null) {
+            list.removeValue(obj, true);
+            if (list.size == 0) objectMap.remove(key);
+        }
     }
 
     public static Room build(Assets assets, int roomIndex) {

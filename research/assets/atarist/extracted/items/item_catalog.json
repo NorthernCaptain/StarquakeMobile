@@ -1,0 +1,503 @@
+{
+  "format": {
+    "type": "Atari ST 4-bitplane masked sprite",
+    "bytes_per_row": 10,
+    "frame_size": 160,
+    "width_pixels": 16,
+    "height_pixels": 16,
+    "mask_rule": "mask bit 1 = transparent, 0 = opaque",
+    "palette": "HUD palette at 0x3AE1A"
+  },
+  "base_address": "0x26B56",
+  "count": 35,
+  "frames": [
+    {
+      "index": 0,
+      "address": "0x26B56",
+      "opaque_pixels": 256,
+      "colored_pixels": 74,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 1,
+      "address": "0x26BF6",
+      "opaque_pixels": 256,
+      "colored_pixels": 134,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 2,
+      "address": "0x26C96",
+      "opaque_pixels": 256,
+      "colored_pixels": 76,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 3,
+      "address": "0x26D36",
+      "opaque_pixels": 256,
+      "colored_pixels": 135,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 4,
+      "address": "0x26DD6",
+      "opaque_pixels": 256,
+      "colored_pixels": 144,
+      "palette_indices": [
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 5,
+      "address": "0x26E76",
+      "opaque_pixels": 256,
+      "colored_pixels": 136,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 6,
+      "address": "0x26F16",
+      "opaque_pixels": 256,
+      "colored_pixels": 77,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 7,
+      "address": "0x26FB6",
+      "opaque_pixels": 256,
+      "colored_pixels": 136,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 8,
+      "address": "0x27056",
+      "opaque_pixels": 256,
+      "colored_pixels": 76,
+      "palette_indices": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 9,
+      "address": "0x270F6",
+      "opaque_pixels": 256,
+      "colored_pixels": 179,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        15
+      ]
+    },
+    {
+      "index": 10,
+      "address": "0x27196",
+      "opaque_pixels": 256,
+      "colored_pixels": 188,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 11,
+      "address": "0x27236",
+      "opaque_pixels": 256,
+      "colored_pixels": 179,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 12,
+      "address": "0x272D6",
+      "opaque_pixels": 256,
+      "colored_pixels": 187,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 13,
+      "address": "0x27376",
+      "opaque_pixels": 256,
+      "colored_pixels": 172,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 14,
+      "address": "0x27416",
+      "opaque_pixels": 256,
+      "colored_pixels": 182,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 15,
+      "address": "0x274B6",
+      "opaque_pixels": 256,
+      "colored_pixels": 146,
+      "palette_indices": [
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 16,
+      "address": "0x27556",
+      "opaque_pixels": 256,
+      "colored_pixels": 80,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "index": 17,
+      "address": "0x275F6",
+      "opaque_pixels": 256,
+      "colored_pixels": 125,
+      "palette_indices": [
+        3,
+        10,
+        11,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 18,
+      "address": "0x27696",
+      "opaque_pixels": 256,
+      "colored_pixels": 203,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 19,
+      "address": "0x27736",
+      "opaque_pixels": 256,
+      "colored_pixels": 160,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 20,
+      "address": "0x277D6",
+      "opaque_pixels": 256,
+      "colored_pixels": 172,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 21,
+      "address": "0x27876",
+      "opaque_pixels": 256,
+      "colored_pixels": 104,
+      "palette_indices": [
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 22,
+      "address": "0x27916",
+      "opaque_pixels": 256,
+      "colored_pixels": 80,
+      "palette_indices": [
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 23,
+      "address": "0x279B6",
+      "opaque_pixels": 256,
+      "colored_pixels": 174,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "index": 24,
+      "address": "0x27A56",
+      "opaque_pixels": 256,
+      "colored_pixels": 114,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 25,
+      "address": "0x27AF6",
+      "opaque_pixels": 256,
+      "colored_pixels": 154,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "index": 26,
+      "address": "0x27B96",
+      "opaque_pixels": 256,
+      "colored_pixels": 127,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 27,
+      "address": "0x27C36",
+      "opaque_pixels": 256,
+      "colored_pixels": 163,
+      "palette_indices": [
+        2,
+        3,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 28,
+      "address": "0x27CD6",
+      "opaque_pixels": 256,
+      "colored_pixels": 80,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 29,
+      "address": "0x27D76",
+      "opaque_pixels": 256,
+      "colored_pixels": 110,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 30,
+      "address": "0x27E16",
+      "opaque_pixels": 256,
+      "colored_pixels": 218,
+      "palette_indices": [
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 31,
+      "address": "0x27EB6",
+      "opaque_pixels": 256,
+      "colored_pixels": 154,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 32,
+      "address": "0x27F56",
+      "opaque_pixels": 256,
+      "colored_pixels": 130,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "index": 33,
+      "address": "0x27FF6",
+      "opaque_pixels": 256,
+      "colored_pixels": 91,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "index": 34,
+      "address": "0x28096",
+      "opaque_pixels": 256,
+      "colored_pixels": 83,
+      "palette_indices": [
+        1,
+        2,
+        3,
+        12,
+        13,
+        14,
+        15
+      ]
+    }
+  ]
+}
