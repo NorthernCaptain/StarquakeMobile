@@ -25,6 +25,10 @@ public class InputManager {
     private final boolean[] pressed     = new boolean[COUNT];
     private final boolean[] justPressed = new boolean[COUNT];
 
+    // Analog direction from touch circle pad (0,0 = no input, normalized -1..1)
+    private float analogX, analogY;
+    private boolean analogActive;
+
     private final KeyboardListener keyboardListener = new KeyboardListener();
     private final GamepadListener  gamepadListener  = new GamepadListener();
 
@@ -52,6 +56,17 @@ public class InputManager {
     public boolean isJustPressed(Action action) {
         return justPressed[action.ordinal()];
     }
+
+    /** Set analog direction from touch circle pad. Values are normalized -1..1. */
+    public void setAnalog(float x, float y) {
+        analogX = x;
+        analogY = y;
+        analogActive = (x != 0 || y != 0);
+    }
+
+    public float getAnalogX() { return analogX; }
+    public float getAnalogY() { return analogY; }
+    public boolean isAnalogActive() { return analogActive; }
 
     /** Call at end of each frame to clear one-shot flags. */
     public void update() {

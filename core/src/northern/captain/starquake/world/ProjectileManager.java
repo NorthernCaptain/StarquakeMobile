@@ -15,14 +15,14 @@ import java.util.Iterator;
 public class ProjectileManager {
     private static final int MAX_PROJECTILES = 5;
     private static final float WALK_SPEED = 120f;
-    private static final float FLY_SPEED = 100f;
+    private static final float FLY_SPEED = 150f;
     public static final int WALK_COST = 5;
     public static final int FLY_COST = 8;
     private static final float FRAME_DURATION = 0.06f;
     private static final float HIT_FRAME_DURATION = 0.06f;
     private static final int WALK_FRAMES = 4;
     private static final int FLY_FRAMES = 4;
-    private static final int HIT_FRAMES = 4;
+    private static final int HIT_FRAMES = 3;
 
     // Sprite dimensions
     private static final int PROJ_W = 16;

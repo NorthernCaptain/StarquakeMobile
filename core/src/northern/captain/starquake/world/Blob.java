@@ -138,9 +138,18 @@ public class Blob implements Collidable {
     }
 
     public void applyInput(boolean wantLeft, boolean wantRight, boolean wantUp, boolean wantDown) {
+        applyInput(wantLeft, wantRight, wantUp, wantDown, 0, 0, false);
+    }
+
+    public void applyInput(boolean wantLeft, boolean wantRight, boolean wantUp, boolean wantDown,
+                           float analogX, float analogY, boolean analogActive) {
         if (state == State.TRANSITION || state == State.LIFTING) return;
         if (state == State.FLYING) {
-            applyFlyingInput(wantLeft, wantRight, wantUp, wantDown);
+            if (analogActive) {
+                applyAnalogFlyingInput(analogX, analogY);
+            } else {
+                applyFlyingInput(wantLeft, wantRight, wantUp, wantDown);
+            }
             return;
         }
 
@@ -184,6 +193,20 @@ public class Blob implements Collidable {
         } else {
             vy = 0;
         }
+    }
+
+    private void applyAnalogFlyingInput(float analogX, float analogY) {
+        float len = (float) Math.sqrt(analogX * analogX + analogY * analogY);
+        if (len < 0.15f) {
+            vx = 0;
+            vy = 0;
+            return;
+        }
+        // Always fly at max speed, direction only
+        vx = (analogX / len) * FLY_SPEED;
+        vy = (analogY / len) * FLY_SPEED;
+        if (analogX > 0.1f) facingRight = true;
+        else if (analogX < -0.1f) facingRight = false;
     }
 
     /** Called by BlobRenderer when the turn animation completes. */

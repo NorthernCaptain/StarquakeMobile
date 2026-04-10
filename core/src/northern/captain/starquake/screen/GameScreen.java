@@ -260,6 +260,7 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         delta = Math.min(delta, 1 / 15f);
 
+        touchControls.setWalkMode(blob.state != Blob.State.FLYING);
         touchControls.poll();
         updateWorld(delta);
         renderWorld(delta);
@@ -341,7 +342,10 @@ public class GameScreen implements Screen {
                 inputManager.isPressed(Action.LEFT),
                 inputManager.isPressed(Action.RIGHT),
                 inputManager.isPressed(Action.UP),
-                inputManager.isPressed(Action.DOWN));
+                inputManager.isPressed(Action.DOWN),
+                inputManager.getAnalogX(),
+                inputManager.getAnalogY(),
+                inputManager.isAnalogActive());
 
         updateTempPlatforms(delta);
 
@@ -371,7 +375,14 @@ public class GameScreen implements Screen {
             } else if (blob.state == Blob.State.FLYING) {
                 if (gameState.getLaserEnergy() >= ProjectileManager.FLY_COST) {
                     gameState.useLaser(ProjectileManager.FLY_COST);
-                    float dx = blob.vx, dy = blob.vy;
+                    float dx, dy;
+                    if (inputManager.isAnalogActive()) {
+                        dx = inputManager.getAnalogX();
+                        dy = inputManager.getAnalogY();
+                    } else {
+                        dx = blob.vx;
+                        dy = blob.vy;
+                    }
                     if (dx == 0 && dy == 0) dx = blob.facingRight ? 1 : -1;
                     projectileManager.fireFly(blob.x, blob.y, dx, dy);
                 }
