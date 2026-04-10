@@ -35,10 +35,15 @@ import northern.captain.starquake.world.objects.BreakableFloor;
 import northern.captain.starquake.world.objects.CoreTrigger;
 import northern.captain.starquake.world.objects.GameObjectRegistry;
 import northern.captain.starquake.world.objects.HoverStand;
+import northern.captain.starquake.event.EnterTeleportEvent;
 import northern.captain.starquake.event.EnterTradeEvent;
 import northern.captain.starquake.hud.Overlay;
+import northern.captain.starquake.hud.TeleportOverlay;
 import northern.captain.starquake.hud.TradingOverlay;
+import northern.captain.starquake.world.TeleportRegistry;
 import northern.captain.starquake.world.items.ItemType;
+import northern.captain.starquake.world.objects.Teleporter;
+import northern.captain.starquake.world.transitions.TeleportTransition;
 import northern.captain.starquake.world.transitions.AssemblyTransition;
 import northern.captain.starquake.world.transitions.BlobTransition;
 import northern.captain.starquake.world.transitions.BlobTransitionManager;
@@ -82,6 +87,11 @@ public class GameScreen implements Screen {
 
     private Overlay activeOverlay;
 
+    // Teleport system
+    private final TeleportRegistry teleportRegistry = new TeleportRegistry();
+    private TeleportTransition teleportTransition;
+    private int teleportTargetRoom = -1;
+
     public GameScreen(StarquakeGame game, int startRoom) {
         this.game = game;
         roomRenderer = new RoomRenderer(game.assets);
@@ -102,6 +112,11 @@ public class GameScreen implements Screen {
         room = Room.build(game.assets, startRoom, objectRegistry);
         long seed = System.currentTimeMillis();
         CoreTrigger.initCoreAssembly(game.assets, seed, itemManager.getPartPool());
+        teleportRegistry.initialize(seed);
+        // DEBUG: mark all teleporters as visited
+        for (int i = 0; i < TeleportRegistry.COUNT; i++) {
+            teleportRegistry.markVisited(TeleportRegistry.TELEPORT_ROOMS[i]);
+        }
         itemManager.initializeGame(seed);
         // DEBUG: place pyramid + access card in start room
         itemManager.debugPlace(ItemType.PYRAMID, startRoom, 2, 4);
@@ -137,6 +152,7 @@ public class GameScreen implements Screen {
         EventBus.get().register(GameEvent.Type.BLOB_DIED, e -> triggerDeath());
         EventBus.get().register(GameEvent.Type.LIFT_STARTED, e -> startLift());
         EventBus.get().register(GameEvent.Type.ENTER_TRADE, e -> startTrading((EnterTradeEvent) e));
+        EventBus.get().register(GameEvent.Type.ENTER_TELEPORT, e -> startTeleport((EnterTeleportEvent) e));
         HoverStand.registerEvents();
 
         // Birth effect on initial spawn
@@ -190,6 +206,42 @@ public class GameScreen implements Screen {
         blob.startLifting();
     }
 
+    private void executeTeleportRoomSwitch() {
+        // Build new room
+        room.clearTempPlatforms();
+        platforms.clear();
+        room.dispose();
+        room = Room.build(game.assets, teleportTargetRoom, objectRegistry);
+        itemManager.populateRoom(room);
+        tunnelController.setRoom(room);
+
+        // Position BLOB at teleporter tile in the new room
+        findTeleporter:
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 8; col++) {
+                int tileId = game.assets.getTileIdAt(teleportTargetRoom, col, row);
+                if (tileId == Teleporter.TILE_ID) {
+                    blob.x = col * 32 + 8;
+                    blob.y = (5 - row) * 24;
+                    break findTeleporter;
+                }
+            }
+        }
+
+        Teleporter.suppressUntilExit = true;
+
+        // Provide new room's terrain to the transition
+        TextureRegion targetTerrain = roomRenderer.getTerrainTexture(room);
+        teleportTransition.setTarget(targetTerrain);
+        teleportTargetRoom = -1;
+    }
+
+    private void startTeleport(EnterTeleportEvent e) {
+        teleportRegistry.markVisited(e.roomIndex);
+        activeOverlay = new TeleportOverlay(game.assets, gameViewport, teleportRegistry, e.roomIndex);
+        blob.startLifting();
+    }
+
     private void triggerDeath() {
         transitionManager.start(blob, new BlobTransition[]{
                 new ExplosionTransition(),
@@ -209,9 +261,35 @@ public class GameScreen implements Screen {
     }
 
     private void updateWorld(float delta) {
+        // Teleport room transition (disintegrate/reassemble)
+        if (teleportTransition != null) {
+            teleportTransition.update(delta);
+            if (teleportTransition.needsTarget()) {
+                executeTeleportRoomSwitch();
+            }
+            if (teleportTransition.isDone()) {
+                teleportTransition = null;
+                blob.stopLifting();
+            }
+            return;
+        }
+
         if (activeOverlay != null) {
             activeOverlay.update(delta, inputManager);
             if (activeOverlay.isDone()) {
+                if (activeOverlay instanceof TeleportOverlay) {
+                    int target = ((TeleportOverlay) activeOverlay).getTargetRoom();
+                    activeOverlay = null;
+                    if (target >= 0) {
+                        teleportTargetRoom = target;
+                        TextureRegion sourceTerrain = roomRenderer.getTerrainTexture(room);
+                        teleportTransition = new TeleportTransition();
+                        teleportTransition.start(sourceTerrain);
+                        return;
+                    }
+                    // Cancelled — suppress re-trigger until BLOB exits the booth
+                    Teleporter.suppressUntilExit = true;
+                }
                 blob.stopLifting();
                 activeOverlay = null;
             }
@@ -346,7 +424,9 @@ public class GameScreen implements Screen {
         batch.setProjectionMatrix(gameViewport.getCamera().combined);
         batch.begin();
 
-        if (isRoomTransitioning()) {
+        if (teleportTransition != null) {
+            teleportTransition.render(batch);
+        } else if (isRoomTransitioning()) {
             renderRoomTransition(terrainCur, terrainPrev);
         } else {
             renderRoom(terrainCur, delta);
@@ -477,6 +557,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         EventBus.get().clear();
+        Teleporter.suppressUntilExit = false;
         batch.dispose();
         roomRenderer.dispose();
         platformRenderer.dispose();

@@ -22,6 +22,9 @@ import northern.captain.starquake.world.Collidable;
 public class Teleporter extends GameObject {
     public static final int TILE_ID = 36;
 
+    /** Set true after teleport arrival to prevent immediate re-trigger. */
+    public static boolean suppressUntilExit;
+
     private static final int FG_WIDTH = 16;
     private final TextureRegion fgRegion;
 
@@ -60,7 +63,14 @@ public class Teleporter extends GameObject {
 
         // Trigger zone: rightmost 6px of the tile
         float triggerLeft = x + TILE_W - 6;
-        if (blob.x + Blob.SIZE > triggerLeft) {
+        boolean inTrigger = blob.x + Blob.SIZE > triggerLeft;
+
+        if (suppressUntilExit) {
+            if (!inTrigger) suppressUntilExit = false;
+            return;
+        }
+
+        if (inTrigger) {
             EventBus.get().post(new EnterTeleportEvent(room.roomIndex));
         }
     }
