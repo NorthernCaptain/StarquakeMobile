@@ -49,7 +49,9 @@ public class TeleportOverlay implements Overlay {
     private static final String LABEL_TELEPORT = "TELEPORT";
     private static final float TYPE_SPEED = 18f; // chars per second
 
-    enum State { SLIDE_IN, ACTIVE, SLIDE_OUT, DONE }
+    private static final float CONFIRM_TIME = 0.5f;
+
+    enum State { SLIDE_IN, ACTIVE, CONFIRM, SLIDE_OUT, DONE }
 
     private final Viewport viewport;
     private final TeleportRegistry registry;
@@ -101,6 +103,7 @@ public class TeleportOverlay implements Overlay {
         switch (state) {
             case SLIDE_IN:  updateSlideIn(); break;
             case ACTIVE:    updateActive(input); break;
+            case CONFIRM:   if (timer >= CONFIRM_TIME) setState(State.SLIDE_OUT); break;
             case SLIDE_OUT: updateSlideOut(); break;
             default: break;
         }
@@ -161,7 +164,7 @@ public class TeleportOverlay implements Overlay {
             setState(State.SLIDE_OUT); // same location
         } else {
             targetRoom = room;
-            setState(State.SLIDE_OUT);
+            setState(State.CONFIRM); // show selected name briefly before closing
         }
     }
 
@@ -180,7 +183,7 @@ public class TeleportOverlay implements Overlay {
                         if (idx >= TeleportRegistry.COUNT || !registry.isVisited(idx)) continue;
                         float cx = COL_X[col];
                         float cy = getRowY(row) + offsetY;
-                        if (tx >= cx - 2 && tx <= cx + 42 && ty >= cy - 2 && ty <= cy + 10) {
+                        if (tx >= cx - 2 && tx <= cx + 42 && ty >= cy - 10 && ty <= cy + 2) {
                             selCol = col;
                             selRow = row;
                             acceptSelection();
@@ -264,9 +267,16 @@ public class TeleportOverlay implements Overlay {
                 String name = registry.getName(idx);
                 if (name == null) continue;
 
-                float x = COL_X[col];
-                float y = getRowY(row) + offsetY;
                 boolean isSelected = (col == selCol && row == selRow);
+
+                // In CONFIRM or SLIDE_OUT after confirm: only draw the selected name in yellow
+                if (state == State.CONFIRM || (state == State.SLIDE_OUT && targetRoom >= 0)) {
+                    if (!isSelected) continue;
+                    font.setColor(COLOR_YELLOW);
+                    font.draw(batch, name, COL_X[col], getRowY(row) + offsetY);
+                    continue;
+                }
+
                 boolean isCurrent = (idx == currentTeleportIdx);
 
                 if (isSelected && state == State.ACTIVE) {
@@ -275,7 +285,7 @@ public class TeleportOverlay implements Overlay {
                 }
 
                 font.setColor(isCurrent ? COLOR_CURRENT : COLOR_VISITED);
-                font.draw(batch, name, x, y);
+                font.draw(batch, name, COL_X[col], getRowY(row) + offsetY);
             }
         }
         font.setColor(Color.WHITE);

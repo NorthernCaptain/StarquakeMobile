@@ -269,6 +269,8 @@ public class GameScreen implements Screen {
             }
             if (teleportTransition.isDone()) {
                 teleportTransition = null;
+                blob.facingRight = false;
+                blob.x -= 8;
                 blob.stopLifting();
             }
             return;
@@ -289,6 +291,8 @@ public class GameScreen implements Screen {
                     }
                     // Cancelled — suppress re-trigger until BLOB exits the booth
                     Teleporter.suppressUntilExit = true;
+                    blob.facingRight = false;
+                    blob.x -= 8;
                 }
                 blob.stopLifting();
                 activeOverlay = null;
