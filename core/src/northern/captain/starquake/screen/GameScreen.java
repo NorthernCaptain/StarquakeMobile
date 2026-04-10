@@ -31,9 +31,14 @@ import northern.captain.starquake.world.TempPlatform;
 import northern.captain.starquake.event.EventBus;
 import northern.captain.starquake.event.GameEvent;
 import northern.captain.starquake.world.objects.GameObject;
+import northern.captain.starquake.world.objects.BreakableFloor;
 import northern.captain.starquake.world.objects.CoreTrigger;
 import northern.captain.starquake.world.objects.GameObjectRegistry;
 import northern.captain.starquake.world.objects.HoverStand;
+import northern.captain.starquake.event.EnterTradeEvent;
+import northern.captain.starquake.hud.Overlay;
+import northern.captain.starquake.hud.TradingOverlay;
+import northern.captain.starquake.world.items.ItemType;
 import northern.captain.starquake.world.transitions.AssemblyTransition;
 import northern.captain.starquake.world.transitions.BlobTransition;
 import northern.captain.starquake.world.transitions.BlobTransitionManager;
@@ -75,6 +80,8 @@ public class GameScreen implements Screen {
     private float transitionTime;
     private int transitionDx, transitionDy;
 
+    private Overlay activeOverlay;
+
     public GameScreen(StarquakeGame game, int startRoom) {
         this.game = game;
         roomRenderer = new RoomRenderer(game.assets);
@@ -96,8 +103,13 @@ public class GameScreen implements Screen {
         long seed = System.currentTimeMillis();
         CoreTrigger.initCoreAssembly(game.assets, seed, itemManager.getPartPool());
         itemManager.initializeGame(seed);
+        // DEBUG: place pyramid + access card in start room
+        itemManager.debugPlace(ItemType.PYRAMID, startRoom, 2, 4);
+        itemManager.debugPlace(ItemType.ACCESS_CARD, startRoom, 5, 4);
         itemManager.populateRoom(room);
         blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
+        // DEBUG: give player a core part to trade
+        inventory.add(ItemType.PART_A0);
 
         game.assets.font.getData().setScale(1f);
         game.assets.font.setUseIntegerPositions(true);
@@ -124,6 +136,7 @@ public class GameScreen implements Screen {
         gameState.registerEvents();
         EventBus.get().register(GameEvent.Type.BLOB_DIED, e -> triggerDeath());
         EventBus.get().register(GameEvent.Type.LIFT_STARTED, e -> startLift());
+        EventBus.get().register(GameEvent.Type.ENTER_TRADE, e -> startTrading((EnterTradeEvent) e));
         HoverStand.registerEvents();
 
         // Birth effect on initial spawn
@@ -158,6 +171,25 @@ public class GameScreen implements Screen {
         });
     }
 
+    private void startTrading(EnterTradeEvent e) {
+        // Pick 4 random parts from full pool, excluding the offered item
+        ItemType[] pool = itemManager.getPartPool();
+        ItemType[] shuffled = pool.clone();
+        for (int i = shuffled.length - 1; i > 0; i--) {
+            int j = (int) (Math.random() * (i + 1));
+            ItemType tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+        }
+        ItemType[] options = new ItemType[4];
+        int count = 0;
+        for (ItemType part : shuffled) {
+            if (count >= 4) break;
+            if (part != e.offeredItem) options[count++] = part;
+        }
+        activeOverlay = new TradingOverlay(game.assets, gameViewport, inventory, e.pyramid,
+                e.offeredItem, e.slotIndex, options);
+        blob.startLifting();
+    }
+
     private void triggerDeath() {
         transitionManager.start(blob, new BlobTransition[]{
                 new ExplosionTransition(),
@@ -177,6 +209,15 @@ public class GameScreen implements Screen {
     }
 
     private void updateWorld(float delta) {
+        if (activeOverlay != null) {
+            activeOverlay.update(delta, inputManager);
+            if (activeOverlay.isDone()) {
+                blob.stopLifting();
+                activeOverlay = null;
+            }
+            return;
+        }
+
         transitionManager.update(delta);
         tunnelController.update(delta);
         itemManager.update(delta);
@@ -216,14 +257,20 @@ public class GameScreen implements Screen {
 
         updateTempPlatforms(delta);
 
-        for (GameObject obj : room.getObjects()) {
-            obj.update(delta);
-        }
         if (blob.attachment != null) {
             blob.attachment.update(delta);
         }
 
+        // Save prev ground state BEFORE blob.update changes onGround,
+        // then objects can detect landing (onGround && !prevOnGround)
+        BreakableFloor.postUpdateBlobTracking();
+        BreakableFloor.updateBlobTracking(blob);
         blob.update(delta, room);
+
+        for (GameObject obj : room.getObjects()) {
+            obj.update(delta);
+        }
+
         gameState.update(delta);
 
         Array<GameObject> overlapping = getOverlappingObjects();
@@ -306,6 +353,11 @@ public class GameScreen implements Screen {
         }
 
         hud.render(batch, gameState);
+
+        if (activeOverlay != null) {
+            activeOverlay.render(batch);
+        }
+
         batch.end();
 
         touchControls.render();

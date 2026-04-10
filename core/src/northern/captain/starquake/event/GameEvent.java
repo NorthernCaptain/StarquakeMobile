@@ -35,5 +35,5 @@ public class GameEvent {
     public static final GameEvent BLOB_DISMOUNTED_PLATFORM = new GameEvent(Type.BLOB_DISMOUNTED_PLATFORM);
     public static final GameEvent LIFT_STARTED = new GameEvent(Type.LIFT_STARTED);
     // ENTER_TELEPORT uses EnterTeleportEvent subclass (carries roomIndex)
-    public static final GameEvent ENTER_TRADE = new GameEvent(Type.ENTER_TRADE);
+    // ENTER_TRADE uses EnterTradeEvent subclass (carries pyramid, offeredItem, slotIndex)
 }

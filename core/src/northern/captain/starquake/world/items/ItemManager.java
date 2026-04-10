@@ -48,14 +48,20 @@ public class ItemManager {
         ItemType[] requiredParts = (core != null) ? core.getRequiredParts() : new ItemType[0];
 
         // Required core elements (7 entries with 2 candidate rooms each)
-        // First 5 entries place the actual required parts, remaining 2 get random decoys
+        // 5 get actual required parts, 2 get random decoys — assignment randomized
         int[][] coreRoomPairs = {
             {436, 422}, {236, 222}, {52, 16}, {502, 504},
             {296, 314}, {72, 106}, {310, 278}
         };
+        // Shuffle indices so required parts go to random pairs
+        int[] pairOrder = {0, 1, 2, 3, 4, 5, 6};
+        for (int i = pairOrder.length - 1; i > 0; i--) {
+            int j = rng.nextInt(i + 1);
+            int tmp = pairOrder[i]; pairOrder[i] = pairOrder[j]; pairOrder[j] = tmp;
+        }
         ItemType[] partPool = getPartPool();
         for (int i = 0; i < coreRoomPairs.length; i++) {
-            int[] pair = coreRoomPairs[i];
+            int[] pair = coreRoomPairs[pairOrder[i]];
             int room = pair[rng.nextInt(2)];
             ItemType part = (i < requiredParts.length && requiredParts[i] != null)
                 ? requiredParts[i]
@@ -157,6 +163,11 @@ public class ItemManager {
         }
         int col = tilePos % 8;
         int row = tilePos / 8;
+        addPlacement(roomIndex, new ItemPlacement(type, col, row));
+    }
+
+    // Debug: force-place an item at a specific tile in a room
+    public void debugPlace(ItemType type, int roomIndex, int col, int row) {
         addPlacement(roomIndex, new ItemPlacement(type, col, row));
     }
 

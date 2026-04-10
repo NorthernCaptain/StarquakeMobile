@@ -4,10 +4,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.event.EnterTradeEvent;
 import northern.captain.starquake.event.EventBus;
-import northern.captain.starquake.event.GameEvent;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Collidable;
+import northern.captain.starquake.world.Inventory;
+import com.badlogic.gdx.math.MathUtils;
 
 /**
  * Cheops Pyramid (item 25). Placed randomly in rooms (32 instances).
@@ -53,13 +55,23 @@ public class CheopsPyramid extends ItemPickup {
         if (!canPickUp(entity)) return false;
 
         if (!inventory().contains(ItemType.ACCESS_CARD)) {
-            // No card — show flashing card hint
             flashTimer = FLASH_DURATION;
             return true;
         }
 
-        // TODO: post EnterTradeEvent(this) once trading screen is implemented
-        EventBus.get().post(GameEvent.ENTER_TRADE);
+        // Pick random eligible inventory item (non-card, non-key, non-pyramid)
+        int[] eligibleSlots = new int[Inventory.MAX_SLOTS];
+        int count = 0;
+        for (int i = 0; i < Inventory.MAX_SLOTS; i++) {
+            ItemType it = inventory().getSlot(i);
+            if (it != null && it != ItemType.ACCESS_CARD && it != ItemType.KEY && it != ItemType.PYRAMID) {
+                eligibleSlots[count++] = i;
+            }
+        }
+        if (count == 0) return true; // nothing to trade
+
+        int slot = eligibleSlots[MathUtils.random(count - 1)];
+        EventBus.get().post(new EnterTradeEvent(this, inventory().getSlot(slot), slot));
         return true;
     }
 

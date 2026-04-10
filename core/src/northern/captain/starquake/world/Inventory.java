@@ -60,6 +60,13 @@ public class Inventory {
         return (index >= 0 && index < count) ? slots[index] : null;
     }
 
+    /** Replace item at given slot index. Index must be valid (0..count-1). */
+    public void setSlot(int index, ItemType item) {
+        if (index >= 0 && index < count) {
+            slots[index] = item;
+        }
+    }
+
     public void clear() {
         for (int i = 0; i < MAX_SLOTS; i++) slots[i] = null;
         count = 0;

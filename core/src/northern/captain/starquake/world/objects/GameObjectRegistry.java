@@ -70,8 +70,8 @@ public class GameObjectRegistry {
         r.register(SpaceLock.TILE_LEFT, SpaceLock::left);
         // Tile 38: space lock from right
         r.register(SpaceLock.TILE_RIGHT, SpaceLock::right);
-        // Tile 39: bottom 16px empty
-        r.register(39, (a, col, row) -> new CollisionTile(a, col, row, 0, 0, 0, 16));
+        // Tile 39: breakable floor — solid top 8px, breaks when BLOB lands on it
+        r.register(BreakableFloor.TILE_ID, BreakableFloor::new);
         // Tile 40: electric shocker — horizontal arc between side poles
         r.register(ElectricShocker.TILE_ID_40, ElectricShocker::sidePoles);
         // Tile 43: tunnel teleporter going right
