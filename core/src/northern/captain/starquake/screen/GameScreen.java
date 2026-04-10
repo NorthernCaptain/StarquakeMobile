@@ -40,6 +40,7 @@ import northern.captain.starquake.event.EnterTradeEvent;
 import northern.captain.starquake.hud.Overlay;
 import northern.captain.starquake.hud.TeleportOverlay;
 import northern.captain.starquake.hud.TradingOverlay;
+import northern.captain.starquake.world.ProjectileManager;
 import northern.captain.starquake.world.TeleportRegistry;
 import northern.captain.starquake.world.items.ItemType;
 import northern.captain.starquake.world.objects.Teleporter;
@@ -72,6 +73,7 @@ public class GameScreen implements Screen {
     private final GameState gameState = new GameState();
     private final Inventory inventory = new Inventory();
     private final ItemManager itemManager;
+    private final ProjectileManager projectileManager;
     private final Hud hud;
     private final LiftController liftController = new LiftController();
     private final TunnelController tunnelController;
@@ -101,6 +103,7 @@ public class GameScreen implements Screen {
         objectRegistry = GameObjectRegistry.createDefault();
         tunnelController = new TunnelController(game.assets);
         itemManager = new ItemManager(game.assets);
+        projectileManager = new ProjectileManager(game.assets);
         ItemPickup.init(gameState, inventory, itemManager);
         hud = new Hud(game.assets, inventory);
 
@@ -137,6 +140,7 @@ public class GameScreen implements Screen {
             if (next < 0) return null;
             room.clearTempPlatforms();
             platforms.clear();
+            projectileManager.clear();
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
@@ -176,6 +180,7 @@ public class GameScreen implements Screen {
             if (next < 0) return null;
             room.clearTempPlatforms();
             platforms.clear();
+            projectileManager.clear();
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
@@ -210,6 +215,7 @@ public class GameScreen implements Screen {
         // Build new room
         room.clearTempPlatforms();
         platforms.clear();
+        projectileManager.clear();
         room.dispose();
         room = Room.build(game.assets, teleportTargetRoom, objectRegistry);
         itemManager.populateRoom(room);
@@ -355,6 +361,24 @@ public class GameScreen implements Screen {
 
         gameState.update(delta);
 
+        // Shooting
+        if (inputManager.isJustPressed(Action.ACTION_A)) {
+            if (blob.state == Blob.State.WALK || blob.state == Blob.State.IDLE) {
+                if (gameState.getLaserEnergy() >= ProjectileManager.WALK_COST) {
+                    gameState.useLaser(ProjectileManager.WALK_COST);
+                    projectileManager.fireWalk(blob.x, blob.y, blob.facingRight);
+                }
+            } else if (blob.state == Blob.State.FLYING) {
+                if (gameState.getLaserEnergy() >= ProjectileManager.FLY_COST) {
+                    gameState.useLaser(ProjectileManager.FLY_COST);
+                    float dx = blob.vx, dy = blob.vy;
+                    if (dx == 0 && dy == 0) dx = blob.facingRight ? 1 : -1;
+                    projectileManager.fireFly(blob.x, blob.y, dx, dy);
+                }
+            }
+        }
+        projectileManager.update(delta, room);
+
         Array<GameObject> overlapping = getOverlappingObjects();
         dispatchObjectActions(overlapping);
         checkObjectCollisions(overlapping);
@@ -395,6 +419,7 @@ public class GameScreen implements Screen {
         if (next >= 0) {
             room.clearTempPlatforms();
             platforms.clear();
+            projectileManager.clear();
 
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
@@ -476,6 +501,7 @@ public class GameScreen implements Screen {
         transitionManager.render(batch);
         tunnelController.render(batch);
         blobRenderer.render(batch, blob, delta);
+        projectileManager.render(batch);
 
         for (GameObject obj : room.getObjects()) {
             obj.renderForeground(batch, delta);

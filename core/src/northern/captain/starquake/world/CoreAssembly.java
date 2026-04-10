@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.event.EventBus;
+import northern.captain.starquake.event.GameOverEvent;
 import northern.captain.starquake.world.items.ItemType;
 
 import java.util.Random;
@@ -255,6 +257,9 @@ public class CoreAssembly {
             if (blob != null) blob.stopLifting();
             blob = null;
             inventory = null;
+            if (isComplete()) {
+                EventBus.get().post(new GameOverEvent(true));
+            }
         }
     }
 

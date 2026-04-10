@@ -19,7 +19,8 @@ public class GameEvent {
         ENTER_TELEPORT,
         ENTER_TRADE,
         TUNNEL_TELEPORT,
-        ROOM_CHANGED
+        ROOM_CHANGED,
+        GAME_OVER
     }
 
     public final Type type;
