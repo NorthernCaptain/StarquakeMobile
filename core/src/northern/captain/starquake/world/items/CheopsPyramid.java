@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.event.EnterTradeEvent;
 import northern.captain.starquake.event.EventBus;
 import northern.captain.starquake.input.InputManager;
@@ -56,6 +57,7 @@ public class CheopsPyramid extends ItemPickup {
 
         if (!inventory().contains(ItemType.ACCESS_CARD)) {
             flashTimer = FLASH_DURATION;
+            SoundManager.play(SoundManager.SoundType.ACCESS_DENIED);
             return true;
         }
 

@@ -40,6 +40,8 @@ import northern.captain.starquake.event.EnterTradeEvent;
 import northern.captain.starquake.hud.Overlay;
 import northern.captain.starquake.hud.TeleportOverlay;
 import northern.captain.starquake.hud.TradingOverlay;
+import northern.captain.starquake.audio.SoundManager;
+import static northern.captain.starquake.audio.SoundManager.SoundType;
 import northern.captain.starquake.world.ProjectileManager;
 import northern.captain.starquake.world.TeleportRegistry;
 import northern.captain.starquake.world.items.ItemType;
@@ -89,6 +91,9 @@ public class GameScreen implements Screen {
 
     private Overlay activeOverlay;
 
+    // Walk step sound timer
+    private float stepTimer;
+
     // Teleport system
     private final TeleportRegistry teleportRegistry = new TeleportRegistry();
     private TeleportTransition teleportTransition;
@@ -102,7 +107,7 @@ public class GameScreen implements Screen {
 
         objectRegistry = GameObjectRegistry.createDefault();
         tunnelController = new TunnelController(game.assets);
-        itemManager = new ItemManager(game.assets);
+        itemManager = new ItemManager(game.assets, objectRegistry);
         projectileManager = new ProjectileManager(game.assets);
         ItemPickup.init(gameState, inventory, itemManager);
         hud = new Hud(game.assets, inventory);
@@ -116,18 +121,9 @@ public class GameScreen implements Screen {
         long seed = System.currentTimeMillis();
         CoreTrigger.initCoreAssembly(game.assets, seed, itemManager.getPartPool());
         teleportRegistry.initialize(seed);
-        // DEBUG: mark all teleporters as visited
-        for (int i = 0; i < TeleportRegistry.COUNT; i++) {
-            teleportRegistry.markVisited(TeleportRegistry.TELEPORT_ROOMS[i]);
-        }
         itemManager.initializeGame(seed);
-        // DEBUG: place pyramid + access card in start room
-        itemManager.debugPlace(ItemType.PYRAMID, startRoom, 2, 4);
-        itemManager.debugPlace(ItemType.ACCESS_CARD, startRoom, 5, 4);
         itemManager.populateRoom(room);
         blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
-        // DEBUG: give player a core part to trade
-        inventory.add(ItemType.PART_A0);
 
         game.assets.font.getData().setScale(1f);
         game.assets.font.setUseIntegerPositions(true);
@@ -153,10 +149,14 @@ public class GameScreen implements Screen {
 
         // Register event listeners
         gameState.registerEvents();
-        EventBus.get().register(GameEvent.Type.BLOB_DIED, e -> triggerDeath());
+        EventBus.get().register(GameEvent.Type.BLOB_DIED, e -> {
+            SoundManager.play(SoundType.DEATH);
+            triggerDeath();
+        });
         EventBus.get().register(GameEvent.Type.LIFT_STARTED, e -> startLift());
         EventBus.get().register(GameEvent.Type.ENTER_TRADE, e -> startTrading((EnterTradeEvent) e));
         EventBus.get().register(GameEvent.Type.ENTER_TELEPORT, e -> startTeleport((EnterTeleportEvent) e));
+        EventBus.get().register(GameEvent.Type.BLOB_SPAWNED, e -> SoundManager.play(SoundType.SPAWN));
         HoverStand.registerEvents();
 
         // Birth effect on initial spawn
@@ -246,6 +246,7 @@ public class GameScreen implements Screen {
         teleportRegistry.markVisited(e.roomIndex);
         activeOverlay = new TeleportOverlay(game.assets, gameViewport, teleportRegistry, e.roomIndex);
         blob.startLifting();
+        SoundManager.play(SoundType.TELEPORT_ENTER);
     }
 
     private void triggerDeath() {
@@ -294,6 +295,7 @@ public class GameScreen implements Screen {
                         TextureRegion sourceTerrain = roomRenderer.getTerrainTexture(room);
                         teleportTransition = new TeleportTransition();
                         teleportTransition.start(sourceTerrain);
+                        SoundManager.play(SoundType.TELEPORT);
                         return;
                     }
                     // Cancelled — suppress re-trigger until BLOB exits the booth
@@ -347,6 +349,17 @@ public class GameScreen implements Screen {
                 inputManager.getAnalogY(),
                 inputManager.isAnalogActive());
 
+        // Walk step sound — play immediately on first step, then every 0.42s
+        if (blob.state == Blob.State.WALK) {
+            if (stepTimer <= 0) {
+                SoundManager.play(SoundType.STEP);
+                stepTimer = 0.48f;
+            }
+            stepTimer -= delta;
+        } else {
+            stepTimer = 0;
+        }
+
         updateTempPlatforms(delta);
 
         if (blob.attachment != null) {
@@ -371,6 +384,7 @@ public class GameScreen implements Screen {
                 if (gameState.getLaserEnergy() >= ProjectileManager.WALK_COST) {
                     gameState.useLaser(ProjectileManager.WALK_COST);
                     projectileManager.fireWalk(blob.x, blob.y, blob.facingRight);
+                    SoundManager.play(SoundType.FIRE_WALK);
                 }
             } else if (blob.state == Blob.State.FLYING) {
                 if (gameState.getLaserEnergy() >= ProjectileManager.FLY_COST) {
@@ -385,6 +399,7 @@ public class GameScreen implements Screen {
                     }
                     if (dx == 0 && dy == 0) dx = blob.facingRight ? 1 : -1;
                     projectileManager.fireFly(blob.x, blob.y, dx, dy);
+                    SoundManager.play(SoundType.FIRE_FLY);
                 }
             }
         }
@@ -404,6 +419,7 @@ public class GameScreen implements Screen {
             float newBlobY = py + TempPlatform.HEIGHT;
             if (gameState.getPlatforms() > 0 && !blob.wouldCollide(newBlobY, room)) {
                 gameState.usePlatform();
+                SoundManager.play(SoundType.PLATFORM);
                 TempPlatform plat = new TempPlatform(px, py);
                 platforms.add(plat);
                 room.addTempPlatform(plat);
@@ -439,8 +455,16 @@ public class GameScreen implements Screen {
             transitionDy = exit.dy;
             transitionTime = 0;
 
-            if (exit.dx != 0) blob.x = exit.dx > 0 ? 0 : Room.WIDTH - Blob.SIZE;
-            if (exit.dy != 0) blob.y = exit.dy > 0 ? Room.HEIGHT - Blob.SIZE : 0;
+            if (exit.dx != 0) {
+                blob.x = exit.dx > 0 ? 0 : Room.WIDTH - Blob.SIZE;
+                // Clamp Y to room bounds and stop vertical momentum
+                blob.y = Math.max(0, Math.min(blob.y, Room.HEIGHT - Blob.SIZE));
+                blob.vy = 0;
+            }
+            if (exit.dy != 0) {
+                blob.y = exit.dy > 0 ? Room.HEIGHT - Blob.SIZE : 0;
+                blob.x = Math.max(0, Math.min(blob.x, Room.WIDTH - Blob.SIZE));
+            }
         } else {
             blob.x = Math.max(0, Math.min(blob.x, Room.WIDTH - Blob.SIZE));
             blob.y = Math.max(0, Math.min(blob.y, Room.HEIGHT - Blob.SIZE));
@@ -472,6 +496,7 @@ public class GameScreen implements Screen {
             renderRoom(terrainCur, delta);
         }
 
+        hud.setDebugRoomIndex(room.roomIndex);
         hud.render(batch, gameState);
 
         if (activeOverlay != null) {
@@ -571,6 +596,11 @@ public class GameScreen implements Screen {
                 overlappingList.add(obj);
             }
         }
+    }
+
+    /** Get the current room's rendered terrain texture. Ensures FBO is rendered. */
+    public TextureRegion getRoomTerrain() {
+        return roomRenderer.getTerrainTexture(room);
     }
 
     @Override

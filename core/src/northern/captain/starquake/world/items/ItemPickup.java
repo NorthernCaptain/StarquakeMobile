@@ -7,6 +7,7 @@ import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Collidable;
 import northern.captain.starquake.world.GameState;
 import northern.captain.starquake.world.Inventory;
+import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.objects.GameObject;
 
@@ -86,6 +87,7 @@ public abstract class ItemPickup extends GameObject {
         int roomIdx = (room != null) ? room.roomIndex : -1;
         collect();
         itemManager().onItemCollected(this);
+        SoundManager.play(SoundManager.SoundType.PICKUP_ITEM);
         if (dropped != null && roomIdx >= 0) {
             itemManager().dropItem(dropped, roomIdx, tileCol, tileRow);
         }

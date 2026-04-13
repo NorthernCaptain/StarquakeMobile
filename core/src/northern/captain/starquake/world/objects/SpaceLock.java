@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.Collidable;
@@ -106,9 +107,11 @@ public class SpaceLock extends GameObject {
         if (inventory == null || !inventory.contains(ItemType.ACCESS_CARD)) {
             // No card — blink card icon
             hintTimer = HINT_DURATION;
+            SoundManager.play(SoundManager.SoundType.ACCESS_DENIED);
             return true;
         }
 
+        SoundManager.play(SoundManager.SoundType.ACCESS_OK);
         // Teleport BLOB to partner's open area
         float targetX;
         if (partner.fromLeft) {

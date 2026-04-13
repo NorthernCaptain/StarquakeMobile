@@ -45,6 +45,9 @@ public class Hud {
     private final BitmapFont font;
     private final Inventory inventory;
     private final StringBuilder sb = new StringBuilder(16);
+    private int debugRoomIndex;
+
+    public void setDebugRoomIndex(int index) { debugRoomIndex = index; }
 
     // Vital icons: health, platforms, laser (top to bottom in source)
     private final TextureRegion iconHealth;
@@ -91,6 +94,14 @@ public class Hud {
         sb.append((char) ('0' + lives / 10));
         sb.append((char) ('0' + lives % 10));
         font.draw(batch, sb, 12, HUD_Y + HUD_H - 1);
+
+        // Debug: room number next to lives
+        sb.setLength(0);
+        sb.append('R');
+        if (debugRoomIndex < 100) sb.append('0');
+        if (debugRoomIndex < 10) sb.append('0');
+        sb.append(debugRoomIndex);
+        font.draw(batch, sb, 34, HUD_Y + HUD_H - 1);
 
         sb.setLength(0);
         int score = state.getScore();

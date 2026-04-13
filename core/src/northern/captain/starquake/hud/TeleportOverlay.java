@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.TeleportRegistry;
 
@@ -118,17 +119,22 @@ public class TeleportOverlay implements Overlay {
     private void updateActive(InputManager input) {
         if (input.isJustPressed(InputManager.Action.UP)) {
             moveSelection(0, -1);
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
         }
         if (input.isJustPressed(InputManager.Action.DOWN)) {
             moveSelection(0, 1);
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
         }
         if (input.isJustPressed(InputManager.Action.LEFT)) {
             moveSelection(-1, 0);
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
         }
         if (input.isJustPressed(InputManager.Action.RIGHT)) {
             moveSelection(1, 0);
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
         }
         if (input.isJustPressed(InputManager.Action.ACTION_A)) {
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
             acceptSelection();
         }
         if (input.isJustPressed(InputManager.Action.ACTION_B)) {
@@ -137,18 +143,65 @@ public class TeleportOverlay implements Overlay {
         checkTouch();
     }
 
-    /** Move selection in the given direction, skipping unvisited cells. */
+    /** Move selection to the nearest visited cell in the given direction. */
     private void moveSelection(int dc, int dr) {
-        int startCol = selCol, startRow = selRow;
-        for (int step = 0; step < TeleportRegistry.COUNT; step++) {
-            selCol = (selCol + dc + COLS) % COLS;
-            selRow = (selRow + dr + ROWS) % ROWS;
-            int idx = selCol * ROWS + selRow;
-            if (idx < TeleportRegistry.COUNT && registry.isVisited(idx)) return;
+        if (dc != 0) {
+            // Horizontal: move to next column, find nearest visited row in that column
+            for (int step = 1; step <= COLS; step++) {
+                int tryCol = (selCol + dc * step + COLS) % COLS;
+                int bestRow = findNearestVisitedRow(tryCol, selRow);
+                if (bestRow >= 0) {
+                    selCol = tryCol;
+                    selRow = bestRow;
+                    return;
+                }
+            }
+        } else {
+            // Vertical: move to next row, find nearest visited column in that row
+            for (int step = 1; step <= ROWS; step++) {
+                int tryRow = (selRow + dr * step + ROWS) % ROWS;
+                int bestCol = findNearestVisitedCol(tryRow, selCol);
+                if (bestCol >= 0) {
+                    selCol = bestCol;
+                    selRow = tryRow;
+                    return;
+                }
+            }
         }
-        // No visited cell found in that direction — stay put
-        selCol = startCol;
-        selRow = startRow;
+    }
+
+    /** Find the visited row closest to targetRow in the given column, or -1. */
+    private int findNearestVisitedRow(int col, int targetRow) {
+        int best = -1;
+        int bestDist = ROWS;
+        for (int row = 0; row < ROWS; row++) {
+            int idx = col * ROWS + row;
+            if (idx < TeleportRegistry.COUNT && registry.isVisited(idx)) {
+                int dist = Math.min(Math.abs(row - targetRow), ROWS - Math.abs(row - targetRow));
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = row;
+                }
+            }
+        }
+        return best;
+    }
+
+    /** Find the visited column closest to targetCol in the given row, or -1. */
+    private int findNearestVisitedCol(int row, int targetCol) {
+        int best = -1;
+        int bestDist = COLS;
+        for (int col = 0; col < COLS; col++) {
+            int idx = col * ROWS + row;
+            if (idx < TeleportRegistry.COUNT && registry.isVisited(idx)) {
+                int dist = Math.min(Math.abs(col - targetCol), COLS - Math.abs(col - targetCol));
+                if (dist < bestDist) {
+                    bestDist = dist;
+                    best = col;
+                }
+            }
+        }
+        return best;
     }
 
     private void acceptSelection() {

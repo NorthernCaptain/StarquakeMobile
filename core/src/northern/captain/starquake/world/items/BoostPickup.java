@@ -1,6 +1,8 @@
 package northern.captain.starquake.world.items;
 
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
+import northern.captain.starquake.audio.SoundManager.SoundType;
 import northern.captain.starquake.world.Collidable;
 import northern.captain.starquake.world.GameState;
 
@@ -25,6 +27,7 @@ public class BoostPickup extends ItemPickup {
         effect.apply(gameState());
         collect();
         itemManager().onItemCollected(this);
+        SoundManager.play(pickupSound(itemType));
     }
 
     public static BoostEffect effectFor(ItemType type) {
@@ -38,6 +41,20 @@ public class BoostPickup extends ItemPickup {
             case PLATFORM_FULL:   return s -> s.addPlatforms(GameState.MAX_PLATFORMS);
             case EXTRA_LIFE:      return GameState::addLife;
             default:              return s -> {};
+        }
+    }
+
+    private static SoundType pickupSound(ItemType type) {
+        switch (type) {
+            case HEALTH_SMALL:
+            case HEALTH_FULL:     return SoundType.PICKUP_ENERGY;
+            case PLATFORM_SMALL:
+            case PLATFORM_FULL:   return SoundType.PICKUP_PLATFORM;
+            case LASER_SMALL:
+            case LASER_FULL:      return SoundType.PICKUP_AMMO;
+            case UNIVERSAL_BOOST:
+            case EXTRA_LIFE:      return SoundType.PICKUP_MULTI;
+            default:              return SoundType.PICKUP_ENERGY;
         }
     }
 }

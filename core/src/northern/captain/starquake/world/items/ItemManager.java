@@ -7,6 +7,7 @@ import northern.captain.starquake.Assets;
 import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.Room;
 import northern.captain.starquake.world.objects.CoreTrigger;
+import northern.captain.starquake.world.objects.GameObjectRegistry;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -19,12 +20,14 @@ public class ItemManager {
     private static final float BOOST_RESPAWN_TIME = 60f;
 
     private final Assets assets;
+    private final GameObjectRegistry objectRegistry;
     private final IntMap<Array<ItemPlacement>> placements = new IntMap<>();
     private final ArrayList<RespawnEntry> respawnQueue = new ArrayList<>();
     private Room activeRoom;
 
-    public ItemManager(Assets assets) {
+    public ItemManager(Assets assets, GameObjectRegistry objectRegistry) {
         this.assets = assets;
+        this.objectRegistry = objectRegistry;
     }
 
     // ---- Initialization ----
@@ -137,7 +140,7 @@ public class ItemManager {
         }
     }
 
-    /** Find a non-solid tile above a solid tile (floor position) in the given room. */
+    /** Find a non-solid tile above a fully solid tile (floor position) in the given room. */
     private int findFloorTile(int roomIndex, Random rng) {
         // Scan columns in random order, find a tile that's empty above solid
         int startCol = rng.nextInt(8);
@@ -147,7 +150,9 @@ public class ItemManager {
                 int tileAbove = assets.getTileIdAt(roomIndex, col, row);
                 int tileBelow = assets.getTileIdAt(roomIndex, col, row + 1);
                 if (tileAbove >= 0 && assets.isTileNonSolid(tileAbove)
-                    && tileBelow >= 0 && !assets.isTileNonSolid(tileBelow)) {
+                    && !objectRegistry.isRegistered(tileAbove) // not a special tile with gaps
+                    && tileBelow >= 0 && !assets.isTileNonSolid(tileBelow)
+                    && !objectRegistry.isRegistered(tileBelow)) { // floor is fully solid
                     return row * 8 + col;
                 }
             }
@@ -158,8 +163,8 @@ public class ItemManager {
     private void placeItem(ItemType type, int roomIndex, Random rng) {
         int tilePos = findFloorTile(roomIndex, rng);
         if (tilePos < 0) {
-            // Fallback: place at center bottom
-            tilePos = 4 * 8 + 4; // row 4, col 4
+            Gdx.app.log("ItemManager", "No valid floor tile in room " + roomIndex + " for " + type);
+            return;
         }
         int col = tilePos % 8;
         int row = tilePos / 8;

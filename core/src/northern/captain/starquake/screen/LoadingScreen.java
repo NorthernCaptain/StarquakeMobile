@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import northern.captain.starquake.StarquakeGame;
+import northern.captain.starquake.audio.SoundManager;
 
 public class LoadingScreen implements Screen {
     private final StarquakeGame game;
@@ -20,8 +21,8 @@ public class LoadingScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         if (game.assets.update()) {
-            // setScreen calls hide() then dispose() on this screen — no manual dispose needed
-            game.setScreen(new GameScreen(game, 31));
+            SoundManager.init();
+            game.setScreen(new TitleScreen(game));
             return;
         }
 

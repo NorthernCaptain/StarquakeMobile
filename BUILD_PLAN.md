@@ -1225,24 +1225,287 @@ After Phase 1 implementation:
 
 ---
 
-### Phase 5: HUD + GameState ✅ PARTIAL
+### Phase 5: HUD + GameState ✅ COMPLETE
 
-**Done:**
 - HUD overlay (256×24 at y=144) with score, lives, resource bars
 - GameState: lives, score, health, platforms, laser with auto-regen
 - 3 progress bars: health (green), platforms (blue), laser (yellow)
 - Vital icons from sprites atlas (hud_vitals, hud_heart)
 - Color item sprites replaced (Atari ST extracted, 35 items in items.atlas)
+- Item transparency fixed (black → transparent in all 36 item PNGs)
 
-**TODO — Phase 5 remaining:**
-- Refactor `TradeEntrance.java` → `SpaceLock.java` (tiles 37-38 are within-room teleporters requiring Access Card, NOT trade entrances)
-- Inventory system (4-slot FIFO, see Phase 9 spec)
-- HUD inventory display (right side, 4 item icon slots)
-- Item pickup game objects in rooms (boost items + core elements + pyramids)
-- Door opening mechanic (KEY only, reusable)
-- Cheops Pyramid item (item 25): placed in rooms, press UP to trade
-- Cheops trading screen (exchange UI with 5 options)
-- Core room assembly display + delivery mechanic
-- Teleport chooser screen
-- Enemy system (patrol AI, collision with Collidable)
-- Sound effects and music
+---
+
+### Phase 6: Items + Inventory ✅ COMPLETE
+
+- `ItemType` enum (35 items) with category helpers (isBoost, isCorePart, isInventoriable, isPyramid)
+- `Inventory` class: 4-slot FIFO with add/remove/setSlot/contains
+- `ItemPickup` abstract base: renders 16×16, canPickUp checks WALK/IDLE + overlapsSprite hitbox
+- `BoostPickup`: auto-collect via onEnter (works during flying)
+- `CorePartPickup`: manual pickup via UP, adds to inventory
+- `KeyPickup` / `AccessCardPickup`: manual pickup, inventoriable
+- `CheopsPyramid`: press UP to trade (requires Access Card), posts EnterTradeEvent
+- `ItemManager`: global placement, room population, collection tracking, boost respawn (60s), floor-tile validation (skips special tiles with gaps)
+- HUD inventory display: 4 slots on right side with cached item icons
+- 256 items distributed: 96 health, 32 laser, 32 platform, 32 life, 32 universal, 32 pyramid + key + card + 18 core elements
+
+---
+
+### Phase 7: Doors + Space Locks + Core Assembly ✅ COMPLETE
+
+- `Door` (tile 45): shows key blink when locked, 1s unlock animation, collision off immediately
+- `SpaceLock` (tiles 37/38): within-room teleport requiring Access Card, finds partner lock, 2px proximity check
+- `CoreAssembly`: 3×3 grid in room 199, 5 missing pieces, animated delivery sequence (DISASSEMBLE → SCAN → DELIVER → LIGHTNING → FADE_IN → PAUSE_MERGE → ASSEMBLE)
+- `CoreTrigger` (tile 122): invisible trigger, drives CoreAssembly animation, 1s arm delay
+- `BreakableFloor` (tile 39): solid top 8px, breaks on landing, persistent broken state, chunk particle animation
+- `GameOverEvent` with win/fail flag, posted when all 9 core pieces delivered
+
+---
+
+### Phase 8: Trading Screen ✅ COMPLETE
+
+- `Overlay` interface: update/render/isDone for full-screen overlays
+- `TradingOverlay`: circuit board background, 5 exchange cells (4 random core parts + keep), slide animation, typewriter text, flashing highlight, swap animation (item flies to HUD slot), touch support
+- `EnterTradeEvent`: carries pyramid ref, offered item, slot index
+- Random exchange options from full 15-type part pool per pyramid visit
+
+---
+
+### Phase 9: Teleport System ✅ COMPLETE
+
+- `TeleportWords`: 150 pronounceable 5-letter words
+- `TeleportRegistry`: assigns names to 15 teleporters, tracks visited state
+- `TeleportOverlay`: teleportng.png background, 3×5 grid of names, arrow+fire navigation, touch, lightning arc, typewriter text, confirm state (yellow name + pause before close)
+- `TeleportTransition`: room disintegrate/reassemble particle effect (8×8 chunks, radial explosion from center with bulge, per-chunk scale/rotation)
+- `Teleporter.suppressUntilExit`: prevents re-trigger after arrival or cancel
+- BLOB faces left and shifts 8px after exiting teleporter
+
+---
+
+### Phase 10: Shooting System ✅ COMPLETE
+
+- `Projectile` data class: WALK and FLY types
+- `ProjectileManager`: spawn, update, wall collision, reflect (fly), hit effects, render
+- Walk shot: `weapon_fx_walk` sprites (0-3 right, 4-7 left), 16×8, 120px/s horizontal, destroys on wall hit
+- Fly shot: `weapon_fx_fly` sprites (0-3), 16×8, 150px/s in movement direction, bounces once off walls, 2s TTL, rotated to travel direction
+- Hit effect: `effect` 0-2 sparkle on destroy
+- Max 5 simultaneous projectiles, cleared on all room transitions
+- Laser energy cost: 5 (walk), 8 (fly), auto-regen 6/s
+
+---
+
+### Phase 11: Analog Controls ✅ COMPLETE
+
+- Walk mode: 4 rounded-rectangle D-pad buttons in cross arrangement + single enlarged fire button
+- Fly mode: circular analog pad with dead zone, 360° direction, direction indicator dot
+- `InputManager` analog fields: analogX, analogY, analogActive
+- `Blob.applyAnalogFlyingInput()`: full-speed in any direction, facing follows horizontal component
+- Fly shot direction follows analog stick
+- Walk mode/fly mode switch based on blob state
+
+---
+
+### Phase 12: Enemies — TODO
+
+**Enemy sprites**: 38 sprites in atlas (indices 24-61), all 16×16. No enemy placement data in metadata — must be procedurally generated per room.
+
+**Enemy types** (from research/enemies-and-hazards.md):
+
+| Type | Damage | Killable | Behavior |
+|------|--------|----------|----------|
+| Standard Alien | Energy drain on contact | Yes (laser) | Patrol / track BLOB, intelligence by depth |
+| Gyroscope | Instant kill | No | Rotate in place or move unpredictably |
+| Chain Tank | Instant kill | No | Move along set paths |
+| Hedgehog Plant | Instant kill | No | Static or semi-static |
+
+**Key design rules:**
+- Up to 4 enemies per room
+- Enemy intelligence increases with depth (room Y: 0=surface, 31=deep)
+- Enemies respawn on room re-entry
+- Score: 80-320 points per kill (varies by depth)
+- Standard aliens drain health; gyroscopes/tanks/hedgehogs instant-kill
+
+**2-room cache**: Keep current room + previous room enemy state alive in memory. Going back one room = enemies resume where they were (frozen). Going further = regenerated fresh. Not persisted to save file.
+
+**Implementation plan:**
+
+1. **`Enemy` class** — implements `Collidable`. Fields: x, y, vx, vy, type (STANDARD/GYROSCOPE/TANK/HEDGEHOG), sprite indices, alive, animation timer. Standard AI: patrol horizontally, reverse on wall hit. Deep rooms: add vertical tracking toward BLOB.
+
+2. **`EnemyManager` class** — owned by GameScreen. Generates enemies per room based on room Y (depth). Manages 2-room cache (current + previous). Updates, renders, checks collisions with BLOB and projectiles.
+
+3. **Enemy generation** — seeded by room index (deterministic per room, no global seed needed). Depth determines: count (1-4), type mix (more instant-kill deeper), AI aggressiveness, speed. Skip rooms with teleporters, core room, lift tubes.
+
+4. **Sprite assignment** — 38 enemy sprites likely contain multiple enemy type animations. Group them: indices 24-35 = standard aliens (3 types × 4 frames), 36-43 = gyroscopes (2 types × 4 frames), 44-51 = tanks (2 types × 4 frames), 52-61 = hedgehogs/misc. Exact mapping TBD from visual inspection.
+
+5. **Collision integration:**
+   - Enemy↔BLOB: checked in `updateGameplay()` after blob.update. Standard = `gameState.damage()`, instant-kill = `EventBus.post(BLOB_DIED)`
+   - Projectile↔Enemy: checked in `ProjectileManager.update()`. Walk shot kills standard aliens. Fly shot kills on hit (after bounce too). Instant-kill enemies = projectile destroyed, enemy unharmed.
+
+6. **Rendering**: after game objects, before BLOB (enemies appear behind BLOB like in original).
+
+**Files:**
+- `world/Enemy.java` — enemy entity
+- `world/EnemyManager.java` — generation, 2-room cache, update, render, collision
+- `screen/GameScreen.java` — wire enemy manager
+
+---
+
+### Phase 13: Save/Restore System — TODO
+
+**Architecture**: Multiple small libGDX `Preferences` files, each category independent. Objects push state changes, SaveManager writes to the appropriate prefs file.
+
+**Preference files** (via `Gdx.app.getPreferences(name)`):
+
+| File | Contents | Write frequency | Size |
+|------|----------|----------------|------|
+| `save_state` | Room index, blob x/y, lives, score, health, laser, platforms | Every room transition + every 5s | ~200B |
+| `save_inventory` | 4 inventory slots as ItemType names | On pickup/drop/trade | ~100B |
+| `save_items` | Full initial item placements (JSON array) + collected items list | Initial: once on new game. Collected: on each collection | ~6KB |
+| `save_core` | CoreAssembly: displayPieces, requiredParts, restored flags, restoredCount | On core delivery (rare) | ~500B |
+| `save_teleport` | 15 teleporter names + visited flags | On teleporter visit | ~300B |
+| `save_doors` | Which doors are unlocked (room indices) | On door unlock | ~50B |
+| `save_breakable` | Broken floor tile keys | On floor break | ~200B |
+| `save_meta` | Game version, save exists flag | On new game | ~20B |
+
+**SaveManager class** (`world/SaveManager.java`):
+- `saveState(GameState, Blob, Room)` — blob position + vitals
+- `saveInventory(Inventory)` — 4 slots
+- `saveItemPlacements(ItemManager)` — full placements (new game) or collected list (during play)
+- `saveCoreAssembly(CoreAssembly)` — grid state
+- `saveTeleport(TeleportRegistry)` — names + visited
+- `loadAll()` — returns a SaveData struct with all loaded state, or null if no save
+- `clearAll()` — delete all prefs (new game)
+- `hasSave()` — check save_meta exists
+
+**App-level preferences** (separate from save game, never deleted):
+
+| File | Contents | Persists across |
+|------|----------|----------------|
+| `app_settings` | Sound on/off, music on/off, music volume, SFX volume, left-handed controls | Forever |
+| `app_achievements` | Unlocked achievements, best score, games completed, total play time | Forever |
+
+These use `Gdx.app.getPreferences("app_settings")` etc. — completely independent from the `save_*` files. `clearAll()` on new game does NOT touch these.
+
+**Save triggers:**
+- Room transition: save `save_state`
+- Item collected: save `save_items` (append to collected list)
+- Inventory change: save `save_inventory`
+- Core delivery: save `save_core`
+- Teleporter visited: save `save_teleport`
+- Door unlocked: save `save_doors`
+- Floor broken: save `save_breakable`
+- Periodic: save `save_state` every 5 seconds
+
+**Load flow (app start):**
+1. Check `save_meta` for existing save
+2. If exists: load all prefs → build game state from saved data → skip item generation
+3. If not: new game → generate everything → save initial state to all prefs
+
+**New game:**
+- `clearAll()` wipes all preference files
+- Normal game initialization runs
+- Full item placements saved to `save_items` immediately
+
+---
+
+### Phase 14: Game Over / Win Screens — TODO
+
+- `GameOverEvent(win=true)` already posted when all 9 core pieces delivered
+- `GameOverEvent(win=false)` needs to be posted when lives reach 0 (currently BLOB respawns infinitely)
+- Game Over screen: dark overlay, "GAME OVER" typing animation, final score, tap to restart
+- Game Won screen: special animation/effect, "CONGRATULATIONS" typing, final score, tap to restart
+- Both wipe save file on display (game is over, no resuming)
+- `GameState.isGameOver()` check to prevent respawn at 0 lives
+
+---
+
+### Phase 15: Leaderboards & Achievements — TODO
+
+**Leaderboards** (2 boards, stored in `app_achievements` prefs):
+
+| Board | Metric | Notes |
+|-------|--------|-------|
+| High Score | Total game score | Kills, core deliveries, pickups |
+| Explorer | Exploration score | Rooms visited (1pt each, 512 max) + teleporters discovered (10pt each) + tunnels used (5pt each) + pyramids traded (10pt each) + doors opened (10pt each) |
+
+**Achievements** (stored in `app_achievements` prefs, unlocked once = forever):
+
+| Achievement | Trigger | Difficulty |
+|---|---|---|
+| First Steps | Walk 100 tiles | Tutorial |
+| Lift Off | Use hover platform for the first time | Easy |
+| Tunnel Vision | Use a tunnel teleporter | Easy |
+| Beam Me Up | Use a teleporter | Easy |
+| Trader | Complete first pyramid trade | Easy |
+| Key Master | Open first door | Easy |
+| Core Discovery | Enter the core room (199) | Medium |
+| First Delivery | Deliver first core piece | Medium |
+| Sharpshooter | Kill 10 enemies | Medium |
+| Explorer | Visit 100 rooms | Medium |
+| Frequent Flyer | Use all 15 teleporters | Medium |
+| Half Way There | Deliver 5 core pieces | Medium |
+| Cartographer | Visit 256 rooms (half the map) | Hard |
+| Planet Savior | Deliver all 9 core pieces (win) | Hard |
+| Full Map | Visit all 512 rooms | Very Hard |
+| Speed Demon | Complete game in under 30 minutes | Very Hard |
+| No Death Run | Complete game without dying | Extreme |
+
+**Implementation:**
+- `AchievementManager` class: checks triggers, unlocks, persists to `app_achievements` prefs
+- Listens to EventBus events (BLOB_DIED, ENTER_TELEPORT, ENTER_TRADE, GAME_OVER, ROOM_CHANGED, etc.)
+- Tracks cumulative stats: rooms visited set, enemies killed count, tiles walked, deaths count, game start time
+- On unlock: show brief toast/notification overlay (icon + name, fades after 2s)
+- Leaderboard screen: accessible from title screen, shows top scores + exploration scores
+- Achievement screen: grid of icons, unlocked = full color, locked = greyed silhouette
+
+---
+
+### Phase 16: Sound Effects — TODO
+
+**Architecture**: `SoundManager` class owns all sound loading and playback. Uses libGDX `Sound` (short effects, fully loaded in memory, low latency). Respects `app_settings` mute/volume prefs.
+
+**Sound files** (copied to `android/assets/audio/sfx/`):
+
+| File | Game event | Trigger location |
+|------|-----------|-----------------|
+| `blob_step.mp3` | BLOB walk step | BlobRenderer or Blob, every N frames during WALK state |
+| `blob_fire.mp3` | Shoot projectile | ProjectileManager.fireWalk / fireFly |
+| `blob_death.mp3` | BLOB dies | EventBus BLOB_DIED |
+| `blob_platform.mp3` | Place temp platform | GameScreen.updateTempPlatforms |
+| `electic.mp3` | Electric shocker arc | ElectricShocker on ACTIVE phase start |
+| `explosion_burst.mp3` | Projectile hit / enemy kill | ProjectileManager on projectile destroy |
+
+**SoundManager class** (`core/src/northern/captain/starquake/audio/SoundManager.java`):
+- Loads all sounds in constructor via `Gdx.audio.newSound()`
+- `play(SoundType type)` — plays the sound at current volume, respects mute
+- `play(SoundType type, float volume)` — override volume (e.g. for distance-based)
+- `setEnabled(boolean)` / `setVolume(float)` — from settings
+- `dispose()` — releases all sounds
+- Walk step: rate-limited (play at most every 0.15s to avoid overlap)
+
+**`SoundType` enum**: STEP, FIRE, DEATH, PLATFORM, ELECTRIC, EXPLOSION
+
+**Integration points:**
+- GameScreen constructor: create SoundManager, pass to systems that need it
+- Blob walk: call `soundManager.play(STEP)` every ~4 walk frames
+- Shooting: play FIRE on projectile creation
+- Death: listen to BLOB_DIED event
+- Platform: play on successful platform placement
+- Electric: play on shocker ACTIVE phase
+- Projectile hit: play EXPLOSION on destroy
+
+**Files:**
+- `audio/SoundManager.java` — new
+- `screen/GameScreen.java` — create + wire SoundManager
+- `world/ProjectileManager.java` — accept SoundManager for fire/hit sounds
+- `world/objects/ElectricShocker.java` — accept SoundManager for arc sound
+- Copy mp3 files to `android/assets/audio/sfx/`
+
+---
+
+### Phase 17: Remaining Features — TODO
+
+- **Score tracking**: `addScore()` exists but never called. Award points for: core delivery (10,000), enemy kills (80-320), item pickups
+- **Title screen**: ✅ DONE (starfield, banner, walking blob, terrain, core grid, icon buttons)
+- **Music**: no music system yet (Phase 16 covers SFX only)
+- **Pause functionality**: no pause button or menu

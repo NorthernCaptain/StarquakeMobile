@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.Collidable;
 
@@ -122,7 +123,10 @@ public class ElectricShocker extends GameObject {
                 if (phaseTimer >= IDLE_TIME) { phase = Phase.CHARGING; phaseTimer = 0; }
                 break;
             case CHARGING:
-                if (phaseTimer >= CHARGE_TIME) { phase = Phase.ACTIVE; phaseTimer = 0; }
+                if (phaseTimer >= CHARGE_TIME) {
+                    phase = Phase.ACTIVE; phaseTimer = 0;
+                    SoundManager.play(SoundManager.SoundType.ELECTRIC);
+                }
                 break;
             case ACTIVE:
                 if (phaseTimer >= ACTIVE_TIME) { phase = Phase.IDLE; phaseTimer = 0; }

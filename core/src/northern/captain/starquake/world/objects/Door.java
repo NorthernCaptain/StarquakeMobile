@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.Collidable;
@@ -109,11 +110,13 @@ public class Door extends CollisionTile {
             float doorCenterX = x + TILE_W / 2f;
             hintOnRight = blobCenterX < doorCenterX;
             hintTimer = HINT_DURATION;
+            SoundManager.play(SoundManager.SoundType.ACCESS_DENIED);
             return true;
         }
 
         // Has key — start unlock animation (door blinks, collision off immediately)
         unlockTimer = UNLOCK_DURATION;
+        SoundManager.play(SoundManager.SoundType.ACCESS_OK);
         return true;
     }
 }

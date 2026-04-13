@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -110,6 +111,7 @@ public class ProjectileManager {
                 p.y = newY;
             } else {
                 spawnHitEffect(newX + PROJ_W / 2f, newY + PROJ_H / 2f);
+                SoundManager.play(SoundManager.SoundType.EXPLOSION);
                 it.remove();
             }
         }

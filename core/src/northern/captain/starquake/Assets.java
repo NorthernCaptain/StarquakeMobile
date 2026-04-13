@@ -32,7 +32,7 @@ public class Assets {
     /** Fast non-solid lookup indexed by tile ID. */
     private boolean[] nonSolidTile;
     /** Screen background regions keyed by name */
-    public TextureRegion hudScreen, teleportScreen, teleportngScreen, titleScreen, tradingScreen, circuitScreen;
+    public TextureRegion teleportngScreen, circuitScreen, infoScreen, bannerScreen;
 
     /** Shared 1×1 white pixel for shader effects (lightning, etc.) */
     public TextureRegion whitePixel;
@@ -108,12 +108,10 @@ public class Assets {
         screensAtlas = manager.get("atlases/screens.atlas");
         for (Texture t : screensAtlas.getTextures())
             t.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
-        hudScreen = screensAtlas.findRegion("hud_gameplay");
-        teleportScreen = screensAtlas.findRegion("teleport");
         teleportngScreen = screensAtlas.findRegion("teleportng");
-        titleScreen = screensAtlas.findRegion("title");
-        tradingScreen = screensAtlas.findRegion("trading_pyramid");
         circuitScreen = screensAtlas.findRegion("circuit_board");
+        infoScreen = screensAtlas.findRegion("infoscreen");
+        bannerScreen = screensAtlas.findRegion("starquake_banner");
 
         // Font
         TextureAtlas fontAtlas = manager.get("atlases/font.atlas");

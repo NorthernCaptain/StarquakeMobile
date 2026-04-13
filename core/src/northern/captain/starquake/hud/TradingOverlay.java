@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Inventory;
 import northern.captain.starquake.world.items.CheopsPyramid;
@@ -151,14 +152,17 @@ public class TradingOverlay implements Overlay {
     private void updateActive(InputManager input) {
         if (input.isJustPressed(InputManager.Action.LEFT)) {
             selectedIndex = (selectedIndex - 1 + optionCount) % optionCount;
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
         }
         if (input.isJustPressed(InputManager.Action.RIGHT)) {
             selectedIndex = (selectedIndex + 1) % optionCount;
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
         }
         if (input.isJustPressed(InputManager.Action.DOWN)) {
             setState(State.SLIDE_OUT);
         }
         if (input.isJustPressed(InputManager.Action.UP)) {
+            SoundManager.play(SoundManager.SoundType.UI_TEXT);
             acceptSelection();
         }
 
