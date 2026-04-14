@@ -66,19 +66,37 @@ public class TunnelController {
         int adjacentRoom = Room.adjacentIndex(e.roomIndex, dx, 0);
         if (adjacentRoom < 0) return;
 
-        // Find exit tile in adjacent room at same Y row
+        // Find exit tile in adjacent room — prefer same row, fall back to any row
         int exitTileId = goingRight ? TunnelTeleporter.TILE_LEFT : TunnelTeleporter.TILE_RIGHT;
         int foundCol = -1;
+        int foundRow = -1;
+
+        // First: check same row
         for (int col = 0; col < Room.TILE_COLS; col++) {
             if (assets.getTileIdAt(adjacentRoom, col, e.tileRow) == exitTileId) {
                 foundCol = col;
+                foundRow = e.tileRow;
                 break;
+            }
+        }
+
+        // Fallback: scan all rows
+        if (foundCol < 0) {
+            for (int row = 0; row < Room.TILE_ROWS; row++) {
+                for (int col = 0; col < Room.TILE_COLS; col++) {
+                    if (assets.getTileIdAt(adjacentRoom, col, row) == exitTileId) {
+                        foundCol = col;
+                        foundRow = row;
+                        break;
+                    }
+                }
+                if (foundCol >= 0) break;
             }
         }
         if (foundCol < 0) return; // no exit found
 
         destTileCol = foundCol;
-        destTileRow = e.tileRow;
+        destTileRow = foundRow;
 
         // Lock blob and start suck-in
         blob.startTransition();

@@ -8,6 +8,7 @@ import northern.captain.starquake.Assets;
 import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.GameState;
 import northern.captain.starquake.world.Inventory;
+import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.world.Room;
 import northern.captain.starquake.world.items.ItemType;
 import northern.captain.starquake.world.objects.CoreTrigger;
@@ -46,6 +47,11 @@ public class Hud {
     private final Inventory inventory;
     private final StringBuilder sb = new StringBuilder(16);
     private int debugRoomIndex;
+    private int displayScore;
+    private int scoreFrom;
+    private int scoreTo;
+    private float scoreTimer;
+    private static final float SCORE_ANIM_TIME = 0.4f;
 
     public void setDebugRoomIndex(int index) { debugRoomIndex = index; }
 
@@ -78,7 +84,7 @@ public class Hud {
         }
     }
 
-    public void render(SpriteBatch batch, GameState state) {
+    public void render(SpriteBatch batch, GameState state, float delta) {
         // Background bar
         batch.setColor(BG_COLOR);
         batch.draw(pixel, 0, HUD_Y, HUD_W, HUD_H);
@@ -103,10 +109,33 @@ public class Hud {
         sb.append(debugRoomIndex);
         font.draw(batch, sb, 34, HUD_Y + HUD_H - 1);
 
+        // Exploration %
+        ScoreManager scoreMgr = ScoreManager.get();
+        if (scoreMgr != null) {
+            sb.setLength(0);
+            int pct = scoreMgr.getExplorationPercent();
+            if (pct < 10) sb.append(' ');
+            sb.append(pct);
+            sb.append('%');
+            font.draw(batch, sb, 68, HUD_Y + HUD_H - 1);
+        }
+
+        // Animated score display
+        int realScore = state.getScore();
+        if (realScore != scoreTo) {
+            scoreFrom = displayScore;
+            scoreTo = realScore;
+            scoreTimer = 0;
+        }
+        if (displayScore != scoreTo) {
+            scoreTimer += delta;
+            float t = Math.min(scoreTimer / SCORE_ANIM_TIME, 1f);
+            displayScore = scoreFrom + (int) ((scoreTo - scoreFrom) * t);
+            if (t >= 1f) displayScore = scoreTo;
+        }
         sb.setLength(0);
-        int score = state.getScore();
         for (int i = 7; i >= 0; i--) {
-            sb.append((char) ('0' + (score / (int) Math.pow(10, i)) % 10));
+            sb.append((char) ('0' + (displayScore / (int) Math.pow(10, i)) % 10));
         }
         font.draw(batch, sb, 2, HUD_Y + HUD_H - 11);
 

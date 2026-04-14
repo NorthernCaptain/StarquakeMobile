@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import northern.captain.starquake.Assets;
 import northern.captain.starquake.event.EventBus;
+import northern.captain.starquake.event.GameEvent;
 import northern.captain.starquake.event.GameOverEvent;
 import northern.captain.starquake.world.items.ItemType;
 
@@ -232,6 +233,7 @@ public class CoreAssembly {
             restoredCount++;
             anyDelivered = true;
             inventory.remove(matchedPart);
+            EventBus.get().post(GameEvent.CORE_DELIVERED);
             matchedPart = null;
             fadeInIdx = matchedGridIdx;
             setPhase(Phase.FADE_IN);

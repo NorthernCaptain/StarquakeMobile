@@ -263,7 +263,7 @@ public class TitleScreen implements Screen {
 
         if (transition.needsTarget()) {
             // Create GameScreen and get its first room terrain
-            pendingGameScreen = new GameScreen(game, 163);
+            pendingGameScreen = new GameScreen(game, 435);
             pendingGameScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             // Render the room FBO
             TextureRegion roomTerrain = pendingGameScreen.getRoomTerrain();

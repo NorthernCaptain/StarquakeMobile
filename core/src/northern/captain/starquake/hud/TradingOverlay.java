@@ -10,6 +10,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import northern.captain.starquake.Assets;
 import northern.captain.starquake.audio.SoundManager;
+import northern.captain.starquake.event.EventBus;
+import northern.captain.starquake.event.TradeCompletedEvent;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Inventory;
 import northern.captain.starquake.world.items.CheopsPyramid;
@@ -225,6 +227,7 @@ public class TradingOverlay implements Overlay {
         if (t >= 1f) {
             inventory.setSlot(offeredSlotIndex, swapItem);
             pyramid.consumeAfterTrade();
+            EventBus.get().post(new TradeCompletedEvent(offeredItem, swapItem));
             setState(State.SLIDE_OUT);
         }
     }

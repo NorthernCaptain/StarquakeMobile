@@ -85,7 +85,8 @@ public class GameObjectRegistry {
                 8, 8, 8, 0,
                 6, 0, 20, 16));
         // Tile 48: solid top 8px only
-        r.register(48, (a, col, row) -> new CollisionTile(a, col, row, 0, 0, 0, 16));
+        // 48 is an empty tile! exclude
+        //r.register(48, (a, col, row) -> new CollisionTile(a, col, row, 0, 0, 0, 16));
         // Tile 58: solid bottom 16px
         r.register(58, (a, col, row) -> new CollisionTile(a, col, row, 0, 0, 8, 0));
         // Tile 59: solid left 24px

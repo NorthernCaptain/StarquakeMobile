@@ -8,6 +8,8 @@ import northern.captain.starquake.world.Collidable;
 import northern.captain.starquake.world.GameState;
 import northern.captain.starquake.world.Inventory;
 import northern.captain.starquake.audio.SoundManager;
+import northern.captain.starquake.event.EventBus;
+import northern.captain.starquake.event.ItemCollectedEvent;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.objects.GameObject;
 
@@ -78,7 +80,9 @@ public abstract class ItemPickup extends GameObject {
     protected void collect() {
         if (collected) return;
         collected = true;
+        int roomIdx = (room != null) ? room.roomIndex : -1;
         if (room != null) room.removeObject(this);
+        EventBus.get().post(new ItemCollectedEvent(itemType, roomIdx));
     }
 
     /** Shared helper: add this item to inventory, handle FIFO overflow drop. */

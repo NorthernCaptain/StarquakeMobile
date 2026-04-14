@@ -37,12 +37,14 @@ import northern.captain.starquake.world.objects.GameObjectRegistry;
 import northern.captain.starquake.world.objects.HoverStand;
 import northern.captain.starquake.event.EnterTeleportEvent;
 import northern.captain.starquake.event.EnterTradeEvent;
+import northern.captain.starquake.event.RoomChangedEvent;
 import northern.captain.starquake.hud.Overlay;
 import northern.captain.starquake.hud.TeleportOverlay;
 import northern.captain.starquake.hud.TradingOverlay;
 import northern.captain.starquake.audio.SoundManager;
 import static northern.captain.starquake.audio.SoundManager.SoundType;
 import northern.captain.starquake.world.ProjectileManager;
+import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.world.TeleportRegistry;
 import northern.captain.starquake.world.items.ItemType;
 import northern.captain.starquake.world.objects.Teleporter;
@@ -137,10 +139,12 @@ public class GameScreen implements Screen {
             room.clearTempPlatforms();
             platforms.clear();
             projectileManager.clear();
+            int oldRoom = room.roomIndex;
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
             tunnelController.setRoom(room);
+            EventBus.get().post(new RoomChangedEvent(oldRoom, next));
             transitionDx = dx;
             transitionDy = 0;
             transitionTime = 0;
@@ -158,6 +162,9 @@ public class GameScreen implements Screen {
         EventBus.get().register(GameEvent.Type.ENTER_TELEPORT, e -> startTeleport((EnterTeleportEvent) e));
         EventBus.get().register(GameEvent.Type.BLOB_SPAWNED, e -> SoundManager.play(SoundType.SPAWN));
         HoverStand.registerEvents();
+        ScoreManager.init(gameState);
+        // Mark starting room as visited
+        EventBus.get().post(new RoomChangedEvent(-1, startRoom));
 
         // Birth effect on initial spawn
         triggerSpawn();
@@ -181,10 +188,12 @@ public class GameScreen implements Screen {
             room.clearTempPlatforms();
             platforms.clear();
             projectileManager.clear();
+            int oldRoom = room.roomIndex;
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
             liftController.setRoom(room);
+            EventBus.get().post(new RoomChangedEvent(oldRoom, next));
             // No slide transition for lift — instant room switch
             prevRoom.dispose();
             prevRoom = null;
@@ -216,10 +225,12 @@ public class GameScreen implements Screen {
         room.clearTempPlatforms();
         platforms.clear();
         projectileManager.clear();
+        int oldRoom = room.roomIndex;
         room.dispose();
         room = Room.build(game.assets, teleportTargetRoom, objectRegistry);
         itemManager.populateRoom(room);
         tunnelController.setRoom(room);
+        EventBus.get().post(new RoomChangedEvent(oldRoom, teleportTargetRoom));
 
         // Position BLOB at teleporter tile in the new room
         findTeleporter:
@@ -448,9 +459,11 @@ public class GameScreen implements Screen {
             platforms.clear();
             projectileManager.clear();
 
+            int oldRoom = room.roomIndex;
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
+            EventBus.get().post(new RoomChangedEvent(oldRoom, next));
             transitionDx = exit.dx;
             transitionDy = exit.dy;
             transitionTime = 0;
@@ -497,7 +510,7 @@ public class GameScreen implements Screen {
         }
 
         hud.setDebugRoomIndex(room.roomIndex);
-        hud.render(batch, gameState);
+        hud.render(batch, gameState, delta);
 
         if (activeOverlay != null) {
             activeOverlay.render(batch);
@@ -628,6 +641,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         EventBus.get().clear();
+        ScoreManager.dispose();
         Teleporter.suppressUntilExit = false;
         batch.dispose();
         roomRenderer.dispose();

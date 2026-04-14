@@ -20,7 +20,12 @@ public class GameEvent {
         ENTER_TRADE,
         TUNNEL_TELEPORT,
         ROOM_CHANGED,
-        GAME_OVER
+        GAME_OVER,
+        ITEM_COLLECTED,
+        TRADE_COMPLETED,
+        DOOR_OPENED,
+        CORE_DELIVERED,
+        FLOOR_BROKEN
     }
 
     public final Type type;
@@ -37,4 +42,10 @@ public class GameEvent {
     public static final GameEvent LIFT_STARTED = new GameEvent(Type.LIFT_STARTED);
     // ENTER_TELEPORT uses EnterTeleportEvent subclass (carries roomIndex)
     // ENTER_TRADE uses EnterTradeEvent subclass (carries pyramid, offeredItem, slotIndex)
+    // ITEM_COLLECTED uses ItemCollectedEvent subclass
+    // TRADE_COMPLETED uses TradeCompletedEvent subclass
+    // ROOM_CHANGED uses RoomChangedEvent subclass
+    public static final GameEvent DOOR_OPENED = new GameEvent(Type.DOOR_OPENED);
+    public static final GameEvent CORE_DELIVERED = new GameEvent(Type.CORE_DELIVERED);
+    public static final GameEvent FLOOR_BROKEN = new GameEvent(Type.FLOOR_BROKEN);
 }

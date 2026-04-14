@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import northern.captain.starquake.Assets;
+import northern.captain.starquake.event.EventBus;
+import northern.captain.starquake.event.GameEvent;
 import northern.captain.starquake.world.Blob;
 
 import java.util.Random;
@@ -123,6 +125,7 @@ public class BreakableFloor extends GameObject {
         animating = true;
         animTimer = 0;
         brokenTiles.add(persistKey());
+        EventBus.get().post(GameEvent.FLOOR_BROKEN);
 
         Random rng = new Random();
         float solidTop = y + TILE_H - SOLID_H;
