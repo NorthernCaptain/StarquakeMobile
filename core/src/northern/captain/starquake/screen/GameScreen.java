@@ -42,6 +42,7 @@ import northern.captain.starquake.event.RoomChangedEvent;
 import northern.captain.starquake.hud.Overlay;
 import northern.captain.starquake.hud.TeleportOverlay;
 import northern.captain.starquake.hud.TradingOverlay;
+import northern.captain.starquake.audio.MusicManager;
 import northern.captain.starquake.audio.SoundManager;
 import static northern.captain.starquake.audio.SoundManager.SoundType;
 import northern.captain.starquake.world.CoreAssembly;
@@ -298,6 +299,7 @@ public class GameScreen implements Screen {
         updateWorld(delta);
         renderWorld(delta);
         inputManager.update();
+        if (MusicManager.get() != null) MusicManager.get().update();
     }
 
     private void updateWorld(float delta) {
@@ -656,11 +658,13 @@ public class GameScreen implements Screen {
     @Override
     public void pause() {
         if (AchievementManager.get() != null) AchievementManager.get().onPause();
+        if (MusicManager.get() != null) MusicManager.get().pause();
     }
 
     @Override
     public void resume() {
         if (AchievementManager.get() != null) AchievementManager.get().onResume();
+        if (MusicManager.get() != null) MusicManager.get().resume();
     }
 
     @Override

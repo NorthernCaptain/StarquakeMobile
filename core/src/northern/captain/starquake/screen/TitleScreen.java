@@ -20,6 +20,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import northern.captain.starquake.audio.MusicManager;
 import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.services.GameServicesFactory;
 import northern.captain.starquake.services.LeaderboardDef;
@@ -258,6 +259,7 @@ public class TitleScreen implements Screen {
         batch.end();
 
         inputManager.update();
+        if (MusicManager.get() != null) MusicManager.get().update();
     }
 
     private void updateTransition(float delta) {

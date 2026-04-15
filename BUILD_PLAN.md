@@ -1420,94 +1420,75 @@ These use `Gdx.app.getPreferences("app_settings")` etc. — completely independe
 
 ---
 
-### Phase 15: Leaderboards & Achievements — TODO
+### Phase 15: Leaderboards & Achievements ✅ COMPLETE
 
-**Leaderboards** (2 boards, stored in `app_achievements` prefs):
+**Architecture**: Platform-agnostic interface + factory + per-platform implementations.
 
-| Board | Metric | Notes |
-|-------|--------|-------|
-| High Score | Total game score | Kills, core deliveries, pickups |
-| Explorer | Exploration score | Rooms visited (1pt each, 512 max) + teleporters discovered (10pt each) + tunnels used (5pt each) + pyramids traded (10pt each) + doors opened (10pt each) |
+**Core classes** (`services/` package):
+- `GameServicesProcessor` — interface: signIn, unlockAchievement(AchievementDef), submitScore(LeaderboardDef, int), showAchievements, showLeaderboard
+- `GameServicesFactory` — singleton, default NoOpProcessor for desktop
+- `AchievementDef` — 17 achievements enum
+- `LeaderboardDef` — 2 leaderboards enum (HIGH_SCORE, EXPLORER)
+- `AchievementManager` — event-driven singleton, local prefs cache, per-game stats (rooms visited, kills, deaths, play time)
 
-**Achievements** (stored in `app_achievements` prefs, unlocked once = forever):
+**Platform implementations:**
+- Android: `GooglePlayProcessor` using Play Games SDK v2 (21.0.0), `AndroidGameServicesFactory`, auto-sign-in on startup
+- iOS: `GameCenterProcessor` using RoboVM GameKit bindings, `IOSGameServicesFactory`, auth in `didFinishLaunching`
+- Desktop: NoOpProcessor (achievements tracked locally only)
+
+**Events added**: `CoreDeliveredEvent` (carries totalDelivered count), replaces singleton
+
+**Leaderboards** (2 boards):
+
+| Board | Metric |
+|-------|--------|
+| High Score | Total game score |
+| Explorer | Weighted exploration score (rooms×12 + teleporters×10 + trades×8 + tunnels×6 + doors×5) |
+
+**Achievements** (17 total):
 
 | Achievement | Trigger | Difficulty |
 |---|---|---|
-| First Steps | Walk 100 tiles | Tutorial |
-| Lift Off | Use hover platform for the first time | Easy |
-| Tunnel Vision | Use a tunnel teleporter | Easy |
-| Beam Me Up | Use a teleporter | Easy |
+| First Steps | Visit second room | Tutorial |
+| Lift Off | Use hover platform | Easy |
+| Tunnel Vision | Use tunnel teleporter | Easy |
+| Beam Me Up | Use teleporter | Easy |
 | Trader | Complete first pyramid trade | Easy |
 | Key Master | Open first door | Easy |
-| Core Discovery | Enter the core room (199) | Medium |
+| Core Discovery | Enter core room (199) | Medium |
 | First Delivery | Deliver first core piece | Medium |
-| Sharpshooter | Kill 10 enemies | Medium |
+| Sharpshooter | Kill 20 enemies | Medium |
 | Explorer | Visit 100 rooms | Medium |
-| Frequent Flyer | Use all 15 teleporters | Medium |
+| Frequent Flyer | Discover all 15 teleporters | Medium |
 | Half Way There | Deliver 5 core pieces | Medium |
-| Cartographer | Visit 256 rooms (half the map) | Hard |
-| Planet Savior | Deliver all 9 core pieces (win) | Hard |
+| Cartographer | Visit 256 rooms | Hard |
+| Planet Savior | Win the game | Hard |
 | Full Map | Visit all 512 rooms | Very Hard |
-| Speed Demon | Complete game in under 30 minutes | Very Hard |
-| No Death Run | Complete game without dying | Extreme |
+| Speed Demon | Win in under 30 minutes | Very Hard |
+| No Death Run | Win without dying | Extreme |
 
-**Implementation:**
-- `AchievementManager` class: checks triggers, unlocks, persists to `app_achievements` prefs
-- Listens to EventBus events (BLOB_DIED, ENTER_TELEPORT, ENTER_TRADE, GAME_OVER, ROOM_CHANGED, etc.)
-- Tracks cumulative stats: rooms visited set, enemies killed count, tiles walked, deaths count, game start time
-- On unlock: show brief toast/notification overlay (icon + name, fades after 2s)
-- Leaderboard screen: accessible from title screen, shows top scores + exploration scores
-- Achievement screen: grid of icons, unlocked = full color, locked = greyed silhouette
+**Per-game stats** persisted to `app_game_stats` prefs: rooms visited, enemies killed, death count, play time (pauses when backgrounded). Reset on new game.
+
+**Wired into**: GameScreen (init, events, pause/resume, dispose), TitleScreen (leaderboard/achievement buttons), GameOverScreen (submit scores)
 
 ---
 
-### Phase 16: Sound Effects — TODO
+### Phase 16: Sound Effects ✅ COMPLETE
 
-**Architecture**: `SoundManager` class owns all sound loading and playback. Uses libGDX `Sound` (short effects, fully loaded in memory, low latency). Respects `app_settings` mute/volume prefs.
+`SoundManager` singleton with 22 sound types. Static `play(SoundType)` method, null-safe. Initialized in LoadingScreen after assets load.
 
-**Sound files** (copied to `android/assets/audio/sfx/`):
+**22 sounds** covering: walk steps (0.48s timer), walk/fly fire, death, spawn, platform place, electric shocker, projectile explosion, teleport enter/transition, access ok/denied, 4 pickup types (energy/platform/ammo/multi), inventory pickup, UI text clicks, core sequence A/B/C, game over.
 
-| File | Game event | Trigger location |
-|------|-----------|-----------------|
-| `blob_step.mp3` | BLOB walk step | BlobRenderer or Blob, every N frames during WALK state |
-| `blob_fire.mp3` | Shoot projectile | ProjectileManager.fireWalk / fireFly |
-| `blob_death.mp3` | BLOB dies | EventBus BLOB_DIED |
-| `blob_platform.mp3` | Place temp platform | GameScreen.updateTempPlatforms |
-| `electic.mp3` | Electric shocker arc | ElectricShocker on ACTIVE phase start |
-| `explosion_burst.mp3` | Projectile hit / enemy kill | ProjectileManager on projectile destroy |
-
-**SoundManager class** (`core/src/northern/captain/starquake/audio/SoundManager.java`):
-- Loads all sounds in constructor via `Gdx.audio.newSound()`
-- `play(SoundType type)` — plays the sound at current volume, respects mute
-- `play(SoundType type, float volume)` — override volume (e.g. for distance-based)
-- `setEnabled(boolean)` / `setVolume(float)` — from settings
-- `dispose()` — releases all sounds
-- Walk step: rate-limited (play at most every 0.15s to avoid overlap)
-
-**`SoundType` enum**: STEP, FIRE, DEATH, PLATFORM, ELECTRIC, EXPLOSION
-
-**Integration points:**
-- GameScreen constructor: create SoundManager, pass to systems that need it
-- Blob walk: call `soundManager.play(STEP)` every ~4 walk frames
-- Shooting: play FIRE on projectile creation
-- Death: listen to BLOB_DIED event
-- Platform: play on successful platform placement
-- Electric: play on shocker ACTIVE phase
-- Projectile hit: play EXPLOSION on destroy
-
-**Files:**
-- `audio/SoundManager.java` — new
-- `screen/GameScreen.java` — create + wire SoundManager
-- `world/ProjectileManager.java` — accept SoundManager for fire/hit sounds
-- `world/objects/ElectricShocker.java` — accept SoundManager for arc sound
-- Copy mp3 files to `android/assets/audio/sfx/`
+Wired into: GameScreen (step/fire/platform/death/spawn), ProjectileManager (explosion), ElectricShocker (electric), Door/SpaceLock/CheopsPyramid (access ok/denied), BoostPickup (pickup types), ItemPickup (inventory), TradingOverlay/TeleportOverlay (UI text), TitleScreen (UI text/teleport), GameOverScreen (game over).
 
 ---
 
 ### Phase 17: Remaining Features — TODO
 
 - **Score tracking**: ✅ DONE (ScoreManager singleton, event-driven, exploration %, weighted leaderboard score, animated HUD display)
-- **Title screen**: ✅ DONE (starfield, banner, walking blob, terrain, core grid, icon buttons)
-- **Music**: no music system yet (Phase 16 covers SFX only)
-- **Pause functionality**: no pause button or menu
+- **Title screen**: ✅ DONE (starfield, banner, walking blob, terrain, core grid, icon buttons, transitions)
+- **Game over / Win screens**: ✅ DONE (letter drops, death clouds, win screen with infoscreen background)
+- **Enemies**: not yet implemented (Phase 12 spec ready)
 - **Save/load**: not yet implemented (Phase 13 spec ready)
+- **Music**: no music system yet
+- **Pause functionality**: no pause button or menu
