@@ -532,6 +532,7 @@ public class TitleScreen implements Screen {
             gameViewport.unproject(touchPos);
             if (touchPos.x >= TERRAIN_X && touchPos.x <= TERRAIN_X + TERRAIN_W
                     && touchPos.y >= TERRAIN_Y + 24 && touchPos.y <= PLAY_Y + 10) {
+                SoundManager.play(SoundManager.SoundType.UI_TEXT);
                 startGame();
                 return;
             }
@@ -549,12 +550,14 @@ public class TitleScreen implements Screen {
                 }
             }
             if (hitExitButton(sx, sy)) {
+                SoundManager.play(SoundManager.SoundType.UI_TEXT);
                 triggerExit();
             }
         }
     }
 
     private void activateFocus() {
+        SoundManager.play(SoundManager.SoundType.UI_TEXT);
         switch (focus) {
             case PLAY:
                 startGame();
@@ -603,7 +606,7 @@ public class TitleScreen implements Screen {
         titleRegion.flip(false, true);
         transition = new TeleportTransition();
         transition.start(titleRegion);
-        SoundManager.play(SoundManager.SoundType.TELEPORT_ENTER);
+        SoundManager.play(SoundManager.SoundType.TELEPORT);
     }
 
     @Override

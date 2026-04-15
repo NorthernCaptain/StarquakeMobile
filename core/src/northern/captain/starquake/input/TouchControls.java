@@ -16,7 +16,7 @@ public class TouchControls {
     private static final float BUTTON_SIZE = 80;
     private static final float PADDING = 16;
     private static final Color BTN_COLOR = new Color(1, 1, 1, 0.2f);
-    private static final Color BTN_PRESSED_COLOR = new Color(1, 1, 1, 0.5f);
+    private static final Color BTN_PRESSED_COLOR = new Color(1, 1, 1, 0.25f);
     private static final Color CIRCLE_COLOR = new Color(1, 1, 1, 0.15f);
     private static final Color CIRCLE_ACTIVE_COLOR = new Color(1, 1, 1, 0.3f);
 
