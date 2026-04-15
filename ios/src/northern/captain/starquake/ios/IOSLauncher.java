@@ -15,6 +15,15 @@ public class IOSLauncher extends IOSApplication.Delegate {
         return new IOSApplication(new StarquakeGame(), config);
     }
 
+    @Override
+    public boolean didFinishLaunching(UIApplication application, org.robovm.apple.uikit.UIApplicationLaunchOptions launchOptions) {
+        boolean result = super.didFinishLaunching(application, launchOptions);
+        org.robovm.apple.uikit.UIViewController rootVC =
+                application.getKeyWindow().getRootViewController();
+        IOSGameServicesFactory.initialize(rootVC);
+        return result;
+    }
+
     public static void main(String[] argv) {
         NSAutoreleasePool pool = new NSAutoreleasePool();
         UIApplication.main(argv, null, IOSLauncher.class);

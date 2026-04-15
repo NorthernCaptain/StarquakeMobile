@@ -21,6 +21,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import northern.captain.starquake.audio.SoundManager;
+import northern.captain.starquake.services.GameServicesFactory;
+import northern.captain.starquake.services.LeaderboardDef;
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Blob;
@@ -563,7 +565,13 @@ public class TitleScreen implements Screen {
                 startGame();
                 break;
             case ICONS:
-                // TODO: leaderboard, achievements, settings
+                if (iconIndex == 0) {
+                    GameServicesFactory.get().getProcessor().showLeaderboard(LeaderboardDef.HIGH_SCORE);
+                } else if (iconIndex == 1) {
+                    GameServicesFactory.get().getProcessor().showAchievements();
+                } else if (iconIndex == 2) {
+                    // TODO: settings screen
+                }
                 break;
             case EXIT:
                 triggerExit();

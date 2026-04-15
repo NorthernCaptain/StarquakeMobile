@@ -13,6 +13,7 @@ public class AndroidLauncher extends AndroidApplication {
         config.useImmersiveMode = true;
         config.useAccelerometer = false;
         config.useCompass = false;
+        AndroidGameServicesFactory.initialize(this);
         initialize(new StarquakeGame(), config);
     }
 }

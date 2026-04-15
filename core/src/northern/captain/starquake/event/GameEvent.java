@@ -46,6 +46,6 @@ public class GameEvent {
     // TRADE_COMPLETED uses TradeCompletedEvent subclass
     // ROOM_CHANGED uses RoomChangedEvent subclass
     public static final GameEvent DOOR_OPENED = new GameEvent(Type.DOOR_OPENED);
-    public static final GameEvent CORE_DELIVERED = new GameEvent(Type.CORE_DELIVERED);
+    // CORE_DELIVERED uses CoreDeliveredEvent subclass (carries totalDelivered)
     public static final GameEvent FLOOR_BROKEN = new GameEvent(Type.FLOOR_BROKEN);
 }

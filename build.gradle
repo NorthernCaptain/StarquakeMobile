@@ -40,6 +40,7 @@ project(":android") {
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86"
         natives "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-x86_64"
         implementation "com.badlogicgames.gdx-controllers:gdx-controllers-android:2.2.4"
+        implementation "com.google.android.gms:play-services-games-v2:21.0.0"
     }
 }
 

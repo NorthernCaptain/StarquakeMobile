@@ -18,7 +18,10 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.input.InputManager;
+import northern.captain.starquake.services.AchievementManager;
+import northern.captain.starquake.services.LeaderboardDef;
 import northern.captain.starquake.world.GameState;
+import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.world.transitions.TeleportTransition;
 
 /**
@@ -284,6 +287,13 @@ public class GameOverScreen implements Screen {
             if (allDone) {
                 phase = Phase.WAITING;
                 timer = 0;
+                // Submit scores
+                AchievementManager am = AchievementManager.get();
+                if (am != null) {
+                    am.submitScore(LeaderboardDef.HIGH_SCORE, gameState.getScore());
+                    ScoreManager sm = ScoreManager.get();
+                    if (sm != null) am.submitScore(LeaderboardDef.EXPLORER, sm.getExplorationScore());
+                }
             }
             return;
         }

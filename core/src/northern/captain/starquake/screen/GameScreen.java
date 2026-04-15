@@ -47,6 +47,7 @@ import static northern.captain.starquake.audio.SoundManager.SoundType;
 import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.ProjectileManager;
 import northern.captain.starquake.world.ScoreManager;
+import northern.captain.starquake.services.AchievementManager;
 import northern.captain.starquake.world.TeleportRegistry;
 import northern.captain.starquake.world.items.ItemType;
 import northern.captain.starquake.world.objects.Teleporter;
@@ -170,6 +171,11 @@ public class GameScreen implements Screen {
         });
         HoverStand.registerEvents();
         ScoreManager.init(gameState);
+        AchievementManager.init();
+        AchievementManager.get().startNewGame();
+        AchievementManager.get().setTeleportRegistry(teleportRegistry);
+        AchievementManager.get().registerEvents();
+        AchievementManager.get().onResume();
         // Mark starting room as visited
         EventBus.get().post(new RoomChangedEvent(-1, startRoom));
 
@@ -288,6 +294,7 @@ public class GameScreen implements Screen {
 
         touchControls.setWalkMode(blob.state != Blob.State.FLYING);
         touchControls.poll();
+        if (AchievementManager.get() != null) AchievementManager.get().update(delta);
         updateWorld(delta);
         renderWorld(delta);
         inputManager.update();
@@ -648,10 +655,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
+        if (AchievementManager.get() != null) AchievementManager.get().onPause();
     }
 
     @Override
     public void resume() {
+        if (AchievementManager.get() != null) AchievementManager.get().onResume();
     }
 
     @Override
@@ -662,6 +671,7 @@ public class GameScreen implements Screen {
     public void dispose() {
         EventBus.get().clear();
         ScoreManager.dispose();
+        AchievementManager.dispose();
         Teleporter.suppressUntilExit = false;
         batch.dispose();
         roomRenderer.dispose();
