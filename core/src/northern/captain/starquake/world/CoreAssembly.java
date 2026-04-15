@@ -20,7 +20,7 @@ import java.util.Random;
 public class CoreAssembly {
     public static final int CORE_ROOM = 199;
     private static final int GRID_SIZE = 3;
-    private static final int MISSING_COUNT = 5;
+    private static final int MISSING_COUNT = 9;
 
     // Animation timing
     private static final float DISASSEMBLE_TIME = 0.5f;
@@ -101,7 +101,7 @@ public class CoreAssembly {
             restored[i] = true;
             requiredParts[i] = null;
         }
-        restoredCount = 4;
+        restoredCount = 9 - MISSING_COUNT;
 
         int[] positions = {0, 1, 2, 3, 4, 5, 6, 7, 8};
         for (int i = positions.length - 1; i > 0; i--) {
@@ -284,6 +284,12 @@ public class CoreAssembly {
         return flashCount % 2 == 0;
     }
 
+    /** Returns the inventory slot being delivered (flying), or -1 if not delivering. */
+    public int getDeliveringSlot() {
+        if (phase == Phase.DELIVER || phase == Phase.LIGHTNING) return currentSlot;
+        return -1;
+    }
+
     public boolean isComplete() { return restoredCount >= 9; }
     public int getRestoredCount() { return restoredCount; }
 
@@ -329,7 +335,13 @@ public class CoreAssembly {
             }
         }
 
-        // Flying delivery item
+        // Flying delivery item and lightning rendered in renderOverlay() — after HUD
+
+        // Red flash is rendered by Hud (draws after game objects)
+    }
+
+    /** Render flying delivery item and lightning — call AFTER HUD so it appears on top. */
+    public void renderOverlay(SpriteBatch batch) {
         if (phase == Phase.DELIVER || phase == Phase.LIGHTNING) {
             if (matchedPart != null) {
                 TextureRegion icon = icons[matchedPart.spriteIndex];
@@ -338,13 +350,9 @@ public class CoreAssembly {
                 }
             }
         }
-
-        // Lightning arc between delivered item and grid cell
         if (phase == Phase.LIGHTNING) {
             renderLightning(batch);
         }
-
-        // Red flash is rendered by Hud (draws after game objects)
     }
 
     private void renderLightning(SpriteBatch batch) {

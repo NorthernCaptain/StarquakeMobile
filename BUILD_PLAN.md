@@ -1408,14 +1408,15 @@ These use `Gdx.app.getPreferences("app_settings")` etc. — completely independe
 
 ---
 
-### Phase 14: Game Over / Win Screens — TODO
+### Phase 14: Game Over / Win Screens ✅ COMPLETE
 
-- `GameOverEvent(win=true)` already posted when all 9 core pieces delivered
-- `GameOverEvent(win=false)` needs to be posted when lives reach 0 (currently BLOB respawns infinitely)
-- Game Over screen: dark overlay, "GAME OVER" typing animation, final score, tap to restart
-- Game Won screen: special animation/effect, "CONGRATULATIONS" typing, final score, tap to restart
-- Both wipe save file on display (game is over, no resuming)
-- `GameState.isGameOver()` check to prevent respawn at 0 lives
+- `GameOverEvent(win=false)` posted from `triggerDeath()` when lives=0 (after explosion+pause, skips assembly)
+- `GameOverEvent(win=true)` posted from `CoreAssembly` when all 9 pieces delivered
+- Both routed through single GAME_OVER event listener in GameScreen
+- **Flow**: game over event → room explode transition → GameOverScreen (letter drops) → if win: WinScreen → TitleScreen
+- `GameOverScreen`: TeleportTransition disintegrate, 9 letter sprites (32×32) drop with scale animation + death cloud puffs, wait for input, fade to next screen
+- `WinScreen`: infoscreen background, typewriter text (congratulations, scores, exploration %), fade to title
+- Core delivery overlay renders on top of HUD (flying item visible above HUD bar, hidden from inventory slot during flight)
 
 ---
 
@@ -1505,7 +1506,8 @@ These use `Gdx.app.getPreferences("app_settings")` etc. — completely independe
 
 ### Phase 17: Remaining Features — TODO
 
-- **Score tracking**: `addScore()` exists but never called. Award points for: core delivery (10,000), enemy kills (80-320), item pickups
+- **Score tracking**: ✅ DONE (ScoreManager singleton, event-driven, exploration %, weighted leaderboard score, animated HUD display)
 - **Title screen**: ✅ DONE (starfield, banner, walking blob, terrain, core grid, icon buttons)
 - **Music**: no music system yet (Phase 16 covers SFX only)
 - **Pause functionality**: no pause button or menu
+- **Save/load**: not yet implemented (Phase 13 spec ready)

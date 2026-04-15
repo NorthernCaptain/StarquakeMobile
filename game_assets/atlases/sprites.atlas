@@ -690,23 +690,30 @@ hud_vitals
   orig: 17, 22
   offset: 0, 0
   index: -1
-laser
+inventory_icon
   rotate: false
-  xy: 524, 65
-  size: 16, 8
-  orig: 16, 8
+  xy: 524, 57
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
-  index: 0
+  index: -1
 laser
   rotate: false
   xy: 542, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 1
+  index: 0
 laser
   rotate: false
   xy: 560, 65
+  size: 16, 8
+  orig: 16, 8
+  offset: 0, 0
+  index: 1
+laser
+  rotate: false
+  xy: 578, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
@@ -720,7 +727,7 @@ leaderboards
   index: -1
 platform
   rotate: false
-  xy: 578, 65
+  xy: 596, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
@@ -734,84 +741,84 @@ settings
   index: -1
 weapon_fx_fly
   rotate: false
-  xy: 596, 65
-  size: 16, 8
-  orig: 16, 8
-  offset: 0, 0
-  index: 0
-weapon_fx_fly
-  rotate: false
   xy: 614, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 1
+  index: 0
 weapon_fx_fly
   rotate: false
   xy: 632, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 2
+  index: 1
 weapon_fx_fly
   rotate: false
   xy: 650, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 3
-weapon_fx_walk
+  index: 2
+weapon_fx_fly
   rotate: false
   xy: 668, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 0
+  index: 3
 weapon_fx_walk
   rotate: false
   xy: 686, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 1
+  index: 0
 weapon_fx_walk
   rotate: false
   xy: 704, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 2
+  index: 1
 weapon_fx_walk
   rotate: false
   xy: 722, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 3
+  index: 2
 weapon_fx_walk
   rotate: false
   xy: 740, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 4
+  index: 3
 weapon_fx_walk
   rotate: false
   xy: 758, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 5
+  index: 4
 weapon_fx_walk
   rotate: false
   xy: 776, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
-  index: 6
+  index: 5
 weapon_fx_walk
   rotate: false
   xy: 794, 65
+  size: 16, 8
+  orig: 16, 8
+  offset: 0, 0
+  index: 6
+weapon_fx_walk
+  rotate: false
+  xy: 812, 65
   size: 16, 8
   orig: 16, 8
   offset: 0, 0

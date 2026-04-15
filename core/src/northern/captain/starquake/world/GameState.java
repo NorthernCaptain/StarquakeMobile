@@ -15,7 +15,7 @@ public class GameState {
     public static final int MAX_PLATFORMS = 20;
     public static final int MAX_LASER = 100;
 
-    private int lives = MAX_LIVES/2;
+    private int lives = MAX_LIVES / 2;
     private int score;
     private static final float HEALTH_REGEN_RATE = 3f;    // units per second
     private static final float PLATFORM_REGEN_RATE = 1f;  // units per second

@@ -36,6 +36,7 @@ import northern.captain.starquake.world.objects.CoreTrigger;
 import northern.captain.starquake.world.objects.GameObjectRegistry;
 import northern.captain.starquake.world.objects.HoverStand;
 import northern.captain.starquake.event.EnterTeleportEvent;
+import northern.captain.starquake.event.GameOverEvent;
 import northern.captain.starquake.event.EnterTradeEvent;
 import northern.captain.starquake.event.RoomChangedEvent;
 import northern.captain.starquake.hud.Overlay;
@@ -43,6 +44,7 @@ import northern.captain.starquake.hud.TeleportOverlay;
 import northern.captain.starquake.hud.TradingOverlay;
 import northern.captain.starquake.audio.SoundManager;
 import static northern.captain.starquake.audio.SoundManager.SoundType;
+import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.ProjectileManager;
 import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.world.TeleportRegistry;
@@ -161,6 +163,11 @@ public class GameScreen implements Screen {
         EventBus.get().register(GameEvent.Type.ENTER_TRADE, e -> startTrading((EnterTradeEvent) e));
         EventBus.get().register(GameEvent.Type.ENTER_TELEPORT, e -> startTeleport((EnterTeleportEvent) e));
         EventBus.get().register(GameEvent.Type.BLOB_SPAWNED, e -> SoundManager.play(SoundType.SPAWN));
+        EventBus.get().register(GameEvent.Type.GAME_OVER, e -> {
+            GameOverEvent go = (GameOverEvent) e;
+            TextureRegion roomTerrain = roomRenderer.getTerrainTexture(room);
+            game.setScreen(new GameOverScreen(game, roomTerrain, go.win, gameState));
+        });
         HoverStand.registerEvents();
         ScoreManager.init(gameState);
         // Mark starting room as visited
@@ -263,9 +270,16 @@ public class GameScreen implements Screen {
     private void triggerDeath() {
         transitionManager.start(blob, new BlobTransition[]{
                 new ExplosionTransition(),
-                new PauseTransition(2.0f),
-                new AssemblyTransition()
-        }, () -> EventBus.get().post(GameEvent.BLOB_SPAWNED));
+                new PauseTransition(1.0f)
+        }, () -> {
+            if (gameState.isGameOver()) {
+                EventBus.get().post(new GameOverEvent(false));
+            } else {
+                transitionManager.start(blob, new BlobTransition[]{
+                        new AssemblyTransition()
+                }, () -> EventBus.get().post(GameEvent.BLOB_SPAWNED));
+            }
+        });
     }
 
     @Override
@@ -511,6 +525,12 @@ public class GameScreen implements Screen {
 
         hud.setDebugRoomIndex(room.roomIndex);
         hud.render(batch, gameState, delta);
+
+        // Core delivery flying item renders on top of HUD
+        CoreAssembly core = CoreTrigger.getCoreAssembly();
+        if (core != null) {
+            core.renderOverlay(batch);
+        }
 
         if (activeOverlay != null) {
             activeOverlay.render(batch);

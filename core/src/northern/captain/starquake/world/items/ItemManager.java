@@ -50,36 +50,48 @@ public class ItemManager {
         CoreAssembly core = CoreTrigger.getCoreAssembly();
         ItemType[] requiredParts = (core != null) ? core.getRequiredParts() : new ItemType[0];
 
-        // Required core elements (7 entries with 2 candidate rooms each)
-        // 5 get actual required parts, 2 get random decoys — assignment randomized
+        // All core element room pairs (18 total: 9 for required parts, 9 for decoys/trade material)
         int[][] coreRoomPairs = {
             {436, 422}, {236, 222}, {52, 16}, {502, 504},
-            {296, 314}, {72, 106}, {310, 278}
+            {296, 314}, {72, 106}, {310, 278}, {56, 42}, {416, 352},
+            {140, 14}, {266, 316}, {476, 482},
+            {84, 86}, {478, 62}, {80, 82}, {226, 194}, {114, 116}, {466, 372}
         };
-        // Shuffle indices so required parts go to random pairs
-        int[] pairOrder = {0, 1, 2, 3, 4, 5, 6};
+        // Shuffle pair assignment so required parts go to random rooms
+        int[] pairOrder = new int[coreRoomPairs.length];
+        for (int i = 0; i < pairOrder.length; i++) pairOrder[i] = i;
         for (int i = pairOrder.length - 1; i > 0; i--) {
             int j = rng.nextInt(i + 1);
             int tmp = pairOrder[i]; pairOrder[i] = pairOrder[j]; pairOrder[j] = tmp;
         }
         ItemType[] partPool = getPartPool();
+        // Build decoy list: each non-required type once, then random fill
+        java.util.HashSet<ItemType> requiredSet = new java.util.HashSet<>();
+        for (ItemType rp : requiredParts) { if (rp != null) requiredSet.add(rp); }
+        java.util.ArrayList<ItemType> decoyTypes = new java.util.ArrayList<>();
+        for (ItemType p : partPool) { if (!requiredSet.contains(p)) decoyTypes.add(p); }
+
+        int decoyCount = coreRoomPairs.length - requiredParts.length;
+        ItemType[] decoys = new ItemType[Math.max(decoyCount, 0)];
+        for (int i = 0; i < decoys.length; i++) {
+            decoys[i] = decoyTypes.get(i % decoyTypes.size()); // each type at least once, then wrap
+        }
+        // Shuffle decoys
+        for (int i = decoys.length - 1; i > 0; i--) {
+            int j = rng.nextInt(i + 1);
+            ItemType tmp = decoys[i]; decoys[i] = decoys[j]; decoys[j] = tmp;
+        }
+
+        int decoyIdx = 0;
         for (int i = 0; i < coreRoomPairs.length; i++) {
             int[] pair = coreRoomPairs[pairOrder[i]];
             int room = pair[rng.nextInt(2)];
-            ItemType part = (i < requiredParts.length && requiredParts[i] != null)
-                ? requiredParts[i]
-                : partPool[rng.nextInt(partPool.length)];
-            placeItem(part, room, rng);
-        }
-
-        // Extra core elements (11 entries, random sprites — decoys/trade material)
-        int[][] extraRoomPairs = {
-            {56, 42}, {416, 352}, {140, 14}, {266, 316}, {476, 482},
-            {84, 86}, {478, 62}, {80, 82}, {226, 194}, {114, 116}, {466, 372}
-        };
-        for (int[] pair : extraRoomPairs) {
-            int room = pair[rng.nextInt(2)];
-            ItemType part = partPool[rng.nextInt(partPool.length)];
+            ItemType part;
+            if (i < requiredParts.length && requiredParts[i] != null) {
+                part = requiredParts[i];
+            } else {
+                part = decoys[decoyIdx++];
+            }
             placeItem(part, room, rng);
         }
 

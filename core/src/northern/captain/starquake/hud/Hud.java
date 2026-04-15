@@ -60,6 +60,7 @@ public class Hud {
     private final TextureRegion iconPlatforms;
     private final TextureRegion iconLaser;
     private final TextureRegion iconHeart;
+    private final TextureRegion iconInventory;
 
     // Cached item icon regions indexed by sprite index (0-34)
     private final TextureRegion[] itemIcons = new TextureRegion[35];
@@ -78,6 +79,7 @@ public class Hud {
             iconHealth = iconPlatforms = iconLaser = null;
         }
         iconHeart = assets.spritesAtlas.findRegion("hud_heart");
+        iconInventory = assets.spritesAtlas.findRegion("inventory_icon");
 
         for (int i = 0; i < itemIcons.length; i++) {
             itemIcons[i] = assets.itemsAtlas.findRegion("item", i);
@@ -153,18 +155,26 @@ public class Hud {
         drawIcon(batch, iconLaser, iconX, barY0 - 1);
         drawBar(batch, BAR_X, barY0, BAR_W, BAR_H, state.getLaserFraction(), LASER_COLOR);
 
-        // Right section: 4 inventory slots
+        // Inventory icon + 4 inventory slots
         float slotX = HUD_W - 4 * 17 - 2;
+        if (iconInventory != null) {
+            batch.setColor(Color.WHITE);
+            batch.draw(iconInventory, slotX - 18, HUD_Y + (HUD_H - 16) / 2f, 16, 16);
+        }
         float slotY = HUD_Y + (HUD_H - 16) / 2f;
+        CoreAssembly coreAnim = CoreTrigger.getCoreAssembly();
+        int hiddenSlot = (coreAnim != null) ? coreAnim.getDeliveringSlot() : -1;
         for (int i = 0; i < Inventory.MAX_SLOTS; i++) {
             batch.setColor(BAR_BG_COLOR);
             batch.draw(pixel, slotX, slotY, 16, 16);
-            ItemType item = inventory.getSlot(i);
-            if (item != null) {
-                TextureRegion icon = itemIcons[item.spriteIndex];
-                if (icon != null) {
-                    batch.setColor(Color.WHITE);
-                    batch.draw(icon, slotX, slotY, 16, 16);
+            if (i != hiddenSlot) {
+                ItemType item = inventory.getSlot(i);
+                if (item != null) {
+                    TextureRegion icon = itemIcons[item.spriteIndex];
+                    if (icon != null) {
+                        batch.setColor(Color.WHITE);
+                        batch.draw(icon, slotX, slotY, 16, 16);
+                    }
                 }
             }
             slotX += 17;
