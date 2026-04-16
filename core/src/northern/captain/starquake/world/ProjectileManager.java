@@ -37,6 +37,7 @@ public class ProjectileManager {
 
     private final ArrayList<Projectile> projectiles = new ArrayList<>();
     private final ArrayList<HitEffect> hitEffects = new ArrayList<>();
+    private EnemyManager enemyManager;
 
     public ProjectileManager(Assets assets) {
         for (int i = 0; i < WALK_FRAMES; i++) {
@@ -103,6 +104,14 @@ public class ProjectileManager {
                         // Reflected — don't advance to newX/newY (stay outside wall)
                         continue;
                     }
+                }
+            }
+
+            // Enemy collision
+            if (p.alive && enemyManager != null) {
+                Enemy hit = enemyManager.checkProjectileHit(newX, newY, PROJ_W, PROJ_H);
+                if (hit != null) {
+                    p.alive = false;
                 }
             }
 
@@ -219,6 +228,8 @@ public class ProjectileManager {
             return flyFrames[idx];
         }
     }
+
+    public void setEnemyManager(EnemyManager em) { this.enemyManager = em; }
 
     public void clear() {
         projectiles.clear();

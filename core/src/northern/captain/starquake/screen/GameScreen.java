@@ -46,6 +46,7 @@ import northern.captain.starquake.audio.MusicManager;
 import northern.captain.starquake.audio.SoundManager;
 import static northern.captain.starquake.audio.SoundManager.SoundType;
 import northern.captain.starquake.world.CoreAssembly;
+import northern.captain.starquake.world.EnemyManager;
 import northern.captain.starquake.world.ProjectileManager;
 import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.services.AchievementManager;
@@ -82,6 +83,7 @@ public class GameScreen implements Screen {
     private final Inventory inventory = new Inventory();
     private final ItemManager itemManager;
     private final ProjectileManager projectileManager;
+    private final EnemyManager enemyManager;
     private final Hud hud;
     private final LiftController liftController = new LiftController();
     private final TunnelController tunnelController;
@@ -115,6 +117,8 @@ public class GameScreen implements Screen {
         tunnelController = new TunnelController(game.assets);
         itemManager = new ItemManager(game.assets, objectRegistry);
         projectileManager = new ProjectileManager(game.assets);
+        enemyManager = new EnemyManager(game.assets);
+        projectileManager.setEnemyManager(enemyManager);
         ItemPickup.init(gameState, inventory, itemManager);
         hud = new Hud(game.assets, inventory);
 
@@ -129,6 +133,7 @@ public class GameScreen implements Screen {
         teleportRegistry.initialize(seed);
         itemManager.initializeGame(seed);
         itemManager.populateRoom(room);
+        enemyManager.generateForRoom(room);
         blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
 
         game.assets.font.getData().setScale(1f);
@@ -148,6 +153,7 @@ public class GameScreen implements Screen {
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
             tunnelController.setRoom(room);
+            enemyManager.onRoomChanged(prevRoom, room);
             EventBus.get().post(new RoomChangedEvent(oldRoom, next));
             transitionDx = dx;
             transitionDy = 0;
@@ -207,6 +213,7 @@ public class GameScreen implements Screen {
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
             liftController.setRoom(room);
+            enemyManager.onRoomChanged(prevRoom, room);
             EventBus.get().post(new RoomChangedEvent(oldRoom, next));
             // No slide transition for lift — instant room switch
             prevRoom.dispose();
@@ -244,6 +251,8 @@ public class GameScreen implements Screen {
         room = Room.build(game.assets, teleportTargetRoom, objectRegistry);
         itemManager.populateRoom(room);
         tunnelController.setRoom(room);
+        enemyManager.clear();
+        enemyManager.generateForRoom(room);
         EventBus.get().post(new RoomChangedEvent(oldRoom, teleportTargetRoom));
 
         // Position BLOB at teleporter tile in the new room
@@ -438,6 +447,7 @@ public class GameScreen implements Screen {
             }
         }
         projectileManager.update(delta, room);
+        enemyManager.update(delta, room, blob, gameState);
 
         Array<GameObject> overlapping = getOverlappingObjects();
         dispatchObjectActions(overlapping);
@@ -486,6 +496,7 @@ public class GameScreen implements Screen {
             prevRoom = room;
             room = Room.build(game.assets, next, objectRegistry);
             itemManager.populateRoom(room);
+            enemyManager.onRoomChanged(prevRoom, room);
             EventBus.get().post(new RoomChangedEvent(oldRoom, next));
             transitionDx = exit.dx;
             transitionDy = exit.dy;
@@ -576,6 +587,7 @@ public class GameScreen implements Screen {
             blob.attachment.render(batch, blob.x, blob.y - Blob.PLATFORM_HEIGHT);
         }
 
+        enemyManager.render(batch, delta);
         transitionManager.render(batch);
         tunnelController.render(batch);
         blobRenderer.render(batch, blob, delta);

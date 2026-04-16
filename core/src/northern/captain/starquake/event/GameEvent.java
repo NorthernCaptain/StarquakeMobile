@@ -25,7 +25,8 @@ public class GameEvent {
         TRADE_COMPLETED,
         DOOR_OPENED,
         CORE_DELIVERED,
-        FLOOR_BROKEN
+        FLOOR_BROKEN,
+        ENEMY_KILLED
     }
 
     public final Type type;
@@ -48,4 +49,5 @@ public class GameEvent {
     public static final GameEvent DOOR_OPENED = new GameEvent(Type.DOOR_OPENED);
     // CORE_DELIVERED uses CoreDeliveredEvent subclass (carries totalDelivered)
     public static final GameEvent FLOOR_BROKEN = new GameEvent(Type.FLOOR_BROKEN);
+    public static final GameEvent ENEMY_KILLED = new GameEvent(Type.ENEMY_KILLED);
 }

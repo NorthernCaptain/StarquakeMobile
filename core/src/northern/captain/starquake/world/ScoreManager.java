@@ -28,6 +28,7 @@ public class ScoreManager {
     private static final int SCORE_DOOR_OPENED = 947;
     private static final int SCORE_FLOOR_BROKEN = 81;
     private static final int SCORE_CORE_DELIVERED = 9741;
+    private static final int SCORE_ENEMY_KILLED = 47;
 
     // Exploration score weights
     private static final int EXPLORE_ROOM = 12;
@@ -118,6 +119,10 @@ public class ScoreManager {
 
         bus.register(GameEvent.Type.FLOOR_BROKEN, e -> {
             gameState.addScore(SCORE_FLOOR_BROKEN);
+        });
+
+        bus.register(GameEvent.Type.ENEMY_KILLED, e -> {
+            gameState.addScore(SCORE_ENEMY_KILLED);
         });
 
         bus.register(GameEvent.Type.BLOB_DIED, e -> {
