@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--Google Play game services IDs. Save this file as res/values/games-ids.xml in your project.-->
+<resources>
+  <!--app_id-->
+  <string name="app_id" translatable="false">226085341148</string>
+  <!--package_name-->
+  <string name="package_name" translatable="false">northern.captain.starquake</string>
+  <!--achievement First Steps-->
+  <string name="achievement_first_steps" translatable="false">CgkI3I_yncoGEAIQCg</string>
+  <!--achievement Lift Off-->
+  <string name="achievement_lift_off" translatable="false">CgkI3I_yncoGEAIQDA</string>
+  <!--achievement Tunnel Vision-->
+  <string name="achievement_tunnel_vision" translatable="false">CgkI3I_yncoGEAIQBw</string>
+  <!--achievement Beam Me Up-->
+  <string name="achievement_beam_me_up" translatable="false">CgkI3I_yncoGEAIQFA</string>
+  <!--achievement Trader-->
+  <string name="achievement_trader" translatable="false">CgkI3I_yncoGEAIQBQ</string>
+  <!--achievement Key Master-->
+  <string name="achievement_key_master" translatable="false">CgkI3I_yncoGEAIQCQ</string>
+  <!--achievement Core Discovery-->
+  <string name="achievement_core_discovery" translatable="false">CgkI3I_yncoGEAIQEA</string>
+  <!--achievement First Delivery-->
+  <string name="achievement_first_delivery" translatable="false">CgkI3I_yncoGEAIQEw</string>
+  <!--achievement Sharpshooter-->
+  <string name="achievement_sharpshooter" translatable="false">CgkI3I_yncoGEAIQBg</string>
+  <!--achievement Explorer-->
+  <string name="achievement_explorer" translatable="false">CgkI3I_yncoGEAIQFQ</string>
+  <!--achievement Frequent Flyer-->
+  <string name="achievement_frequent_flyer" translatable="false">CgkI3I_yncoGEAIQEg</string>
+  <!--achievement Half Way There-->
+  <string name="achievement_half_way_there" translatable="false">CgkI3I_yncoGEAIQCw</string>
+  <!--achievement Cartographer-->
+  <string name="achievement_cartographer" translatable="false">CgkI3I_yncoGEAIQEQ</string>
+  <!--achievement Planet Savior-->
+  <string name="achievement_planet_savior" translatable="false">CgkI3I_yncoGEAIQDw</string>
+  <!--achievement Full Map-->
+  <string name="achievement_full_map" translatable="false">CgkI3I_yncoGEAIQDQ</string>
+  <!--achievement Speed Demon-->
+  <string name="achievement_speed_demon" translatable="false">CgkI3I_yncoGEAIQCA</string>
+  <!--achievement No Death Run-->
+  <string name="achievement_no_death_run" translatable="false">CgkI3I_yncoGEAIQDg</string>
+  <!--leaderboard High scores-->
+  <string name="leaderboard_high_scores" translatable="false">CgkI3I_yncoGEAIQAQ</string>
+  <!--leaderboard Exploration scores-->
+  <string name="leaderboard_exploration_scores" translatable="false">CgkI3I_yncoGEAIQAg</string>
+</resources>

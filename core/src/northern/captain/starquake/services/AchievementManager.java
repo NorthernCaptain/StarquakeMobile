@@ -58,7 +58,11 @@ public class AchievementManager {
     // ---- Achievement unlocking ----
 
     public void tryUnlock(AchievementDef def) {
-        if (unlocked.contains(def)) return;
+        if (unlocked.contains(def)) {
+            Gdx.app.log("Achievements", "Already unlocked: " + def);
+            return;
+        }
+        Gdx.app.log("Achievements", "Unlocking: " + def);
         unlocked.add(def);
         achievementPrefs.putBoolean(def.name(), true);
         achievementPrefs.flush();
@@ -82,10 +86,10 @@ public class AchievementManager {
             RoomChangedEvent rc = (RoomChangedEvent) e;
             visitedRooms.add(rc.newRoom);
             int count = visitedRooms.size();
-            if (count >= 2) tryUnlock(AchievementDef.FIRST_STEPS);
-            if (count >= 100) tryUnlock(AchievementDef.EXPLORER);
-            if (count >= 256) tryUnlock(AchievementDef.CARTOGRAPHER);
-            if (count >= 512) tryUnlock(AchievementDef.FULL_MAP);
+            if (count == 2) tryUnlock(AchievementDef.FIRST_STEPS);
+            if (count == 100) tryUnlock(AchievementDef.EXPLORER);
+            if (count == 256) tryUnlock(AchievementDef.CARTOGRAPHER);
+            if (count == 512) tryUnlock(AchievementDef.FULL_MAP);
             if (rc.newRoom == CoreAssembly.CORE_ROOM) tryUnlock(AchievementDef.CORE_DISCOVERY);
         });
 
@@ -115,8 +119,8 @@ public class AchievementManager {
 
         bus.register(GameEvent.Type.CORE_DELIVERED, e -> {
             CoreDeliveredEvent cd = (CoreDeliveredEvent) e;
-            if (cd.totalDelivered >= 1) tryUnlock(AchievementDef.FIRST_DELIVERY);
-            if (cd.totalDelivered >= 5) tryUnlock(AchievementDef.HALF_WAY_THERE);
+            if (cd.totalDelivered == 1) tryUnlock(AchievementDef.FIRST_DELIVERY);
+            if (cd.totalDelivered == 5) tryUnlock(AchievementDef.HALF_WAY_THERE);
         });
 
         bus.register(GameEvent.Type.BLOB_MOUNTED_PLATFORM, e -> {
@@ -187,11 +191,16 @@ public class AchievementManager {
     }
 
     private void loadUnlocked() {
+        Gdx.app.log("Achievements", "Loading from prefs, keys: " + achievementPrefs.get().keySet());
         for (AchievementDef def : AchievementDef.values()) {
-            if (achievementPrefs.getBoolean(def.name(), false)) {
+            boolean val = achievementPrefs.getBoolean(def.name(), false);
+            if (val) {
                 unlocked.add(def);
+                Gdx.app.log("Achievements", "Re-syncing previously unlocked: " + def);
+                GameServicesFactory.get().getProcessor().unlockAchievement(def);
             }
         }
+        Gdx.app.log("Achievements", "Loaded " + unlocked.size() + " unlocked achievements");
     }
 
     // ---- Getters ----
@@ -204,6 +213,6 @@ public class AchievementManager {
     /** Called when an enemy is killed (future enemy system). */
     public void onEnemyKilled() {
         enemiesKilled++;
-        if (enemiesKilled >= 20) tryUnlock(AchievementDef.SHARPSHOOTER);
+        if (enemiesKilled == 20) tryUnlock(AchievementDef.SHARPSHOOTER);
     }
 }

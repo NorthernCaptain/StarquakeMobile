@@ -120,16 +120,14 @@ public class MusicManager {
     }
 
     public void pause() {
-        if (currentMusic != null && currentMusic.isPlaying()) {
-            paused = true;
-            currentMusic.pause();
-        }
+        paused = true;
+        stopCurrent();
     }
 
     public void resume() {
-        if (paused && enabled && currentMusic != null) {
+        if (paused && enabled) {
             paused = false;
-            currentMusic.play();
+            playNext();
         }
     }
 

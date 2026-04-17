@@ -614,8 +614,10 @@ public class TitleScreen implements Screen {
             case ICONS:
                 if (iconIndex == 0) {
                     GameServicesFactory.get().getProcessor().showLeaderboard(LeaderboardDef.HIGH_SCORE);
+                    focus = Focus.PLAY; focusTimer = 0;
                 } else if (iconIndex == 1) {
                     GameServicesFactory.get().getProcessor().showAchievements();
+                    focus = Focus.PLAY; focusTimer = 0;
                 } else if (iconIndex == 2) {
                     openSettings();
                 }
