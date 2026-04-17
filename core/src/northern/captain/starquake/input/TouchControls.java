@@ -40,6 +40,9 @@ public class TouchControls {
     private int circlePointer = -1;
     private boolean walkMode = true;
 
+    // Tracked pointer for D-pad left/right (walk mode) — keeps tracking after leaving button
+    private int dpadPointer = -1;
+
     // D-pad center for layout
     private float dpadCenterX, dpadCenterY;
 
@@ -103,9 +106,12 @@ public class TouchControls {
         boolean a = false;
         float padX = 0, padY = 0;
         boolean padActive = false;
-        circlePointer = -1;
 
         boolean up = false, down = false, left = false, right = false;
+
+        // Release tracked pointers if no longer touched
+        if (circlePointer >= 0 && !Gdx.input.isTouched(circlePointer)) circlePointer = -1;
+        if (dpadPointer >= 0 && !Gdx.input.isTouched(dpadPointer)) dpadPointer = -1;
 
         for (int pointer = 0; pointer < 5; pointer++) {
             if (!Gdx.input.isTouched(pointer)) continue;
@@ -113,25 +119,56 @@ public class TouchControls {
             float ty = Gdx.graphics.getHeight() - Gdx.input.getY(pointer);
 
             if (!walkMode) {
-                // Fly mode: circle pad
-                float dx = tx - circleCenterX;
-                float dy = ty - circleCenterY;
-                float dist = (float) Math.sqrt(dx * dx + dy * dy);
-                if (dist <= circleRadius * 1.3f && !padActive) {
+                // Fly mode: circle pad with pointer tracking
+                if (pointer == circlePointer) {
+                    // Already tracking this pointer — follow it anywhere
+                    float dx = tx - circleCenterX;
+                    float dy = ty - circleCenterY;
+                    float dist = (float) Math.sqrt(dx * dx + dy * dy);
                     if (dist > circleInnerRadius) {
                         float normDist = Math.min(dist / circleRadius, 1f);
                         padX = (dx / dist) * normDist;
                         padY = (dy / dist) * normDist;
-                        padActive = true;
+                    }
+                    padActive = true;
+                } else if (circlePointer < 0 && !padActive) {
+                    // New pointer — only acquire if inside circle
+                    float dx = tx - circleCenterX;
+                    float dy = ty - circleCenterY;
+                    float dist = (float) Math.sqrt(dx * dx + dy * dy);
+                    if (dist <= circleRadius * 1.3f) {
                         circlePointer = pointer;
+                        if (dist > circleInnerRadius) {
+                            float normDist = Math.min(dist / circleRadius, 1f);
+                            padX = (dx / dist) * normDist;
+                            padY = (dy / dist) * normDist;
+                        }
+                        padActive = true;
                     }
                 }
             } else {
-                // Walk mode: rectangle D-pad buttons
-                if (zoneUp.contains(tx, ty))    up = true;
-                if (zoneDown.contains(tx, ty))  down = true;
-                if (zoneLeft.contains(tx, ty))  left = true;
-                if (zoneRight.contains(tx, ty)) right = true;
+                // Walk mode: track pointer for left/right
+                if (pointer == dpadPointer) {
+                    // Already tracking — derive direction from offset to D-pad center
+                    float dx = tx - dpadCenterX;
+                    float dy = ty - dpadCenterY;
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        if (dx < 0) left = true; else right = true;
+                    } else {
+                        if (dy > 0) up = true; else down = true;
+                    }
+                } else if (dpadPointer < 0) {
+                    // New pointer — acquire if inside any D-pad button
+                    boolean inDpad = zoneUp.contains(tx, ty) || zoneDown.contains(tx, ty)
+                            || zoneLeft.contains(tx, ty) || zoneRight.contains(tx, ty);
+                    if (inDpad) {
+                        dpadPointer = pointer;
+                        if (zoneUp.contains(tx, ty))    up = true;
+                        if (zoneDown.contains(tx, ty))  down = true;
+                        if (zoneLeft.contains(tx, ty))  left = true;
+                        if (zoneRight.contains(tx, ty)) right = true;
+                    }
+                }
             }
 
             if (zoneA.contains(tx, ty)) a = true;

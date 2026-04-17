@@ -108,6 +108,7 @@ def main():
         ('items',    os.path.join(ASSETS_DIR, 'items'),     None),
         ('screens',  os.path.join(ASSETS_DIR, 'screens'),  None),
         ('font',     os.path.join(ASSETS_DIR, 'font'),     None),
+        ('intro',    os.path.join(ASSETS_DIR, 'intro'),    None),
     ]
 
     total_atlases = 0

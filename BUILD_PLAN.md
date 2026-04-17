@@ -1441,6 +1441,7 @@ Wired into: GameScreen (step/fire/platform/death/spawn), ProjectileManager (expl
 - **Enemies**: ✅ DONE (3 categories, 5 patterns, depth scaling, 2-room cache)
 - **Save/load**: ✅ DONE (9 prefs files, all state persisted, continue from title screen)
 - **Music**: ✅ DONE (MusicManager, 8 tracks shuffled, 25% volume, no back-to-back repeat, pause-aware)
-- **Touch controls**: ✅ DONE (D-pad walk / circular analog fly, fire button with 2x touch area, halved alpha)
-- **Pause functionality**: not yet implemented
+- **Touch controls**: ✅ DONE (D-pad walk / circular analog fly, fire button with 2x touch area, halved alpha, pointer tracking for swipe-through)
+- **Pause functionality**: ✅ DONE (pause icon in HUD, ESC/BACK keys, fade out + slide overlay with banner/Resume/Quit, save before pause, 1s resume delay)
+- **Loading screen**: ✅ DONE (intro atlas with tiled background + Northern Captain logo, 2s fade in / 0.2s hold / 0.7s fade out matching Quadronia, assets load after fade in, music starts after fade out)
 - **Settings screen**: not yet implemented (sound/music on/off, volume, left-handed controls)
