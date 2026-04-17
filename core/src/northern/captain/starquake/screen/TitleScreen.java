@@ -26,6 +26,7 @@ import northern.captain.starquake.services.GameServicesFactory;
 import northern.captain.starquake.services.LeaderboardDef;
 import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.StarquakeGame;
+import northern.captain.starquake.hud.SettingsOverlay;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.transitions.TeleportTransition;
@@ -125,6 +126,9 @@ public class TitleScreen implements Screen {
 
     // Exit delay (play death sound before quitting)
     private float exitTimer = -1;
+
+    // Settings overlay
+    private SettingsOverlay settingsOverlay;
 
     // Sprites
     private Array<TextureAtlas.AtlasRegion> blobFrames;
@@ -233,6 +237,43 @@ public class TitleScreen implements Screen {
             batch.end();
             inputManager.update();
             return;
+        }
+
+        // Settings overlay active — freeze title screen behind it
+        if (settingsOverlay != null) {
+            settingsOverlay.update(delta, inputManager);
+            if (settingsOverlay.isDone()) {
+                settingsOverlay = null;
+                focus = Focus.PLAY;
+                focusTimer = 0;
+            } else {
+                if (Gdx.input.justTouched()) {
+                    touchPos.set(Gdx.input.getX(), Gdx.input.getY());
+                    gameViewport.unproject(touchPos);
+                    settingsOverlay.checkTap(touchPos.x, touchPos.y);
+                }
+                // Render title screen frozen
+                updateStars(delta);
+                screenViewport.apply();
+                batch.setProjectionMatrix(screenViewport.getCamera().combined);
+                batch.begin();
+                renderStars();
+                renderButtonsScreen();
+                batch.end();
+                gameViewport.apply();
+                batch.setProjectionMatrix(gameViewport.getCamera().combined);
+                batch.begin();
+                renderBanner();
+                renderTerrain();
+                renderBlob();
+                renderPlayText();
+                renderCore();
+                settingsOverlay.render(batch);
+                batch.end();
+                inputManager.update();
+                if (MusicManager.get() != null) MusicManager.get().update();
+                return;
+            }
         }
 
         updateStars(delta);
@@ -576,13 +617,17 @@ public class TitleScreen implements Screen {
                 } else if (iconIndex == 1) {
                     GameServicesFactory.get().getProcessor().showAchievements();
                 } else if (iconIndex == 2) {
-                    // TODO: settings screen
+                    openSettings();
                 }
                 break;
             case EXIT:
                 triggerExit();
                 break;
         }
+    }
+
+    private void openSettings() {
+        settingsOverlay = new SettingsOverlay(game.assets);
     }
 
     private void triggerExit() {

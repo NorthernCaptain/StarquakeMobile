@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import northern.captain.starquake.AppSettings;
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.audio.MusicManager;
 import northern.captain.starquake.audio.SoundManager;
@@ -62,6 +63,10 @@ public class LoadingScreen implements Screen {
             SoundManager.init();
             MusicManager.init();
             SaveManager.init();
+            AppSettings.init();
+            // Apply persisted settings
+            SoundManager.get().setEnabled(AppSettings.get().isSoundEnabled());
+            MusicManager.get().setEnabled(false); // music starts after fade out
         }
 
         // Phase transitions
@@ -81,7 +86,7 @@ public class LoadingScreen implements Screen {
             case FADE_OUT:
                 if (timer >= FADE_OUT_TIME) {
                     phase = Phase.DONE;
-                    MusicManager.get().setEnabled(true);
+                    MusicManager.get().setEnabled(AppSettings.get().isMusicEnabled());
                     game.setScreen(new TitleScreen(game));
                     return;
                 }

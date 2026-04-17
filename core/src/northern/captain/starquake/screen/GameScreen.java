@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import northern.captain.starquake.AppSettings;
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.input.InputManager.Action;
@@ -137,7 +138,8 @@ public class GameScreen implements Screen {
         hud = new Hud(game.assets, inventory);
 
         inputManager = new InputManager();
-        touchControls = new TouchControls(inputManager, false);
+        boolean leftHanded = AppSettings.get() != null && !AppSettings.get().isDpadRight();
+        touchControls = new TouchControls(inputManager, leftHanded);
         inputManager.connectControllers();
         Gdx.input.setInputProcessor(new InputMultiplexer(inputManager.getKeyboardListener()));
         Gdx.input.setCatchKey(com.badlogic.gdx.Input.Keys.BACK, true);
