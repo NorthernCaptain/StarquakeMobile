@@ -188,6 +188,13 @@ public class ItemManager {
         addPlacement(roomIndex, new ItemPlacement(type, col, row));
     }
 
+    public IntMap<Array<ItemPlacement>> getPlacements() { return placements; }
+
+    /** Direct placement for save/load — bypasses floor tile check. */
+    public void addPlacementDirect(int roomIndex, ItemType type, int col, int row) {
+        addPlacement(roomIndex, new ItemPlacement(type, col, row));
+    }
+
     private void addPlacement(int roomIndex, ItemPlacement p) {
         Array<ItemPlacement> list = placements.get(roomIndex);
         if (list == null) {

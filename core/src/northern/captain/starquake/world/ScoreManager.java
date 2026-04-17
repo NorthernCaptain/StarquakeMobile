@@ -8,6 +8,7 @@ import northern.captain.starquake.event.RoomChangedEvent;
 import northern.captain.starquake.event.TunnelTeleportEvent;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Tracks game score and exploration statistics.
@@ -148,4 +149,23 @@ public class ScoreManager {
     public int getDeathCount() { return deathCount; }
     public int getTradesCompleted() { return tradesCompleted; }
     public int getCorePartsDelivered() { return corePartsDelivered; }
+    public int getDoorsOpened() { return doorsOpened; }
+
+    // Save/load support
+    public Set<Integer> getVisitedRoomSet() { return visitedRooms; }
+    public Set<Long> getUsedTunnelSet() { return usedTunnels; }
+    public Set<Integer> getCollectedItemTypeSet() { return collectedItemTypes; }
+    public Set<Integer> getDiscoveredTeleporterSet() { return discoveredTeleporters; }
+
+    public void loadState(Set<Integer> rooms, Set<Long> tunnels, Set<Integer> items,
+                          Set<Integer> teleporters, int trades, int doors, int cores, int deaths) {
+        visitedRooms.clear(); visitedRooms.addAll(rooms);
+        usedTunnels.clear(); usedTunnels.addAll(tunnels);
+        collectedItemTypes.clear(); collectedItemTypes.addAll(items);
+        discoveredTeleporters.clear(); discoveredTeleporters.addAll(teleporters);
+        tradesCompleted = trades;
+        doorsOpened = doors;
+        corePartsDelivered = cores;
+        deathCount = deaths;
+    }
 }

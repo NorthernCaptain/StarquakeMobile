@@ -126,6 +126,9 @@ public class BreakableFloor extends GameObject {
         animTimer = 0;
         brokenTiles.add(persistKey());
         EventBus.get().post(GameEvent.FLOOR_BROKEN);
+        if (northern.captain.starquake.world.SaveManager.get() != null) {
+            northern.captain.starquake.world.SaveManager.get().saveBreakableFloors();
+        }
 
         Random rng = new Random();
         float solidTop = y + TILE_H - SOLID_H;
@@ -166,6 +169,9 @@ public class BreakableFloor extends GameObject {
             batch.setColor(Color.WHITE);
         }
     }
+
+    public static java.util.HashSet<Long> getBrokenTiles() { return brokenTiles; }
+    public static void addBrokenTile(long key) { brokenTiles.add(key); }
 
     public static void resetAll() {
         brokenTiles.clear();

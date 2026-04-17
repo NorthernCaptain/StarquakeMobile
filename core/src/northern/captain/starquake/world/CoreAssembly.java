@@ -235,6 +235,7 @@ public class CoreAssembly {
             anyDelivered = true;
             inventory.remove(matchedPart);
             EventBus.get().post(new CoreDeliveredEvent(restoredCount));
+            if (SaveManager.get() != null) SaveManager.get().saveCoreAssembly(this);
             matchedPart = null;
             fadeInIdx = matchedGridIdx;
             setPhase(Phase.FADE_IN);
@@ -289,6 +290,17 @@ public class CoreAssembly {
     public int getDeliveringSlot() {
         if (phase == Phase.DELIVER || phase == Phase.LIGHTNING) return currentSlot;
         return -1;
+    }
+
+    public ItemType getRequiredPart(int index) { return requiredParts[index]; }
+    public boolean isRestored(int index) { return restored[index]; }
+
+    public void loadState(ItemType[] reqParts, boolean[] restoredFlags, int count) {
+        for (int i = 0; i < 9; i++) {
+            requiredParts[i] = reqParts[i];
+            restored[i] = restoredFlags[i];
+        }
+        restoredCount = count;
     }
 
     public boolean isComplete() { return restoredCount >= 9; }

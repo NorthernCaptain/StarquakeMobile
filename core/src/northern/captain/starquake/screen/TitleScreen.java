@@ -24,6 +24,7 @@ import northern.captain.starquake.audio.MusicManager;
 import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.services.GameServicesFactory;
 import northern.captain.starquake.services.LeaderboardDef;
+import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Blob;
@@ -267,7 +268,9 @@ public class TitleScreen implements Screen {
 
         if (transition.needsTarget()) {
             // Create GameScreen and get its first room terrain
-            pendingGameScreen = new GameScreen(game, 435);
+            boolean hasSave = SaveManager.get() != null && SaveManager.get().hasSave();
+            int startRoom = hasSave ? SaveManager.get().getSavedRoom() : 435;
+            pendingGameScreen = new GameScreen(game, startRoom, hasSave);
             pendingGameScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             // Render the room FBO
             TextureRegion roomTerrain = pendingGameScreen.getRoomTerrain();
@@ -434,9 +437,10 @@ public class TitleScreen implements Screen {
                 ? 0.5f + 0.5f * MathUtils.sin(focusTimer * MathUtils.PI * 3)
                 : 1f;
         font.setColor(1, 1, 1, alpha);
-        // Center "PLAY" text
-        float textW = 4 * 8; // 4 chars * 8px
-        font.draw(batch, "PLAY", (VIEWPORT_W - textW) / 2f, PLAY_Y);
+        boolean hasSave = SaveManager.get() != null && SaveManager.get().hasSave();
+        String label = hasSave ? "CONTINUE" : "PLAY";
+        float textW = label.length() * 8;
+        font.draw(batch, label, (VIEWPORT_W - textW) / 2f, PLAY_Y);
         font.setColor(Color.WHITE);
     }
 

@@ -16,7 +16,7 @@ public class Enemy implements Collidable {
     public static final float SIZE = 16;
     private static final float ANIM_FRAME_TIME = 0.1f;
     private static final float CONTACT_COOLDOWN = 0.5f;
-    private static final float RESPAWN_TIME = 2f;
+    private static final float RESPAWN_TIME = 5f;
     private static final float BOLT_DASH_SPEED = 120f;
 
     public final Category category;

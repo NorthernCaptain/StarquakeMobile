@@ -32,10 +32,15 @@ public class CoreTrigger extends GameObject {
         super(assets, tileCol, tileRow);
     }
 
-    /** Initialize the core assembly. Call once at game start. */
+    /** Initialize the core assembly for a new game. Call once at game start. */
     public static void initCoreAssembly(Assets assets, long seed, ItemType[] partPool) {
         coreAssembly = new CoreAssembly(assets);
         coreAssembly.initialize(new Random(seed), partPool);
+    }
+
+    /** Create core assembly without initializing grid — for loading saved state. */
+    public static void createCoreAssembly(Assets assets) {
+        coreAssembly = new CoreAssembly(assets);
     }
 
     public static CoreAssembly getCoreAssembly() {

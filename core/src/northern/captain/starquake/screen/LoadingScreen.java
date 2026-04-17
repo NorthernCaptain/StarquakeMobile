@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.audio.MusicManager;
 import northern.captain.starquake.audio.SoundManager;
+import northern.captain.starquake.world.SaveManager;
 
 public class LoadingScreen implements Screen {
     private final StarquakeGame game;
@@ -24,6 +25,7 @@ public class LoadingScreen implements Screen {
         if (game.assets.update()) {
             SoundManager.init();
             MusicManager.init();
+            SaveManager.init();
             MusicManager.get().setEnabled(true);
             game.setScreen(new TitleScreen(game));
             return;

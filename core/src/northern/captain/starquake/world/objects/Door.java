@@ -9,6 +9,7 @@ import northern.captain.starquake.Assets;
 import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.event.EventBus;
 import northern.captain.starquake.event.GameEvent;
+import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.Collidable;
@@ -23,6 +24,7 @@ import northern.captain.starquake.world.items.ItemType;
  */
 public class Door extends CollisionTile {
     public static final int TILE_ID = 45;
+    public static java.util.Set<Integer> openedRooms; // loaded from save, checked on room enter
 
     private static final float HINT_DURATION = 2f;
     private static final float HINT_FREQ = 5f;
@@ -41,6 +43,14 @@ public class Door extends CollisionTile {
         super(assets, tileCol, tileRow, 8, 16, 0, 0);
         this.tileRegion = assets.tileRegions.get(TILE_ID);
         this.keyIcon = assets.itemsAtlas.findRegion("item", ItemType.KEY.spriteIndex);
+    }
+
+    @Override
+    public void onAddedToRoom(northern.captain.starquake.world.Room room) {
+        super.onAddedToRoom(room);
+        if (openedRooms != null && openedRooms.contains(room.roomIndex)) {
+            opened = true;
+        }
     }
 
     @Override
@@ -120,6 +130,9 @@ public class Door extends CollisionTile {
         unlockTimer = UNLOCK_DURATION;
         SoundManager.play(SoundManager.SoundType.ACCESS_OK);
         EventBus.get().post(GameEvent.DOOR_OPENED);
+        if (SaveManager.get() != null && room != null) {
+            SaveManager.get().saveDoorOpened(room.roomIndex);
+        }
         return true;
     }
 }

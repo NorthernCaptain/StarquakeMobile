@@ -59,6 +59,12 @@ public class GameState {
     public int getPlatforms() { return platforms; }
     public int getLaserEnergy() { return laserEnergy; }
 
+    public void setLives(int v) { lives = Math.min(v, MAX_LIVES); }
+    public void setScore(int v) { score = v; }
+    public void setHealth(int v) { health = Math.min(v, MAX_HEALTH); }
+    public void setPlatforms(int v) { platforms = Math.min(v, MAX_PLATFORMS); }
+    public void setLaserEnergy(int v) { laserEnergy = Math.min(v, MAX_LASER); }
+
     // Normalized 0-1 for progress bars
     public float getHealthFraction() { return (float) health / MAX_HEALTH; }
     public float getPlatformsFraction() { return (float) platforms / MAX_PLATFORMS; }

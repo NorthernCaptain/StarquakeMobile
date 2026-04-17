@@ -21,6 +21,7 @@ import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.services.AchievementManager;
 import northern.captain.starquake.services.LeaderboardDef;
 import northern.captain.starquake.world.GameState;
+import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.world.transitions.TeleportTransition;
 
@@ -226,6 +227,7 @@ public class GameOverScreen implements Screen {
             case BLACK_PAUSE:
                 if (timer >= BLACK_PAUSE_TIME) {
                     SoundManager.play(SoundManager.SoundType.GAME_OVER);
+                    if (SaveManager.get() != null) SaveManager.get().clearAll();
                     phase = Phase.DROPPING;
                     timer = 0;
                     currentLetter = 0;

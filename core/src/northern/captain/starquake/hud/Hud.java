@@ -61,9 +61,13 @@ public class Hud {
     private final TextureRegion iconLaser;
     private final TextureRegion iconHeart;
     private final TextureRegion iconInventory;
+    private final TextureRegion iconPause;
 
     // Cached item icon regions indexed by sprite index (0-34)
     private final TextureRegion[] itemIcons = new TextureRegion[35];
+
+    /** Set to true when pause icon is tapped (polled by GameScreen). */
+    private boolean pauseRequested;
 
     public Hud(Assets assets, Inventory inventory) {
         this.pixel = assets.whitePixel;
@@ -80,6 +84,7 @@ public class Hud {
         }
         iconHeart = assets.spritesAtlas.findRegion("hud_heart");
         iconInventory = assets.spritesAtlas.findRegion("inventory_icon");
+        iconPause = assets.spritesAtlas.findRegion("pause");
 
         for (int i = 0; i < itemIcons.length; i++) {
             itemIcons[i] = assets.itemsAtlas.findRegion("item", i);
@@ -155,8 +160,14 @@ public class Hud {
         drawIcon(batch, iconLaser, iconX, barY0 - 1);
         drawBar(batch, BAR_X, barY0, BAR_W, BAR_H, state.getLaserFraction(), LASER_COLOR);
 
-        // Inventory icon + 4 inventory slots
-        float slotX = HUD_W - 4 * 17 - 2;
+        // Pause icon (far right)
+        if (iconPause != null) {
+            batch.setColor(Color.WHITE);
+            batch.draw(iconPause, HUD_W - 18, HUD_Y + (HUD_H - 16) / 2f, 16, 16);
+        }
+
+        // Inventory icon + 4 inventory slots (shifted 16px left for pause icon)
+        float slotX = HUD_W - 4 * 17 - 2 - 16;
         if (iconInventory != null) {
             batch.setColor(Color.WHITE);
             batch.draw(iconInventory, slotX - 18, HUD_Y + (HUD_H - 16) / 2f, 16, 16);
@@ -184,12 +195,28 @@ public class Hud {
         CoreAssembly core = CoreTrigger.getCoreAssembly();
         if (core != null && core.isInventoryFlashRed()) {
             batch.setColor(0.8f, 0.1f, 0.1f, 0.6f);
-            float flashX = HUD_W - 4 * 17 - 4;
+            float flashX = HUD_W - 4 * 17 - 4 - 16;
             float flashY = HUD_Y + (HUD_H - 20) / 2f;
             batch.draw(pixel, flashX, flashY, 4 * 17 + 4, 20);
         }
 
         batch.setColor(Color.WHITE);
+    }
+
+    /**
+     * Check if a viewport-space tap hit the pause icon area.
+     * Call with coords already unprojected to game viewport.
+     */
+    public void checkPauseTap(float vx, float vy) {
+        if (vx >= HUD_W - 20 && vy >= HUD_Y && vy <= HUD_Y + HUD_H) {
+            pauseRequested = true;
+        }
+    }
+
+    public boolean isPauseRequested() {
+        boolean r = pauseRequested;
+        pauseRequested = false;
+        return r;
     }
 
     private void drawIcon(SpriteBatch batch, TextureRegion icon, float x, float y) {

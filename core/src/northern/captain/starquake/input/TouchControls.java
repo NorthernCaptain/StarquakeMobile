@@ -15,10 +15,10 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 public class TouchControls {
     private static final float BUTTON_SIZE = 80;
     private static final float PADDING = 16;
-    private static final Color BTN_COLOR = new Color(1, 1, 1, 0.2f);
-    private static final Color BTN_PRESSED_COLOR = new Color(1, 1, 1, 0.25f);
-    private static final Color CIRCLE_COLOR = new Color(1, 1, 1, 0.15f);
-    private static final Color CIRCLE_ACTIVE_COLOR = new Color(1, 1, 1, 0.3f);
+    private static final Color BTN_COLOR = new Color(1, 1, 1, 0.1f);
+    private static final Color BTN_PRESSED_COLOR = new Color(1, 1, 1, 0.125f);
+    private static final Color CIRCLE_COLOR = new Color(1, 1, 1, 0.075f);
+    private static final Color CIRCLE_ACTIVE_COLOR = new Color(1, 1, 1, 0.15f);
 
     private static final float DEAD_ZONE = 0.15f;
     private static final float CORNER_RADIUS_FRAC = 0.15f; // rounded corner as fraction of button size
@@ -43,8 +43,9 @@ public class TouchControls {
     // D-pad center for layout
     private float dpadCenterX, dpadCenterY;
 
-    // Single action button
+    // Single action button (zoneA = touch area, zoneADraw = visible button)
     private final Rectangle zoneA = new Rectangle();
+    private final Rectangle zoneADraw = new Rectangle();
 
     public TouchControls(InputManager inputManager, boolean leftHanded) {
         this.inputManager = inputManager;
@@ -93,7 +94,9 @@ public class TouchControls {
         // Single action button — bigger
         float abSize = bs * 1.4f;
         float actionY = h * 0.28f;
-        zoneA.set(actionCenterX - abSize / 2, actionY - abSize / 2, abSize, abSize);
+        zoneADraw.set(actionCenterX - abSize / 2, actionY - abSize / 2, abSize, abSize);
+        // Touch area is 2x wider and 2x taller, centered on the same point
+        zoneA.set(actionCenterX - abSize, actionY - abSize, abSize * 2, abSize * 2);
     }
 
     public void poll() {
@@ -185,8 +188,8 @@ public class TouchControls {
             }
         }
 
-        // Action button (rounded)
-        drawRoundedButton(zoneA, InputManager.Action.ACTION_A);
+        // Action button (rounded) — draw at visible size, touch area is larger
+        drawRoundedButton(zoneADraw, InputManager.Action.ACTION_A);
 
         shapes.end();
         Gdx.gl.glDisable(Gdx.gl.GL_BLEND);

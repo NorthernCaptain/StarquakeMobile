@@ -39,7 +39,9 @@ import northern.captain.starquake.event.EnterTeleportEvent;
 import northern.captain.starquake.event.GameOverEvent;
 import northern.captain.starquake.event.EnterTradeEvent;
 import northern.captain.starquake.event.RoomChangedEvent;
+import com.badlogic.gdx.math.Vector2;
 import northern.captain.starquake.hud.Overlay;
+import northern.captain.starquake.hud.PauseOverlay;
 import northern.captain.starquake.hud.TeleportOverlay;
 import northern.captain.starquake.hud.TradingOverlay;
 import northern.captain.starquake.audio.MusicManager;
@@ -47,11 +49,14 @@ import northern.captain.starquake.audio.SoundManager;
 import static northern.captain.starquake.audio.SoundManager.SoundType;
 import northern.captain.starquake.world.CoreAssembly;
 import northern.captain.starquake.world.EnemyManager;
+import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.world.ProjectileManager;
 import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.services.AchievementManager;
 import northern.captain.starquake.world.TeleportRegistry;
 import northern.captain.starquake.world.items.ItemType;
+import northern.captain.starquake.world.objects.Door;
+import northern.captain.starquake.world.objects.HoverPlatform;
 import northern.captain.starquake.world.objects.Teleporter;
 import northern.captain.starquake.world.transitions.TeleportTransition;
 import northern.captain.starquake.world.transitions.AssemblyTransition;
@@ -98,9 +103,13 @@ public class GameScreen implements Screen {
     private int transitionDx, transitionDy;
 
     private Overlay activeOverlay;
+    private PauseOverlay pauseOverlay;
+    private final Vector2 touchVec = new Vector2(); // reusable for touch unprojection
 
     // Walk step sound timer
     private float stepTimer;
+    private float saveTimer; // periodic save every 5s
+    private final boolean continuing;
 
     // Teleport system
     private final TeleportRegistry teleportRegistry = new TeleportRegistry();
@@ -108,7 +117,12 @@ public class GameScreen implements Screen {
     private int teleportTargetRoom = -1;
 
     public GameScreen(StarquakeGame game, int startRoom) {
+        this(game, startRoom, false);
+    }
+
+    public GameScreen(StarquakeGame game, int startRoom, boolean continuing) {
         this.game = game;
+        this.continuing = continuing;
         roomRenderer = new RoomRenderer(game.assets);
         blobRenderer = new BlobRenderer(game.assets);
         platformRenderer = new PlatformRenderer(game.assets);
@@ -126,15 +140,49 @@ public class GameScreen implements Screen {
         touchControls = new TouchControls(inputManager, false);
         inputManager.connectControllers();
         Gdx.input.setInputProcessor(new InputMultiplexer(inputManager.getKeyboardListener()));
+        Gdx.input.setCatchKey(com.badlogic.gdx.Input.Keys.BACK, true);
 
-        room = Room.build(game.assets, startRoom, objectRegistry);
-        long seed = System.currentTimeMillis();
-        CoreTrigger.initCoreAssembly(game.assets, seed, itemManager.getPartPool());
-        teleportRegistry.initialize(seed);
-        itemManager.initializeGame(seed);
-        itemManager.populateRoom(room);
-        enemyManager.generateForRoom(room);
-        blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
+        if (continuing && SaveManager.get() != null && SaveManager.get().hasSave()) {
+            // ---- Continue saved game ----
+            SaveManager.get().loadBreakableFloors();
+            Door.openedRooms = SaveManager.get().loadOpenedDoors();
+
+            room = Room.build(game.assets, startRoom, objectRegistry);
+            CoreTrigger.createCoreAssembly(game.assets);
+            SaveManager.get().loadCoreAssembly(CoreTrigger.getCoreAssembly());
+            SaveManager.get().loadTeleportRegistry(teleportRegistry);
+            SaveManager.get().loadItems(itemManager);
+            itemManager.populateRoom(room);
+            enemyManager.generateForRoom(room);
+            blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
+            SaveManager.get().loadState(blob, gameState);
+            if (blob.state == Blob.State.FLYING) {
+                blob.attachment = new HoverPlatform(game.assets);
+                HoverStand.setBlobHasPlatform(true);
+            }
+            SaveManager.get().loadInventory(inventory);
+        } else {
+            // ---- New game ----
+            if (SaveManager.get() != null) SaveManager.get().clearAll();
+            Door.openedRooms = null;
+
+            room = Room.build(game.assets, startRoom, objectRegistry);
+            long seed = System.currentTimeMillis();
+            CoreTrigger.initCoreAssembly(game.assets, seed, itemManager.getPartPool());
+            teleportRegistry.initialize(seed);
+            itemManager.initializeGame(seed);
+            itemManager.populateRoom(room);
+            enemyManager.generateForRoom(room);
+            blob = new Blob(Room.WIDTH / 2f - Blob.SIZE / 2f, 40);
+
+            // Save initial state
+            if (SaveManager.get() != null) {
+                SaveManager.get().createSaveMeta();
+                SaveManager.get().saveItemPlacements(itemManager);
+                SaveManager.get().saveCoreAssembly(CoreTrigger.getCoreAssembly());
+                SaveManager.get().saveTeleportRegistry(teleportRegistry);
+            }
+        }
 
         game.assets.font.getData().setScale(1f);
         game.assets.font.setUseIntegerPositions(true);
@@ -171,6 +219,12 @@ public class GameScreen implements Screen {
         EventBus.get().register(GameEvent.Type.ENTER_TRADE, e -> startTrading((EnterTradeEvent) e));
         EventBus.get().register(GameEvent.Type.ENTER_TELEPORT, e -> startTeleport((EnterTeleportEvent) e));
         EventBus.get().register(GameEvent.Type.BLOB_SPAWNED, e -> SoundManager.play(SoundType.SPAWN));
+        EventBus.get().register(GameEvent.Type.ROOM_CHANGED, e -> {
+            if (SaveManager.get() != null) {
+                SaveManager.get().saveState(room.roomIndex, blob, gameState);
+                SaveManager.get().saveScoreManager(ScoreManager.get());
+            }
+        });
         EventBus.get().register(GameEvent.Type.GAME_OVER, e -> {
             GameOverEvent go = (GameOverEvent) e;
             TextureRegion roomTerrain = roomRenderer.getTerrainTexture(room);
@@ -183,11 +237,16 @@ public class GameScreen implements Screen {
         AchievementManager.get().setTeleportRegistry(teleportRegistry);
         AchievementManager.get().registerEvents();
         AchievementManager.get().onResume();
+
+        if (continuing && SaveManager.get() != null && SaveManager.get().hasSave()) {
+            SaveManager.get().loadScoreManager(ScoreManager.get());
+        }
         // Mark starting room as visited
         EventBus.get().post(new RoomChangedEvent(-1, startRoom));
 
         // Birth effect on initial spawn
-        triggerSpawn();
+        boolean wasFlying = blob.state == Blob.State.FLYING;
+        triggerSpawn(wasFlying);
     }
 
     private boolean isRoomTransitioning() {
@@ -195,9 +254,16 @@ public class GameScreen implements Screen {
     }
 
     private void triggerSpawn() {
+        triggerSpawn(false);
+    }
+
+    private void triggerSpawn(boolean restoreFlying) {
         transitionManager.start(blob, new BlobTransition[]{
                 new AssemblyTransition()
-        }, () -> EventBus.get().post(GameEvent.BLOB_SPAWNED));
+        }, () -> {
+            if (restoreFlying) blob.startFlying();
+            EventBus.get().post(GameEvent.BLOB_SPAWNED);
+        });
     }
 
     private void startLift() {
@@ -304,11 +370,68 @@ public class GameScreen implements Screen {
 
         touchControls.setWalkMode(blob.state != Blob.State.FLYING);
         touchControls.poll();
+
+        // Pause overlay active — freeze gameplay
+        if (pauseOverlay != null) {
+            pauseOverlay.update(delta, inputManager);
+            checkPauseTaps();
+            renderWorld(0); // render frozen world (delta=0)
+            // Render pause overlay on top
+            gameViewport.apply();
+            batch.setProjectionMatrix(gameViewport.getCamera().combined);
+            batch.begin();
+            pauseOverlay.render(batch);
+            batch.end();
+            if (pauseOverlay.isDone()) {
+                if (pauseOverlay.isQuit()) {
+                    game.setScreen(new TitleScreen(game));
+                }
+                pauseOverlay = null;
+            }
+            inputManager.update();
+            return;
+        }
+
+        // Check for pause trigger
+        checkPauseTaps();
+        if (hud.isPauseRequested() || inputManager.isJustPressed(Action.ACTION_B)) {
+            if (activeOverlay == null && !isRoomTransitioning()
+                    && teleportTransition == null && !transitionManager.isActive()) {
+                // Save before pausing
+                if (SaveManager.get() != null) {
+                    SaveManager.get().saveState(room.roomIndex, blob, gameState);
+                    SaveManager.get().saveInventory(inventory);
+                }
+                pauseOverlay = new PauseOverlay(game.assets);
+                inputManager.update();
+                return;
+            }
+        }
+
         if (AchievementManager.get() != null) AchievementManager.get().update(delta);
+        // Periodic save
+        saveTimer += delta;
+        if (saveTimer >= 5f) {
+            saveTimer = 0;
+            if (SaveManager.get() != null) {
+                SaveManager.get().saveState(room.roomIndex, blob, gameState);
+            }
+        }
         updateWorld(delta);
         renderWorld(delta);
         inputManager.update();
         if (MusicManager.get() != null) MusicManager.get().update();
+    }
+
+    private void checkPauseTaps() {
+        if (!Gdx.input.justTouched()) return;
+        touchVec.set(Gdx.input.getX(), Gdx.input.getY());
+        gameViewport.unproject(touchVec);
+        if (pauseOverlay != null) {
+            pauseOverlay.checkTap(touchVec.x, touchVec.y);
+        } else {
+            hud.checkPauseTap(touchVec.x, touchVec.y);
+        }
     }
 
     private void updateWorld(float delta) {

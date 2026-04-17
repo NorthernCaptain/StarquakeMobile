@@ -110,7 +110,9 @@ public class InputManager {
                 case Input.Keys.UP:    return Action.UP;
                 case Input.Keys.DOWN:  return Action.DOWN;
                 case Input.Keys.Z:     return Action.ACTION_A;
-                case Input.Keys.X:     return Action.ACTION_B;
+                case Input.Keys.X:
+                case Input.Keys.ESCAPE:
+                case Input.Keys.BACK:  return Action.ACTION_B;
                 default: return null;
             }
         }

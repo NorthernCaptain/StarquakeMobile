@@ -12,6 +12,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import northern.captain.starquake.StarquakeGame;
 import northern.captain.starquake.audio.SoundManager;
+import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.GameState;
 import northern.captain.starquake.world.ScoreManager;
@@ -100,6 +101,7 @@ public class WinScreen implements Screen {
         };
 
         SoundManager.play(SoundManager.SoundType.GAME_OVER);
+        if (SaveManager.get() != null) SaveManager.get().clearAll();
 
         Gdx.input.setInputProcessor(new InputMultiplexer(inputManager.getKeyboardListener()));
         inputManager.connectControllers();

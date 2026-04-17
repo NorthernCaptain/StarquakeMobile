@@ -39,7 +39,10 @@ public class TeleportRegistry {
 
     public void markVisited(int roomIndex) {
         int idx = indexOf(roomIndex);
-        if (idx >= 0) visited[idx] = true;
+        if (idx >= 0) {
+            visited[idx] = true;
+            if (SaveManager.get() != null) SaveManager.get().saveTeleportRegistry(this);
+        }
     }
 
     public boolean isVisited(int index) {
@@ -48,6 +51,13 @@ public class TeleportRegistry {
 
     public String getName(int index) {
         return (index >= 0 && index < COUNT) ? names[index] : null;
+    }
+
+    public void loadState(String[] loadedNames, boolean[] loadedVisited) {
+        for (int i = 0; i < COUNT; i++) {
+            names[i] = loadedNames[i];
+            visited[i] = loadedVisited[i];
+        }
     }
 
     public int getRoomForIndex(int index) {

@@ -52,6 +52,10 @@ public class HoverStand extends GameObject {
         return blobHasPlatform;
     }
 
+    public static void setBlobHasPlatform(boolean value) {
+        blobHasPlatform = value;
+    }
+
     public static void reset() {
         blobHasPlatform = false;
     }

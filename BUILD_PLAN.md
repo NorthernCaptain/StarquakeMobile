@@ -1305,106 +1305,56 @@ After Phase 1 implementation:
 
 ---
 
-### Phase 12: Enemies — TODO
+### Phase 12: Enemies ✅ COMPLETE
 
-**Enemy sprites**: 38 sprites in atlas (indices 24-61), all 16×16. No enemy placement data in metadata — must be procedurally generated per room.
+3 categories (SHOCKER instant-kill, BOLT instant-kill, STANDARD health drain) with 5 movement patterns (sine wave, zigzag, spiral, lurker, weaver). Non-deterministic generation using MathUtils.random.
 
-**Enemy types** (from research/enemies-and-hazards.md):
+**Depth scaling** (distance from map center Y=16):
 
-| Type | Damage | Killable | Behavior |
-|------|--------|----------|----------|
-| Standard Alien | Energy drain on contact | Yes (laser) | Patrol / track BLOB, intelligence by depth |
-| Gyroscope | Instant kill | No | Rotate in place or move unpredictably |
-| Chain Tank | Instant kill | No | Move along set paths |
-| Hedgehog Plant | Instant kill | No | Static or semi-static |
+| Depth | Count | Damage/hit | Speed |
+|-------|-------|------------|-------|
+| 0–3 | 3–5 | 10–13 | 45–50 |
+| 4–7 | 2–4 | 8–10 | 38–45 |
+| 8–11 | 2–3 | 5–8 | 30–38 |
+| 12+ | 2 | 3–5 | 25–30 |
 
-**Key design rules:**
-- Up to 4 enemies per room
-- Enemy intelligence increases with depth (room Y: 0=surface, 31=deep)
-- Enemies respawn on room re-entry
-- Score: 80-320 points per kill (varies by depth)
-- Standard aliens drain health; gyroscopes/tanks/hedgehogs instant-kill
-
-**2-room cache**: Keep current room + previous room enemy state alive in memory. Going back one room = enemies resume where they were (frozen). Going further = regenerated fresh. Not persisted to save file.
-
-**Implementation plan:**
-
-1. **`Enemy` class** — implements `Collidable`. Fields: x, y, vx, vy, type (STANDARD/GYROSCOPE/TANK/HEDGEHOG), sprite indices, alive, animation timer. Standard AI: patrol horizontally, reverse on wall hit. Deep rooms: add vertical tracking toward BLOB.
-
-2. **`EnemyManager` class** — owned by GameScreen. Generates enemies per room based on room Y (depth). Manages 2-room cache (current + previous). Updates, renders, checks collisions with BLOB and projectiles.
-
-3. **Enemy generation** — seeded by room index (deterministic per room, no global seed needed). Depth determines: count (1-4), type mix (more instant-kill deeper), AI aggressiveness, speed. Skip rooms with teleporters, core room, lift tubes.
-
-4. **Sprite assignment** — 38 enemy sprites likely contain multiple enemy type animations. Group them: indices 24-35 = standard aliens (3 types × 4 frames), 36-43 = gyroscopes (2 types × 4 frames), 44-51 = tanks (2 types × 4 frames), 52-61 = hedgehogs/misc. Exact mapping TBD from visual inspection.
-
-5. **Collision integration:**
-   - Enemy↔BLOB: checked in `updateGameplay()` after blob.update. Standard = `gameState.damage()`, instant-kill = `EventBus.post(BLOB_DIED)`
-   - Projectile↔Enemy: checked in `ProjectileManager.update()`. Walk shot kills standard aliens. Fly shot kills on hit (after bounce too). Instant-kill enemies = projectile destroyed, enemy unharmed.
-
-6. **Rendering**: after game objects, before BLOB (enemies appear behind BLOB like in original).
+- Special enemies (shocker/bolt) spawn with 30% chance in depth ≤ 8
+- Standard enemies have 10–20% blob tracking bias (mostly random movement)
+- HP: shocker=2, standard=1. Contact cooldown: 0.5s
+- Respawn: standard enemies respawn as new random type after 5s, at least 60px from blob. Specials don't respawn.
+- 2-room cache: previous room enemies frozen, resume if you go back. Not persisted to save.
+- Skip rooms: core room, teleporter rooms
 
 **Files:**
-- `world/Enemy.java` — enemy entity
-- `world/EnemyManager.java` — generation, 2-room cache, update, render, collision
-- `screen/GameScreen.java` — wire enemy manager
+- `world/Enemy.java` — enemy entity with movement patterns, collision, respawn timer
+- `world/EnemyManager.java` — generation, 2-room cache, update, render, projectile collision
+- `screen/GameScreen.java` — wired enemy manager
 
 ---
 
-### Phase 13: Save/Restore System — TODO
+### Phase 13: Save/Restore System ✅ COMPLETE
 
-**Architecture**: Multiple small libGDX `Preferences` files, each category independent. Objects push state changes, SaveManager writes to the appropriate prefs file.
+`SaveManager` singleton with 9 Preferences files (save_meta, save_state, save_inventory, save_items, save_core, save_teleport, save_doors, save_breakable, save_score). Initialized in LoadingScreen.
 
-**Preference files** (via `Gdx.app.getPreferences(name)`):
+**Save triggers:** room transition (state + score), item collected (items append with dedup), inventory change, core delivery, teleporter visit, door unlock, floor break, periodic 5s timer.
 
-| File | Contents | Write frequency | Size |
-|------|----------|----------------|------|
-| `save_state` | Room index, blob x/y, lives, score, health, laser, platforms | Every room transition + every 5s | ~200B |
-| `save_inventory` | 4 inventory slots as ItemType names | On pickup/drop/trade | ~100B |
-| `save_items` | Full initial item placements (JSON array) + collected items list | Initial: once on new game. Collected: on each collection | ~6KB |
-| `save_core` | CoreAssembly: displayPieces, requiredParts, restored flags, restoredCount | On core delivery (rare) | ~500B |
-| `save_teleport` | 15 teleporter names + visited flags | On teleporter visit | ~300B |
-| `save_doors` | Which doors are unlocked (room indices) | On door unlock | ~50B |
-| `save_breakable` | Broken floor tile keys | On floor break | ~200B |
-| `save_meta` | Game version, save exists flag | On new game | ~20B |
+**Load flow:** TitleScreen checks `hasSave()` → shows "CONTINUE" or "PLAY". Continue: GameScreen constructor loads all saved state (breakable floors, doors, core assembly, teleport registry, items, blob position/vitals/flying state, inventory, score). New game: `clearAll()` + generate + save initial state.
 
-**SaveManager class** (`world/SaveManager.java`):
-- `saveState(GameState, Blob, Room)` — blob position + vitals
-- `saveInventory(Inventory)` — 4 slots
-- `saveItemPlacements(ItemManager)` — full placements (new game) or collected list (during play)
-- `saveCoreAssembly(CoreAssembly)` — grid state
-- `saveTeleport(TeleportRegistry)` — names + visited
-- `loadAll()` — returns a SaveData struct with all loaded state, or null if no save
-- `clearAll()` — delete all prefs (new game)
-- `hasSave()` — check save_meta exists
+**Key details:**
+- Blob flying state saved/restored (including HoverPlatform attachment and HoverStand.blobHasPlatform flag)
+- Flying state restored after spawn animation via callback
+- Boost items excluded from collected saves (they respawn)
+- `clearAll()` wipes save_* prefs only, not app_* prefs
+- Game over and win screens call `clearAll()`
+- Doors check static `openedRooms` set on room build
+- CoreTrigger.createCoreAssembly() skips initialize() when loading saved state
 
-**App-level preferences** (separate from save game, never deleted):
-
-| File | Contents | Persists across |
-|------|----------|----------------|
-| `app_settings` | Sound on/off, music on/off, music volume, SFX volume, left-handed controls | Forever |
-| `app_achievements` | Unlocked achievements, best score, games completed, total play time | Forever |
-
-These use `Gdx.app.getPreferences("app_settings")` etc. — completely independent from the `save_*` files. `clearAll()` on new game does NOT touch these.
-
-**Save triggers:**
-- Room transition: save `save_state`
-- Item collected: save `save_items` (append to collected list)
-- Inventory change: save `save_inventory`
-- Core delivery: save `save_core`
-- Teleporter visited: save `save_teleport`
-- Door unlocked: save `save_doors`
-- Floor broken: save `save_breakable`
-- Periodic: save `save_state` every 5 seconds
-
-**Load flow (app start):**
-1. Check `save_meta` for existing save
-2. If exists: load all prefs → build game state from saved data → skip item generation
-3. If not: new game → generate everything → save initial state to all prefs
-
-**New game:**
-- `clearAll()` wipes all preference files
-- Normal game initialization runs
-- Full item placements saved to `save_items` immediately
+**Files:**
+- `world/SaveManager.java` — all save/load methods
+- `screen/GameScreen.java` — constructor branching (new vs continue), periodic save
+- `screen/TitleScreen.java` — Continue/Play based on save existence
+- `screen/GameOverScreen.java`, `screen/WinScreen.java` — clearAll on end
+- Modified: GameState, ItemManager, CoreAssembly, TeleportRegistry, BreakableFloor, Door, ScoreManager, ItemPickup, CoreTrigger, HoverStand
 
 ---
 
@@ -1488,7 +1438,9 @@ Wired into: GameScreen (step/fire/platform/death/spawn), ProjectileManager (expl
 - **Score tracking**: ✅ DONE (ScoreManager singleton, event-driven, exploration %, weighted leaderboard score, animated HUD display)
 - **Title screen**: ✅ DONE (starfield, banner, walking blob, terrain, core grid, icon buttons, transitions)
 - **Game over / Win screens**: ✅ DONE (letter drops, death clouds, win screen with infoscreen background)
-- **Enemies**: not yet implemented (Phase 12 spec ready)
-- **Save/load**: not yet implemented (Phase 13 spec ready)
-- **Music**: no music system yet
-- **Pause functionality**: no pause button or menu
+- **Enemies**: ✅ DONE (3 categories, 5 patterns, depth scaling, 2-room cache)
+- **Save/load**: ✅ DONE (9 prefs files, all state persisted, continue from title screen)
+- **Music**: ✅ DONE (MusicManager, 8 tracks shuffled, 25% volume, no back-to-back repeat, pause-aware)
+- **Touch controls**: ✅ DONE (D-pad walk / circular analog fly, fire button with 2x touch area, halved alpha)
+- **Pause functionality**: not yet implemented
+- **Settings screen**: not yet implemented (sound/music on/off, volume, left-handed controls)

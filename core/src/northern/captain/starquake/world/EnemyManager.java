@@ -105,23 +105,23 @@ public class EnemyManager {
         int minType, maxType;
 
         if (depthFromCenter <= 3) {
-            count = 3 + MathUtils.random(1);
-            minDamage = 20; maxDamage = 25;
+            count = 3 + MathUtils.random(2);
+            minDamage = 10; maxDamage = 13;
             minSpeed = 45; maxSpeed = 50;
             minType = 12; maxType = 14;
         } else if (depthFromCenter <= 7) {
-            count = 2 + MathUtils.random(1);
-            minDamage = 15; maxDamage = 20;
+            count = 2 + MathUtils.random(2);
+            minDamage = 8; maxDamage = 10;
             minSpeed = 38; maxSpeed = 45;
             minType = 8; maxType = 14;
         } else if (depthFromCenter <= 11) {
-            count = 1 + MathUtils.random(1);
-            minDamage = 10; maxDamage = 15;
+            count = 2 + MathUtils.random(1);
+            minDamage = 5; maxDamage = 8;
             minSpeed = 30; maxSpeed = 38;
             minType = 4; maxType = 10;
         } else {
-            count = MathUtils.random(1);
-            minDamage = 5; maxDamage = 10;
+            count = 2;
+            minDamage = 3; maxDamage = 5;
             minSpeed = 25; maxSpeed = 30;
             minType = 0; maxType = 4;
         }

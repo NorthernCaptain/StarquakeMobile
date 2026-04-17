@@ -12,6 +12,7 @@ import northern.captain.starquake.Assets;
 import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.event.EventBus;
 import northern.captain.starquake.event.TradeCompletedEvent;
+import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.input.InputManager;
 import northern.captain.starquake.world.Inventory;
 import northern.captain.starquake.world.items.CheopsPyramid;
@@ -228,6 +229,7 @@ public class TradingOverlay implements Overlay {
             inventory.setSlot(offeredSlotIndex, swapItem);
             pyramid.consumeAfterTrade();
             EventBus.get().post(new TradeCompletedEvent(offeredItem, swapItem));
+            if (SaveManager.get() != null) SaveManager.get().saveInventory(inventory);
             setState(State.SLIDE_OUT);
         }
     }

@@ -10,6 +10,7 @@ import northern.captain.starquake.world.Inventory;
 import northern.captain.starquake.audio.SoundManager;
 import northern.captain.starquake.event.EventBus;
 import northern.captain.starquake.event.ItemCollectedEvent;
+import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.world.Blob;
 import northern.captain.starquake.world.objects.GameObject;
 
@@ -83,6 +84,9 @@ public abstract class ItemPickup extends GameObject {
         int roomIdx = (room != null) ? room.roomIndex : -1;
         if (room != null) room.removeObject(this);
         EventBus.get().post(new ItemCollectedEvent(itemType, roomIdx));
+        if (SaveManager.get() != null && roomIdx >= 0 && !itemType.isBoost()) {
+            SaveManager.get().saveItemCollected(roomIdx, tileCol, tileRow);
+        }
     }
 
     /** Shared helper: add this item to inventory, handle FIFO overflow drop. */
@@ -92,6 +96,7 @@ public abstract class ItemPickup extends GameObject {
         collect();
         itemManager().onItemCollected(this);
         SoundManager.play(SoundManager.SoundType.PICKUP_ITEM);
+        if (SaveManager.get() != null) SaveManager.get().saveInventory(inventory());
         if (dropped != null && roomIdx >= 0) {
             itemManager().dropItem(dropped, roomIdx, tileCol, tileRow);
         }
