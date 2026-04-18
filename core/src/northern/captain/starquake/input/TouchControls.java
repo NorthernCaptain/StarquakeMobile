@@ -13,8 +13,16 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
  * Fly mode:  circular analog pad (360° direction) + 1 action button.
  */
 public class TouchControls {
-    private static final float BUTTON_SIZE = 80;
-    private static final float PADDING = 16;
+    // Sized in real-world centimetres so touch targets are ergonomically equal
+    // across phones and tablets regardless of pixel density.
+    private static final float BUTTON_CM = 1.0f;  // tap target (~10mm), scaled per-device
+    private static final float PADDING_CM = 0.4f;
+    private static final float DPAD_SPREAD_CM = 1.1f;  // D-pad button center-to-center (one button size)
+    private static final float CIRCLE_RADIUS_CM = 1.4f;
+    private static final float PHONE_SCALE = 1.10f;  // iPhone controls: +10%
+    private static final float TABLET_SCALE = 1.44f; // iPad controls:   +44% (two compounded 20% bumps)
+    private static final float TABLET_MIN_SHORT_CM = 12f;  // tablet if short dim >= 12cm
+    private static final float TABLET_BOTTOM_CM = 2.5f;  // D-pad center 2.5cm above bottom edge on tablets
     private static final Color BTN_COLOR = new Color(1, 1, 1, 0.1f);
     private static final Color BTN_PRESSED_COLOR = new Color(1, 1, 1, 0.125f);
     private static final Color CIRCLE_COLOR = new Color(1, 1, 1, 0.075f);
@@ -67,12 +75,21 @@ public class TouchControls {
     }
 
     private void layoutZones(float w, float h) {
-        float density = Math.max(1f, Gdx.graphics.getDensity());
-        float bs = Math.min(BUTTON_SIZE * density, h / 5f);
-        float pad = PADDING;
+        // Gdx.graphics.getPpcX() reports pixels-per-cm, but on iOS the world
+        // coordinates are logical points (pixels / pixelsPerPoint). Convert
+        // to points-per-cm so the sizes below map to real centimetres on
+        // both iOS and Android. backBufferScale is 1 on Android so the
+        // calculation is cross-platform safe.
+        float scale = Math.max(1f, Gdx.graphics.getBackBufferScale());
+        float uPerCm = Math.max(20f, Math.min(200f, Gdx.graphics.getPpcX())) / scale;
+        boolean tablet = Math.min(w, h) / uPerCm >= TABLET_MIN_SHORT_CM;
+        float sizeScale = tablet ? TABLET_SCALE : PHONE_SCALE;
+        float bs = Math.min(BUTTON_CM * sizeScale * uPerCm, h / 5f);
+        float pad = PADDING_CM * uPerCm;
+        float spread = DPAD_SPREAD_CM * sizeScale * uPerCm;
 
         // Circle pad (shared center with D-pad)
-        circleRadius = bs * 1.5f;
+        circleRadius = CIRCLE_RADIUS_CM * sizeScale * uPerCm;
         circleInnerRadius = circleRadius * DEAD_ZONE;
 
         float actionCenterX;
@@ -83,20 +100,21 @@ public class TouchControls {
             dpadCenterX = w - pad - circleRadius;
             actionCenterX = pad + bs * 0.7f;
         }
-        dpadCenterY = h * 0.28f;
+        // On tablets anchor to a fixed physical distance from the bottom edge —
+        // h*0.28 would place the D-pad too high on a tall tablet screen.
+        dpadCenterY = tablet ? TABLET_BOTTOM_CM * uPerCm : h * 0.28f;
         circleCenterX = dpadCenterX;
         circleCenterY = dpadCenterY;
 
-        // D-pad: 4 buttons in cross arrangement
-        float sp = bs * 0.08f;
-        zoneUp.set(dpadCenterX - bs / 2, dpadCenterY + bs / 2 + sp, bs, bs);
-        zoneDown.set(dpadCenterX - bs / 2, dpadCenterY - bs * 1.5f - sp, bs, bs);
-        zoneLeft.set(dpadCenterX - bs * 1.5f - sp, dpadCenterY - bs / 2, bs, bs);
-        zoneRight.set(dpadCenterX + bs / 2 + sp, dpadCenterY - bs / 2, bs, bs);
+        // D-pad: 4 buttons in cross arrangement; spread = center-to-center
+        zoneUp.set(dpadCenterX - bs / 2, dpadCenterY + spread - bs / 2, bs, bs);
+        zoneDown.set(dpadCenterX - bs / 2, dpadCenterY - spread - bs / 2, bs, bs);
+        zoneLeft.set(dpadCenterX - spread - bs / 2, dpadCenterY - bs / 2, bs, bs);
+        zoneRight.set(dpadCenterX + spread - bs / 2, dpadCenterY - bs / 2, bs, bs);
 
         // Single action button — bigger
         float abSize = bs * 1.4f;
-        float actionY = h * 0.28f;
+        float actionY = dpadCenterY;
         zoneADraw.set(actionCenterX - abSize / 2, actionY - abSize / 2, abSize, abSize);
         // Touch area is 2x wider and 2x taller, centered on the same point
         zoneA.set(actionCenterX - abSize, actionY - abSize, abSize * 2, abSize * 2);
