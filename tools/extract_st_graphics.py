@@ -203,6 +203,16 @@ def extract_tiles(ram, outdir, palettes):
 ADDR_SPRITE_DATA = 0x34978    # Sprite data (immediately after tile graphics)
 SPRITE_FRAME_SIZE = 160       # 16 rows x 10 bytes/row
 SPRITE_ROWS = 16
+ADDR_ITEM_BANK = 0x26B56      # 35 collectible item icons, 16x16 masked frames
+ITEM_COUNT = 35
+ADDR_WEAPON_FX = 0x25096      # 8-row masked weapon/flying projectile effects
+WEAPON_FX_FRAME_SIZE = 80
+WEAPON_FX_COUNT = 12          # 0-7 walking laser cycle, 8-11 flying electro-ball cycle
+ADDR_CLOUD_BANK = 0x3C650     # 24 frames: GAME OVER glyphs + player death cloud bank
+CLOUD_FRAME_COUNT = 24
+CLOUD_FRAME_WIDTH_WORDS = 2   # 32 pixels wide
+CLOUD_FRAME_HEIGHT = 32
+CLOUD_FRAME_SIZE = CLOUD_FRAME_WIDTH_WORDS * 10 * CLOUD_FRAME_HEIGHT
 
 # Sprite memory layout (verified via 68000 disassembly):
 #   BLOB:    11 frames at 0x34978, 160 bytes each, stored top-to-bottom
@@ -217,33 +227,41 @@ ADDR_EFFECTS = 0x35148        # 62 frames x 160 bytes (verified from frame offse
 EFFECTS_FRAME_COUNT = 62
 
 
-def decode_masked_sprite(ram, addr, height):
+def decode_masked_sprite_generic(ram, addr, width_words, height):
     """
-    Decode masked sprite: 10 bytes/row = mask(2) + 4 planes(8).
+    Decode masked sprite: 10 bytes/row per 16-pixel block = mask(2) + 4 planes(8).
     Mask bit 1 = transparent, 0 = opaque.
     Returns (pixels, masks) as 2D lists.
     """
+    width_px = width_words * 16
+    row_stride = width_words * 10
     pixels = []
     masks = []
     for y in range(height):
-        off = addr + y * 10
-        if off + 10 > len(ram):
-            pixels.append([0] * 16)
-            masks.append([1] * 16)
+        off = addr + y * row_stride
+        if off + row_stride > len(ram):
+            pixels.append([0] * width_px)
+            masks.append([1] * width_px)
             continue
-        mask_w = struct.unpack_from('>H', ram, off)[0]
-        planes = [struct.unpack_from('>H', ram, off + 2 + p * 2)[0] for p in range(4)]
         row = []
         mrow = []
-        for bit in range(16):
-            bm = 1 << (15 - bit)
-            ci = sum((1 << p) for p in range(4) if planes[p] & bm)
-            m = 1 if (mask_w & bm) else 0
-            row.append(ci)
-            mrow.append(m)
+        for group in range(width_words):
+            group_off = off + group * 10
+            mask_w = struct.unpack_from('>H', ram, group_off)[0]
+            planes = [struct.unpack_from('>H', ram, group_off + 2 + p * 2)[0] for p in range(4)]
+            for bit in range(16):
+                bm = 1 << (15 - bit)
+                ci = sum((1 << p) for p in range(4) if planes[p] & bm)
+                m = 1 if (mask_w & bm) else 0
+                row.append(ci)
+                mrow.append(m)
         pixels.append(row)
         masks.append(mrow)
     return pixels, masks
+
+
+def decode_masked_sprite(ram, addr, height):
+    return decode_masked_sprite_generic(ram, addr, 1, height)
 
 
 def render_masked_sprite(pixels, masks, palette_rgb, scale=6):
@@ -362,6 +380,191 @@ def extract_sprites(ram, outdir, palettes):
     print(f"  Extracted {total} sprite frames ({BLOB_FRAME_COUNT} blob + "
           f"{LASER_FRAME_COUNT} laser + {EFFECTS_FRAME_COUNT} effects/enemies)")
     return sprite_info
+
+
+def extract_items(ram, outdir):
+    """Extract the 35 collectible item icons from the ST RAM dump."""
+    itemdir = os.path.join(outdir, "items")
+    os.makedirs(itemdir, exist_ok=True)
+
+    hud_rgb = [st_color_to_rgb(c) for c in HUD_PALETTE]
+    item_info = []
+
+    for i in range(ITEM_COUNT):
+        addr = ADDR_ITEM_BANK + i * SPRITE_FRAME_SIZE
+        pixels, masks = decode_masked_sprite(ram, addr, 16)
+        img = render_masked_sprite(pixels, masks, hud_rgb, scale=1)
+        img.save(os.path.join(itemdir, f"item_{i:02d}.png"))
+
+        opaque = sum(1 for y in range(16) for x in range(16) if masks[y][x] == 0)
+        colored = sum(1 for y in range(16) for x in range(16)
+                      if masks[y][x] == 0 and pixels[y][x] != 0)
+        colors = sorted({pixels[y][x] for y in range(16) for x in range(16)
+                         if masks[y][x] == 0 and pixels[y][x] != 0})
+        item_info.append({
+            "index": i,
+            "address": f"0x{addr:05X}",
+            "opaque_pixels": opaque,
+            "colored_pixels": colored,
+            "palette_indices": colors,
+        })
+
+    with open(os.path.join(itemdir, "item_catalog.json"), "w") as f:
+        json.dump({
+            "format": {
+                "type": "Atari ST 4-bitplane masked sprite",
+                "bytes_per_row": 10,
+                "frame_size": SPRITE_FRAME_SIZE,
+                "width_pixels": 16,
+                "height_pixels": 16,
+                "mask_rule": "mask bit 1 = transparent, 0 = opaque",
+                "palette": "HUD palette at 0x3AE1A",
+            },
+            "base_address": f"0x{ADDR_ITEM_BANK:05X}",
+            "count": ITEM_COUNT,
+            "frames": item_info,
+        }, f, indent=2)
+
+    # Contact sheet for quick visual verification.
+    cols = 5
+    rows = (ITEM_COUNT + cols - 1) // cols
+    cell = 40
+    sheet = Image.new('RGBA', (cols * cell, rows * cell), (20, 20, 20, 255))
+    for i in range(ITEM_COUNT):
+        img = Image.open(os.path.join(itemdir, f"item_{i:02d}.png")).resize((32, 32), Image.NEAREST)
+        x = (i % cols) * cell + 4
+        y = (i // cols) * cell + 4
+        sheet.paste(img, (x, y), img)
+    sheet.save(os.path.join(itemdir, "item_sheet.png"))
+
+    print(f"  Extracted {ITEM_COUNT} item icons from 0x{ADDR_ITEM_BANK:05X}")
+    return item_info
+
+
+def extract_weapon_effects(ram, outdir):
+    """Extract the small 8-row weapon/projectile effects from the ST RAM dump."""
+    fxdir = os.path.join(outdir, "weapon_fx")
+    os.makedirs(fxdir, exist_ok=True)
+
+    hud_rgb = [st_color_to_rgb(c) for c in HUD_PALETTE]
+    frame_info = []
+
+    for i in range(WEAPON_FX_COUNT):
+        addr = ADDR_WEAPON_FX + i * WEAPON_FX_FRAME_SIZE
+        pixels, masks = decode_masked_sprite(ram, addr, 8)
+        img = render_masked_sprite(pixels, masks, hud_rgb, scale=1)
+        img.save(os.path.join(fxdir, f"weapon_fx_{i:02d}.png"))
+
+        frame_info.append({
+            "index": i,
+            "address": f"0x{addr:05X}",
+            "opaque_pixels": sum(1 for y in range(8) for x in range(16) if masks[y][x] == 0),
+            "colored_pixels": sum(1 for y in range(8) for x in range(16)
+                                  if masks[y][x] == 0 and pixels[y][x] != 0),
+            "usage": (
+                "flying electro-ball cycle" if i >= 8 else
+                "walking laser cycle"
+            ),
+        })
+
+    with open(os.path.join(fxdir, "weapon_fx_catalog.json"), "w") as f:
+        json.dump({
+            "format": {
+                "type": "Atari ST 4-bitplane masked sprite",
+                "bytes_per_row": 10,
+                "frame_size": WEAPON_FX_FRAME_SIZE,
+                "width_pixels": 16,
+                "height_pixels": 8,
+                "mask_rule": "mask bit 1 = transparent, 0 = opaque",
+                "palette": "HUD palette at 0x3AE1A",
+            },
+            "base_address": f"0x{ADDR_WEAPON_FX:05X}",
+            "count": WEAPON_FX_COUNT,
+            "notes": {
+                "walking_laser": "Ground shot logic starts at frame -4 or -3, producing the cycling wave frames around 3-7.",
+                "flying_electro_ball": "Flying shot logic starts at frame -8, cycling frames 8-11.",
+            },
+            "frames": frame_info,
+        }, f, indent=2)
+
+    cols = 4
+    rows = (WEAPON_FX_COUNT + cols - 1) // cols
+    cell_w = 40
+    cell_h = 28
+    sheet = Image.new('RGBA', (cols * cell_w, rows * cell_h), (20, 20, 20, 255))
+    for i in range(WEAPON_FX_COUNT):
+        img = Image.open(os.path.join(fxdir, f"weapon_fx_{i:02d}.png")).resize((32, 16), Image.NEAREST)
+        x = (i % cols) * cell_w + 4
+        y = (i // cols) * cell_h + 6
+        sheet.paste(img, (x, y), img)
+    sheet.save(os.path.join(fxdir, "weapon_fx_sheet.png"))
+
+    print(f"  Extracted {WEAPON_FX_COUNT} small weapon FX frames from 0x{ADDR_WEAPON_FX:05X}")
+    return frame_info
+
+
+def extract_cloud_bank(ram, outdir):
+    """Extract the 32x32 masked bank at 0x3C650 at native resolution."""
+    bank_dir = os.path.join(outdir, "blob_death_clouds")
+    os.makedirs(bank_dir, exist_ok=True)
+
+    hud_rgb = [st_color_to_rgb(c) for c in HUD_PALETTE]
+    frame_info = []
+
+    for i in range(CLOUD_FRAME_COUNT):
+        addr = ADDR_CLOUD_BANK + i * CLOUD_FRAME_SIZE
+        pixels, masks = decode_masked_sprite_generic(
+            ram, addr, CLOUD_FRAME_WIDTH_WORDS, CLOUD_FRAME_HEIGHT
+        )
+        img = render_masked_sprite(pixels, masks, hud_rgb, scale=1)
+        img.save(os.path.join(bank_dir, f"blob_death_cloud_{i:02d}.png"))
+        frame_info.append({
+            "index": i,
+            "address": f"0x{addr:05X}",
+            "opaque_pixels": sum(
+                1 for y in range(CLOUD_FRAME_HEIGHT) for x in range(CLOUD_FRAME_WIDTH_WORDS * 16)
+                if masks[y][x] == 0
+            ),
+            "usage": (
+                "game_over_glyph" if i <= 8 else
+                "unused_gap" if i <= 11 else
+                "blob_death_cloud"
+            ),
+        })
+
+    with open(os.path.join(bank_dir, "blob_death_cloud_catalog.json"), "w") as f:
+        json.dump({
+            "format": {
+                "type": "Atari ST 4-bitplane masked sprite",
+                "bytes_per_row": CLOUD_FRAME_WIDTH_WORDS * 10,
+                "frame_size": CLOUD_FRAME_SIZE,
+                "width_pixels": CLOUD_FRAME_WIDTH_WORDS * 16,
+                "height_pixels": CLOUD_FRAME_HEIGHT,
+                "mask_rule": "mask bit 1 = transparent, 0 = opaque",
+                "palette": "HUD palette at 0x3AE1A",
+            },
+            "base_address": f"0x{ADDR_CLOUD_BANK:05X}",
+            "count": CLOUD_FRAME_COUNT,
+            "notes": {
+                "game_over_frames": "Indices 0..8 are the GAME OVER glyph tiles.",
+                "blob_death_frames": "Indices 12..23 are the player death cloud animation.",
+            },
+            "frames": frame_info,
+        }, f, indent=2)
+
+    cols = 4
+    rows = (CLOUD_FRAME_COUNT + cols - 1) // cols
+    cell = 40
+    sheet = Image.new('RGBA', (cols * cell, rows * cell), (20, 20, 20, 255))
+    for i in range(CLOUD_FRAME_COUNT):
+        img = Image.open(os.path.join(bank_dir, f"blob_death_cloud_{i:02d}.png"))
+        x = (i % cols) * cell + 4
+        y = (i // cols) * cell + 4
+        sheet.paste(img, (x, y), img)
+    sheet.save(os.path.join(bank_dir, "blob_death_clouds_full.png"))
+
+    print(f"  Extracted {CLOUD_FRAME_COUNT} native 32x32 frames from 0x{ADDR_CLOUD_BANK:05X}")
+    return frame_info
 
 
 def render_tile_at(ram, tile_idx, pal_rgb, img, px, py, scale=2):
@@ -572,13 +775,22 @@ def main():
     print("\n3. Extracting sprites...")
     sprite_info = extract_sprites(ram, outdir, palettes)
 
-    print("\n4. Extracting big platforms...")
+    print("\n4. Extracting item icons...")
+    item_info = extract_items(ram, outdir)
+
+    print("\n5. Extracting weapon FX...")
+    weapon_fx_info = extract_weapon_effects(ram, outdir)
+
+    print("\n6. Extracting GAME OVER / death cloud bank...")
+    cloud_info = extract_cloud_bank(ram, outdir)
+
+    print("\n7. Extracting big platforms...")
     plat_info = extract_big_platforms(ram, outdir, tile_info, palettes)
 
-    print("\n5. Extracting rooms (all 512)...")
+    print("\n8. Extracting rooms (all 512)...")
     extract_rooms(ram, outdir, palettes, room_pal_map)
 
-    print("\n6. Extracting current screen...")
+    print("\n9. Extracting current screen...")
     extract_screen(ram, outdir, palettes, room_pal_map)
 
     print(f"\nDone! Output in {outdir}")

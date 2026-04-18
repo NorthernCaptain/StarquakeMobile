@@ -55,7 +55,7 @@ def run_packer(input_dir, output_dir, atlas_name):
     os.makedirs(output_dir, exist_ok=True)
 
     cmd = [
-        'java', '-jar', PACKER_JAR,
+        'java', '-Djava.awt.headless=true', '-jar', PACKER_JAR,
         input_dir,
         output_dir,
         atlas_name

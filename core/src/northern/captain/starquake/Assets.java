@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.IntMap;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 
+import java.util.Arrays;
+
 public class Assets {
     public final AssetManager manager = new AssetManager();
 
@@ -38,12 +40,15 @@ public class Assets {
     public TextureRegion whitePixel;
     /** Palette lookup shader — reusable for drawing indexed tiles outside FBO. */
     public ShaderProgram paletteShader;
+    /** Palette lookup shader for masked indexed sprites; alpha controls transparency. */
+    public ShaderProgram spritePaletteShader;
     /** Lightning shader used by ElectricShocker. */
     public ShaderProgram lightningShader;
 
     private JsonValue metadata;
     private JsonValue roomsNode;
     private JsonValue bigPlatformsNode;
+    private int[] enemyPaletteByRoom;
 
     private boolean cachesBuilt = false;
 
@@ -71,6 +76,7 @@ public class Assets {
         metadata = new JsonReader().parse(Gdx.files.internal("metadata.json"));
         roomsNode = metadata.get("rooms");
         bigPlatformsNode = metadata.get("big_platforms");
+        buildEnemyPaletteMap();
 
         // Tile index map atlas — set nearest filtering for pixel-perfect palette lookup
         tilesAtlas = manager.get("atlases/tiles.atlas");
@@ -135,6 +141,14 @@ public class Assets {
         if (!paletteShader.isCompiled())
             Gdx.app.error("Assets", "Palette shader error:\n" + paletteShader.getLog());
 
+        // Palette shader for indexed sprites. Unlike terrain, palette index 0
+        // may be an opaque sprite color, so transparency comes from alpha.
+        spritePaletteShader = new ShaderProgram(
+                Gdx.files.internal("shaders/palette.vert"),
+                Gdx.files.internal("shaders/palette_alpha.frag"));
+        if (!spritePaletteShader.isCompiled())
+            Gdx.app.error("Assets", "Sprite palette shader error:\n" + spritePaletteShader.getLog());
+
         // Lightning shader
         lightningShader = new ShaderProgram(
                 Gdx.files.internal("shaders/palette.vert"),
@@ -149,6 +163,19 @@ public class Assets {
 
     public JsonValue getRoom(int index) {
         return roomsNode.get(index);
+    }
+
+    /**
+     * Returns a per-room palette for indexed enemy/effect sprites. The mapping
+     * is a deterministic derangement of the room palette list, so every room's
+     * sprite palette differs from its terrain palette while preserving the same
+     * overall palette distribution.
+     */
+    public int getEnemyPaletteForRoom(int roomIndex, int fallbackPalette) {
+        if (enemyPaletteByRoom == null || roomIndex < 0 || roomIndex >= enemyPaletteByRoom.length) {
+            return fallbackPalette;
+        }
+        return enemyPaletteByRoom[roomIndex];
     }
 
     /** Returns true if this tile has no collision (empty, decorative, pickup, etc). */
@@ -187,11 +214,48 @@ public class Assets {
         return bigPlatformsNode.get(index);
     }
 
+    private void buildEnemyPaletteMap() {
+        int count = roomsNode.size;
+        enemyPaletteByRoom = new int[count];
+
+        int[] roomPalettes = new int[count];
+        for (int i = 0; i < count; i++) {
+            roomPalettes[i] = roomsNode.get(i).getInt("palette");
+        }
+
+        Integer[] roomOrder = new Integer[count];
+        int[] paletteCounts = new int[metadata.getInt("num_palettes", 26)];
+        for (int i = 0; i < count; i++) {
+            roomOrder[i] = i;
+            int palette = roomPalettes[i];
+            if (palette >= 0 && palette < paletteCounts.length) {
+                paletteCounts[palette]++;
+            }
+        }
+        Arrays.sort(roomOrder, (a, b) -> {
+            int pa = roomPalettes[a];
+            int pb = roomPalettes[b];
+            return pa != pb ? pa - pb : a - b;
+        });
+
+        int shift = 1;
+        for (int paletteCount : paletteCounts) {
+            if (paletteCount > shift) shift = paletteCount;
+        }
+
+        for (int i = 0; i < count; i++) {
+            int roomIndex = roomOrder[i];
+            int sourceRoomIndex = roomOrder[(i + shift) % count];
+            enemyPaletteByRoom[roomIndex] = roomPalettes[sourceRoomIndex];
+        }
+    }
+
     public void dispose() {
         manager.dispose();
         if (paletteTexture != null) paletteTexture.dispose();
         if (font != null) font.dispose();
         if (paletteShader != null) paletteShader.dispose();
+        if (spritePaletteShader != null) spritePaletteShader.dispose();
         if (lightningShader != null) lightningShader.dispose();
         if (whitePixel != null) whitePixel.getTexture().dispose();
     }

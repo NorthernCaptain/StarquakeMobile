@@ -733,11 +733,11 @@ public class GameScreen implements Screen {
             blob.attachment.render(batch, blob.x, blob.y - Blob.PLATFORM_HEIGHT);
         }
 
-        enemyManager.render(batch, delta);
+        enemyManager.render(batch, delta, room);
         transitionManager.render(batch);
         tunnelController.render(batch);
         blobRenderer.render(batch, blob, delta);
-        projectileManager.render(batch);
+        projectileManager.render(batch, room);
 
         for (GameObject obj : room.getObjects()) {
             obj.renderForeground(batch, delta);

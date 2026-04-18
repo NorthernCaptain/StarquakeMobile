@@ -1,5 +1,7 @@
 package northern.captain.starquake.world;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -37,9 +39,11 @@ public class ProjectileManager {
 
     private final ArrayList<Projectile> projectiles = new ArrayList<>();
     private final ArrayList<HitEffect> hitEffects = new ArrayList<>();
+    private final Assets assets;
     private EnemyManager enemyManager;
 
     public ProjectileManager(Assets assets) {
+        this.assets = assets;
         for (int i = 0; i < WALK_FRAMES; i++) {
             walkRight[i] = assets.spritesAtlas.findRegion("weapon_fx_walk", i);
             walkLeft[i] = assets.spritesAtlas.findRegion("weapon_fx_walk", i + WALK_FRAMES);
@@ -188,7 +192,7 @@ public class ProjectileManager {
         hitEffects.add(new HitEffect(x, y));
     }
 
-    public void render(SpriteBatch batch) {
+    public void render(SpriteBatch batch, Room room) {
         for (Projectile p : projectiles) {
             int frameIdx = ((int) (p.timer / FRAME_DURATION)) % getFrameCount(p);
             TextureRegion frame = getFrame(p, frameIdx);
@@ -208,12 +212,23 @@ public class ProjectileManager {
         }
 
         // Hit effects
+        if (!hitEffects.isEmpty()) {
+            assets.paletteTexture.bind(1);
+            Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
+            batch.setShader(assets.spritePaletteShader);
+            assets.spritePaletteShader.setUniformi("u_palette", 1);
+            assets.spritePaletteShader.setUniformf("u_paletteRow",
+                    assets.getEnemyPaletteForRoom(room.roomIndex, room.paletteIndex));
+        }
         for (HitEffect h : hitEffects) {
             int idx = Math.min((int) (h.timer / HIT_FRAME_DURATION), HIT_FRAMES - 1);
             TextureRegion frame = hitFrames[idx];
             if (frame != null) {
                 batch.draw(frame, h.x - HIT_SIZE / 2f, h.y - HIT_SIZE / 2f, HIT_SIZE, HIT_SIZE);
             }
+        }
+        if (!hitEffects.isEmpty()) {
+            batch.setShader(null);
         }
     }
 

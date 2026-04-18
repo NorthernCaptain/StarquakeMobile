@@ -1,5 +1,7 @@
 package northern.captain.starquake.world;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -278,7 +280,14 @@ public class EnemyManager {
 
     // ---- Render ----
 
-    public void render(SpriteBatch batch, float delta) {
+    public void render(SpriteBatch batch, float delta, Room room) {
+        assets.paletteTexture.bind(1);
+        Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
+        batch.setShader(assets.spritePaletteShader);
+        assets.spritePaletteShader.setUniformi("u_palette", 1);
+        assets.spritePaletteShader.setUniformf("u_paletteRow",
+                assets.getEnemyPaletteForRoom(room.roomIndex, room.paletteIndex));
+
         for (Enemy e : currentEnemies) {
             if (!e.alive) continue;
 
@@ -287,6 +296,8 @@ public class EnemyManager {
                 batch.draw(frame, e.x, e.y, Enemy.SIZE, Enemy.SIZE);
             }
         }
+
+        batch.setShader(null);
     }
 
     private TextureRegion getFrame(Enemy e) {
