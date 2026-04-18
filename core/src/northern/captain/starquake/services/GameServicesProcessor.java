@@ -15,4 +15,5 @@ public interface GameServicesProcessor {
 
     void showAchievements();
     void showLeaderboard(LeaderboardDef leaderboard);
+    void showAllLeaderboards();
 }

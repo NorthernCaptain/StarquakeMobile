@@ -54,6 +54,7 @@ import northern.captain.starquake.world.SaveManager;
 import northern.captain.starquake.world.ProjectileManager;
 import northern.captain.starquake.world.ScoreManager;
 import northern.captain.starquake.services.AchievementManager;
+import northern.captain.starquake.services.LeaderboardDef;
 import northern.captain.starquake.world.TeleportRegistry;
 import northern.captain.starquake.world.items.ItemType;
 import northern.captain.starquake.world.objects.Door;
@@ -229,6 +230,14 @@ public class GameScreen implements Screen {
         });
         EventBus.get().register(GameEvent.Type.GAME_OVER, e -> {
             GameOverEvent go = (GameOverEvent) e;
+            // Submit scores to leaderboards on any game over
+            if (AchievementManager.get() != null) {
+                AchievementManager.get().submitScore(LeaderboardDef.HIGH_SCORE, gameState.getScore());
+                ScoreManager sm = ScoreManager.get();
+                if (sm != null) {
+                    AchievementManager.get().submitScore(LeaderboardDef.EXPLORER, sm.getExplorationScore());
+                }
+            }
             TextureRegion roomTerrain = roomRenderer.getTerrainTexture(room);
             game.setScreen(new GameOverScreen(game, roomTerrain, go.win, gameState));
         });
@@ -385,10 +394,13 @@ public class GameScreen implements Screen {
             pauseOverlay.render(batch);
             batch.end();
             if (pauseOverlay.isDone()) {
-                if (pauseOverlay.isQuit()) {
-                    game.setScreen(new TitleScreen(game));
-                }
+                PauseOverlay.Result result = pauseOverlay.getResult();
                 pauseOverlay = null;
+                if (result == PauseOverlay.Result.SAVE) {
+                    game.setScreen(new TitleScreen(game));
+                } else if (result == PauseOverlay.Result.END_GAME) {
+                    EventBus.get().post(new GameOverEvent(false));
+                }
             }
             inputManager.update();
             return;
@@ -507,7 +519,16 @@ public class GameScreen implements Screen {
         }
     }
 
+    private static final float MAX_STEP = 1f / 30f;
+
     private void updateGameplay(float delta) {
+        // Cap delta so collision probes (which only test the destination
+        // position, not the swept path) can't tunnel through tiles on a
+        // frame hitch. At WALK_SPEED=48 and TERMINAL_VEL=120, dt=1/30
+        // limits per-frame movement to 1.6px horizontal / 4px vertical —
+        // well under the 16px blob size and 24/32px tile size.
+        if (delta > MAX_STEP) delta = MAX_STEP;
+
         blob.applyInput(
                 inputManager.isPressed(Action.LEFT),
                 inputManager.isPressed(Action.RIGHT),

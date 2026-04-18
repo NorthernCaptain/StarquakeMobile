@@ -232,13 +232,21 @@ public class Blob implements Collidable {
         }
 
         // --- Horizontal collision ---
+        // Probe walks back from the new-position's leading edge until it
+        // lands on a non-solid column, then blob is snapped so its leading
+        // edge touches (but doesn't enter) the solid. If the walk terminates
+        // still inside a solid (blob was already flush against the wall),
+        // do nothing — don't push the blob further in.
         blockedH = false;
         if (vx > 0) {
             float probeX = x + vx * delta;
             if (isSolidColumn(room, probeX + SIZE - 1, bottom, top)) {
                 int ix = (int) (probeX + SIZE - 1);
-                while (ix > x + SIZE && isSolidColumn(room, ix, bottom, top)) ix--;
-                x = ix - SIZE + 1;
+                int minIx = (int) (x + SIZE) - 1;
+                while (ix > minIx && isSolidColumn(room, ix, bottom, top)) ix--;
+                if (!isSolidColumn(room, ix, bottom, top)) {
+                    x = ix - SIZE + 1;
+                }
                 vx = 0;
                 blockedH = true;
                 if (!flying) state = State.IDLE;
@@ -249,8 +257,11 @@ public class Blob implements Collidable {
             float probeX = x + vx * delta;
             if (isSolidColumn(room, probeX, bottom, top)) {
                 int ix = (int) probeX;
-                while (ix < x && isSolidColumn(room, ix, bottom, top)) ix++;
-                x = ix;
+                int maxIx = (int) x;
+                while (ix < maxIx && isSolidColumn(room, ix, bottom, top)) ix++;
+                if (!isSolidColumn(room, ix, bottom, top)) {
+                    x = ix;
+                }
                 vx = 0;
                 blockedH = true;
                 if (!flying) state = State.IDLE;
@@ -292,10 +303,18 @@ public class Blob implements Collidable {
         y = newY;
 
         // --- Edge exit ---
-        if (x + SIZE <= 0)         exit = Exit.LEFT;
-        else if (x >= Room.WIDTH)  exit = Exit.RIGHT;
-        else if (y + SIZE <= 0)    exit = Exit.DOWN;
-        else if (y >= Room.HEIGHT) exit = Exit.UP;
+        // Fire the horizontal exit as soon as the blob's center crosses the
+        // side edge. Waiting until the blob is fully off-screen (x+SIZE <= 0)
+        // lets its collision foot-probes (x+2, x+SIZE-3) drift past the room
+        // boundary, where isSolidAt returns false for out-of-bounds positions.
+        // The floor under the blob then goes undetected and the blob falls
+        // through the edge into the room below.
+        float cx = x + SIZE * 0.5f;
+        float cy = y + SIZE * 0.5f;
+        if (cx <= 0)                  exit = Exit.LEFT;
+        else if (cx >= Room.WIDTH)    exit = Exit.RIGHT;
+        else if (cy <= 0)             exit = Exit.DOWN;
+        else if (cy >= Room.HEIGHT)   exit = Exit.UP;
     }
 
     /** Check if BLOB would collide with anything at the given Y position. */

@@ -137,4 +137,17 @@ public class GooglePlayProcessor implements GameServicesProcessor {
             Gdx.app.error("GooglePlay", "Failed to show leaderboard", e);
         }
     }
+
+    @Override
+    public void showAllLeaderboards() {
+        if (!signedIn) return;
+        try {
+            LeaderboardsClient client = PlayGames.getLeaderboardsClient(activity);
+            client.getAllLeaderboardsIntent().addOnSuccessListener(intent -> {
+                activity.startActivityForResult(intent, RC_LEADERBOARD);
+            });
+        } catch (Exception e) {
+            Gdx.app.error("GooglePlay", "Failed to show all leaderboards", e);
+        }
+    }
 }

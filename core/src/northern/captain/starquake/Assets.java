@@ -153,7 +153,9 @@ public class Assets {
 
     /** Returns true if this tile has no collision (empty, decorative, pickup, etc). */
     public boolean isTileNonSolid(int tileId) {
-        if (tileId < 0 || tileId >= nonSolidTile.length) return true;
+        // Tile 0 is the default for cells with no big_platform assigned — those
+        // render as empty space, so they must also be non-solid for collision.
+        if (tileId <= 0 || tileId >= nonSolidTile.length) return true;
         return nonSolidTile[tileId];
     }
 

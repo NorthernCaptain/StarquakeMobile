@@ -34,10 +34,23 @@ public class GameCenterProcessor implements GameServicesProcessor {
     }
 
     private void initIdMappings() {
-        // TODO: Replace with actual App Store Connect Game Center IDs
-        for (AchievementDef def : AchievementDef.values()) {
-            achievementIds.put(def, "starquake." + def.name().toLowerCase());
-        }
+        achievementIds.put(AchievementDef.FIRST_STEPS, "starquake.first_steps");
+        achievementIds.put(AchievementDef.LIFT_OFF, "starquake.lift_off");
+        achievementIds.put(AchievementDef.TUNNEL_VISION, "starquake.tunnel_vision");
+        achievementIds.put(AchievementDef.BEAM_ME_UP, "starquake.beam_me_up");
+        achievementIds.put(AchievementDef.TRADER, "starquake.trader");
+        achievementIds.put(AchievementDef.KEY_MASTER, "starquake.key_master");
+        achievementIds.put(AchievementDef.CORE_DISCOVERY, "starquake.core_discovery");
+        achievementIds.put(AchievementDef.FIRST_DELIVERY, "starquake.first_delivery");
+        achievementIds.put(AchievementDef.SHARPSHOOTER, "starquake.sharpshooter");
+        achievementIds.put(AchievementDef.EXPLORER, "starquake.explorer");
+        achievementIds.put(AchievementDef.FREQUENT_FLYER, "starquake.frequent_flyer");
+        achievementIds.put(AchievementDef.HALF_WAY_THERE, "starquake.half_way_there");
+        achievementIds.put(AchievementDef.CARTOGRAPHER, "starquake.cartographer");
+        achievementIds.put(AchievementDef.PLANET_SAVIOR, "starquake.planet_savior");
+        achievementIds.put(AchievementDef.FULL_MAP, "starquake.full_map");
+        achievementIds.put(AchievementDef.SPEED_DEMON, "starquake.speed_demon");
+        achievementIds.put(AchievementDef.NO_DEATH_RUN, "starquake.no_death_run");
         leaderboardIds.put(LeaderboardDef.HIGH_SCORE, "starquake.highscore");
         leaderboardIds.put(LeaderboardDef.EXPLORER, "starquake.explorer");
     }
@@ -144,6 +157,21 @@ public class GameCenterProcessor implements GameServicesProcessor {
             viewController.presentViewController(gc, true, null);
         } catch (Exception e) {
             Gdx.app.error("GameCenter", "Failed to show leaderboard", e);
+        }
+    }
+
+    @Override
+    public void showAllLeaderboards() {
+        if (!isSignedIn()) return;
+        try {
+            GKGameCenterViewController gc = new GKGameCenterViewController();
+            gc.setViewState(GKGameCenterViewControllerState.Leaderboards);
+            gc.setGameCenterDelegate(gameCenterViewController -> {
+                gameCenterViewController.dismissViewController(true, null);
+            });
+            viewController.presentViewController(gc, true, null);
+        } catch (Exception e) {
+            Gdx.app.error("GameCenter", "Failed to show all leaderboards", e);
         }
     }
 }

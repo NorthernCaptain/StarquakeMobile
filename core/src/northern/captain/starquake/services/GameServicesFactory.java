@@ -34,5 +34,6 @@ public class GameServicesFactory {
         @Override public void submitScore(LeaderboardDef leaderboard, int score) {}
         @Override public void showAchievements() {}
         @Override public void showLeaderboard(LeaderboardDef leaderboard) {}
+        @Override public void showAllLeaderboards() {}
     }
 }

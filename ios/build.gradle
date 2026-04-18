@@ -23,6 +23,14 @@ launchIOSDevice.dependsOn build
 createIPA.dependsOn build
 
 robovm {
-    iosSkipSigning = true
+    // Switch between dev and dist via -Pios.dist=true (default: dev)
+    def isDist = project.hasProperty('ios.dist') && project.property('ios.dist').toString().toBoolean()
+    if (isDist) {
+        iosSignIdentity = "Apple Distribution: Leonid Khramov (57J7Z7X4J8)"
+        iosProvisioningProfile = "Starquake Dist"
+    } else {
+        iosSignIdentity = "Apple Development: Leonid Khramov (HHDQVS3U27)"
+        iosProvisioningProfile = "Starquake Dev"
+    }
     archs = "arm64"
 }
