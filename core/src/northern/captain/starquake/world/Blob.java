@@ -240,8 +240,8 @@ public class Blob implements Collidable {
         blockedH = false;
         if (vx > 0) {
             float probeX = x + vx * delta;
-            if (isSolidColumn(room, probeX + SIZE - 1, bottom, top)) {
-                int ix = (int) (probeX + SIZE - 1);
+            if (isSolidColumn(room, probeX + SIZE, bottom, top)) {
+                int ix = (int) (probeX + SIZE);
                 int minIx = (int) (x + SIZE) - 1;
                 while (ix > minIx && isSolidColumn(room, ix, bottom, top)) ix--;
                 if (!isSolidColumn(room, ix, bottom, top)) {
@@ -296,7 +296,7 @@ public class Blob implements Collidable {
                 while (iy > top - 2 && (room.isSolidAt(headL, iy) || room.isSolidAt(headR, iy))) {
                     iy--;
                 }
-                newY = iy - SIZE;
+                newY = iy - SIZE + 1;
                 vy = 0;
             }
         }
